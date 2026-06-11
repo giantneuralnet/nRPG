@@ -56,7 +56,6 @@ function attackMonster(m,index) {
     return;
   }
 
-  if (m.zombie) return;
   if (now < m.frozenUntil) {
     flash = "Frozen monster cannot counter!";
     return;
@@ -70,7 +69,7 @@ function attackMonster(m,index) {
 
   setTimeout(() => {
     const now2 = performance.now();
-    if (gameState !== "playing" || !hero.alive || m.hp <= 0 || m.zombie) return;
+    if (gameState !== "playing" || !hero.alive || m.hp <= 0) return;
 
     if (now2 < m.frozenUntil || now2 < m.stoneUntil) {
       m.attacking = false;
@@ -89,12 +88,21 @@ function attackMonster(m,index) {
 function killMonster(index, giveXp = true) {
   if (!board[index]) return;
 
+  const dead = board[index];
+  if (dead.haunted && !dead.ghost) {
+    board[index] = makeGhost(dead);
+    sound("dead");
+    floatText(dead.x, dead.y, "GHOST", "#d8ecff");
+    flash = "A ghost rises!";
+    return;
+  }
+
   kills++;
   sound("dead");
-  floatText(board[index].x, board[index].y, "KO", "#ffffff");
+  floatText(dead.x, dead.y, "KO", "#ffffff");
 
   if (giveXp) {
-    hero.xp += board[index].elite ? 3 : 1;
+    hero.xp += dead.elite ? 3 : 1;
     while (hero.xp >= hero.nextXp) {
       hero.xp -= hero.nextXp;
       levelUp();
@@ -109,6 +117,34 @@ function killMonster(index, giveXp = true) {
   }
 
   board[index] = spawnThing();
+}
+
+function makeGhost(dead) {
+  return {
+    ...dead,
+    y: dead.y,
+    targetY: dead.y,
+    hp: Math.max(1, Math.floor(dead.maxHp * .55)),
+    maxHp: Math.max(1, Math.floor(dead.maxHp * .55)),
+    atk: Math.max(1, Math.floor(dead.atk * .85)),
+    poison: 0,
+    frozenUntil: 0,
+    stoneUntil: 0,
+    attackCooldownUntil: 0,
+    fightCooldownUntil: 0,
+    target: null,
+    zombie: false,
+    ghost: true,
+    haunted: false,
+    attacking: false,
+    vx: (Math.random() - .5) * 2,
+    vy: (Math.random() - .5) * 2,
+    parts: {
+      ...dead.parts,
+      originalColor: null,
+      color: "#d8ecff"
+    }
+  };
 }
 
 function levelUp() {

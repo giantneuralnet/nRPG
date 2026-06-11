@@ -10,6 +10,7 @@ function drawMonster(m) {
   ctx.save();
   ctx.translate(x,y);
   ctx.scale(r/75,r/75);
+  if (m.ghost) ctx.globalAlpha = .68;
   ctx.fillStyle = stone ? "#888888" : frozen ? "#72dfff" : p.color;
 
   if (p.head === "circle") {
@@ -97,7 +98,7 @@ function drawMonster(m) {
 
   ctx.fillStyle = "#222";
   ctx.fillRect(bx,by,barW,barH);
-  ctx.fillStyle = stone ? "#bbbbbb" : m.zombie ? "#7aff7a" : "#e84444";
+  ctx.fillStyle = stone ? "#bbbbbb" : m.ghost ? "#d8ecff" : m.zombie ? "#7aff7a" : "#e84444";
   ctx.fillRect(bx,by,barW*Math.max(0,m.hp/m.maxHp),barH);
   ctx.strokeStyle = "white";
   ctx.lineWidth = 1;
@@ -115,14 +116,15 @@ function drawMonster(m) {
 
   if (stone) {
     ctx.fillStyle = "#bbbbbb";
-    ctx.fillRect(bx,by+barH+17,barW*Math.max(0,(m.stoneUntil-now)/20000),5);
+    const stoneProgress = m.stoneUntil === Infinity ? 1 : Math.max(0,(m.stoneUntil-now)/20000);
+    ctx.fillRect(bx,by+barH+17,barW*stoneProgress,5);
   }
 
   ctx.textAlign = "center";
   ctx.textBaseline = "bottom";
   ctx.font = "bold 14px system-ui";
   ctx.fillStyle = "white";
-  ctx.fillText(`${stone ? "STONE " : ""}${m.zombie ? "ZOMBIE " : ""}${m.elite ? "ELITE " : ""}ATK ${m.atk}`,m.x,by-4);
+  ctx.fillText(`${stone ? "STONE " : ""}${m.ghost ? "GHOST " : ""}${m.haunted ? "HAUNTED " : ""}${m.zombie ? "ZOMBIE " : ""}${m.elite ? "ELITE " : ""}ATK ${m.atk}`,m.x,by-4);
 
   if (m.attacking) {
     ctx.fillStyle = "#ff6666";
@@ -134,16 +136,6 @@ function drawMonster(m) {
 
 function drawItem(item) {
   ctx.save();
-
-  if (item.kind === "smallBomb") {
-    ctx.strokeStyle = "rgba(255,180,80,.45)";
-    ctx.lineWidth = 4;
-    ctx.setLineDash([10,10]);
-    ctx.beginPath();
-    ctx.arc(item.x,item.y,175,0,Math.PI*2);
-    ctx.stroke();
-    ctx.setLineDash([]);
-  }
 
   const size = item.r*2.1;
   ctx.drawImage(icons[item.kind], item.x-size/2, item.y-size/2, size, size);
@@ -161,7 +153,6 @@ function drawItem(item) {
   if (item.kind === "powerPotion") ctx.fillText(`POWER UP`, item.x, item.y+item.r+10);
   if (item.kind === "poison") ctx.fillText(`POISON +${item.value}`, item.x, item.y+item.r+10);
   if (item.kind === "bomb") ctx.fillText(`BOMB ${item.value}`, item.x, item.y+item.r+10);
-  if (item.kind === "smallBomb") ctx.fillText(`SMALL BOMB`, item.x, item.y+item.r+10);
   if (item.kind === "clearBomb") ctx.fillText(`CLEAR BOMB`, item.x, item.y+item.r+10);
   if (item.kind === "randomBomb") ctx.fillText(`RANDOM BOMB`, item.x, item.y+item.r+10);
   if (item.kind === "weakenBomb") ctx.fillText(`WEAKEN`, item.x, item.y+item.r+10);
@@ -173,6 +164,7 @@ function drawItem(item) {
   if (item.kind === "iceBomb") ctx.fillText(`ICE BOMB`, item.x, item.y+item.r+10);
   if (item.kind === "zombieBomb") ctx.fillText(`ZOMBIE BOMB`, item.x, item.y+item.r+10);
   if (item.kind === "stoneScroll") ctx.fillText(`STONE SCROLL`, item.x, item.y+item.r+10);
+  if (item.kind === "hauntedScroll") ctx.fillText(`CURSE SCROLL`, item.x, item.y+item.r+10);
   if (item.kind === "chest") ctx.fillText("CHEST", item.x, item.y+item.r+10);
 
   ctx.restore();

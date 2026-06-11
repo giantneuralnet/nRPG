@@ -5,7 +5,6 @@ function clearCloudAt(x,y) {
     const c = clouds[i];
     if (dist(x,y,c.x,c.y) < c.r * 1.15) {
       clouds.splice(i,1);
-      floatText(x,y,"CLOUD CLEARED","#ffffff");
       sound("item");
       return true;
     }

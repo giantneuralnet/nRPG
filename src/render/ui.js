@@ -64,24 +64,11 @@ function drawClouds() {
 
   ctx.save();
   for (const c of clouds) {
-    ctx.fillStyle = "rgba(225,232,245,.96)";
-    ctx.strokeStyle = "rgba(255,255,255,.95)";
-    ctx.lineWidth = 5;
+    ctx.fillStyle = "#ffffff";
 
     ctx.beginPath();
     ctx.arc(c.x,c.y,c.r,0,Math.PI*2);
-    for (const b of c.bumps) {
-      ctx.moveTo(c.x + Math.cos(b.a)*c.r*b.d + b.r, c.y + Math.sin(b.a)*c.r*b.d);
-      ctx.arc(c.x + Math.cos(b.a)*c.r*b.d, c.y + Math.sin(b.a)*c.r*b.d, b.r,0,Math.PI*2);
-    }
     ctx.fill();
-    ctx.stroke();
-
-    ctx.fillStyle = "#556";
-    ctx.textAlign = "center";
-    ctx.textBaseline = "middle";
-    ctx.font = "bold 22px system-ui";
-    ctx.fillText("tap cloud", c.x, c.y);
   }
   ctx.restore();
 }

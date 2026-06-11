@@ -86,6 +86,8 @@ function makeMonster(x,y,targetY,r) {
     target:null,
     elite,
     zombie:false,
+    ghost:false,
+    haunted:false,
     attacking:false,
     parts:{
       color:pick(colors),
@@ -103,9 +105,9 @@ function makeMonster(x,y,targetY,r) {
 function makeItem(x,y,targetY,r) {
   const kind = pick([
     "sword","shield","potion","potion","poison",
-    "bomb","smallBomb","clearBomb","randomBomb","weakenBomb","strengthBomb",
+    "bomb","clearBomb","randomBomb","weakenBomb","strengthBomb",
     "cloudBomb","poisonBomb","healBomb","lightningBomb","iceBomb","zombieBomb",
-    "powerPotion","regenPotion","vampirePotion","stoneScroll","chest","chest"
+    "powerPotion","regenPotion","vampirePotion","stoneScroll","hauntedScroll","chest","chest"
   ]);
   return {
     type:"item",
@@ -120,7 +122,6 @@ function makeItem(x,y,targetY,r) {
       kind === "powerPotion" ? rand(6,10) :
       kind === "poison" ? rand(2,4) :
       kind === "bomb" ? rand(25,45) :
-      kind === "smallBomb" ? rand(35,65) :
       kind === "lightningBomb" ? rand(35,60) :
       kind === "poisonBomb" ? rand(4,8) :
       kind === "healBomb" ? rand(25,50) :
@@ -132,6 +133,7 @@ function makeItem(x,y,targetY,r) {
       kind === "iceBomb" ? 4 :
       kind === "zombieBomb" ? 0 :
       kind === "stoneScroll" ? 0 :
+      kind === "hauntedScroll" ? 0 :
       0
   };
 }

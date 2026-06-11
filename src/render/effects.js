@@ -6,7 +6,6 @@ function drawBoom() {
   const progress = 1 - boom.t / 20;
 
   if (boom.kind === "normal") ctx.strokeStyle = "rgba(255,220,80,.85)";
-  if (boom.kind === "small") ctx.strokeStyle = "rgba(255,180,80,.85)";
   if (boom.kind === "clear") ctx.strokeStyle = "rgba(255,255,255,.85)";
   if (boom.kind === "random") ctx.strokeStyle = "rgba(200,100,255,.85)";
   if (boom.kind === "weaken") ctx.strokeStyle = "rgba(180,180,180,.85)";

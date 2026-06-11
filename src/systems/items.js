@@ -56,7 +56,6 @@ function useItem(item, index) {
   }
 
   if (item.kind === "bomb") explode(item.x, item.y, item.value, "normal");
-  if (item.kind === "smallBomb") explode(item.x, item.y, item.value, "small");
   if (item.kind === "clearBomb") explode(item.x, item.y, item.value, "clear");
   if (item.kind === "randomBomb") explode(item.x, item.y, item.value, "random");
   if (item.kind === "weakenBomb") explode(item.x, item.y, item.value, "weaken");
@@ -69,6 +68,7 @@ function useItem(item, index) {
   if (item.kind === "zombieBomb") explode(item.x, item.y, item.value, "zombie");
 
   if (item.kind === "stoneScroll") stoneRandomMonster(item.x,item.y);
+  if (item.kind === "hauntedScroll") hauntMonsters(item.x,item.y);
 
   if (item.kind === "chest") openChest(item.x, item.y);
 
@@ -108,9 +108,7 @@ function openChest(x,y) {
     floatText(x,y,"LIFE STEAL","#ff4f9a");
   } else if (roll < .8) {
     explode(x,y,rand(25,45),"normal");
-  } else if (roll < .87) {
-    explode(x,y,rand(35,60),"small");
-  } else if (roll < .93) {
+  } else if (roll < .9) {
     explode(x,y,4,"ice");
   } else {
     explode(x,y,0,"zombie");
@@ -129,18 +127,36 @@ function stoneRandomMonster(x,y) {
   }
 
   const m = pick(monsters);
-  m.stoneUntil = performance.now() + 20000;
+  m.stoneUntil = Infinity;
   m.attacking = false;
   m.vx = 0;
   m.vy = 0;
   flash = "Stone scroll!";
-  floatText(m.x,m.y,"STONE 20s","#bbbbbb");
+  floatText(m.x,m.y,"STONE","#bbbbbb");
   sound("boom");
 }
 
+function hauntMonsters(x,y) {
+  const monsters = board.filter(t => t.type === "monster" && !t.ghost);
+  if (monsters.length <= 0) {
+    flash = "No monster to haunt!";
+    floatText(x,y,"NO TARGET","#b987ff");
+    sound("item");
+    return;
+  }
+
+  for (const m of monsters) {
+    m.haunted = true;
+    floatText(m.x,m.y,"HAUNTED","#b987ff");
+  }
+
+  flash = "Haunted curse!";
+  sound("zap");
+}
+
 function explode(x,y,power,kind) {
-  boom = { x,y, r: kind === "small" ? 170 : Math.max(W,H), t:20, kind };
-  shake = kind === "small" ? 10 : 20;
+  boom = { x,y, r: Math.max(W,H), t:20, kind };
+  shake = 20;
 
   if (kind === "lightning") sound("zap");
   else sound("boom");
@@ -164,32 +180,13 @@ function explode(x,y,power,kind) {
     }
   }
 
-  if (kind === "small") {
-    const radius = 175;
-    flash = `Small bomb!`;
-    for (let i = board.length - 1; i >= 0; i--) {
-      const m = board[i];
-      if (m.type !== "monster") continue;
-      const d = dist(x,y,m.x,m.y);
-      if (d > radius) continue;
-      if (performance.now() < m.stoneUntil) {
-        floatText(m.x,m.y,"STONE","#bbbbbb");
-        continue;
-      }
-      const falloff = 1 - d / radius;
-      const dmg = Math.max(8, Math.floor(power * (.5 + falloff)));
-      m.hp -= dmg;
-      floatText(m.x,m.y,"-"+dmg,"#ffb15e");
-      if (m.hp <= 0) killMonster(i, false);
-    }
-  }
-
   if (kind === "clear") {
     flash = `Clear bomb! No kills.`;
     for (let i = 0; i < board.length; i++) {
       floatText(board[i].x, board[i].y, "CLEARED", "#ffffff");
       board[i] = spawnThing();
     }
+    clouds = [];
   }
 
   if (kind === "random") {
@@ -238,12 +235,7 @@ function explode(x,y,power,kind) {
       clouds.push({
         x: rand(80, Math.max(90, W-80)),
         y: rand(150, Math.max(160, H-130)),
-        r: rand(95,150),
-        bumps: Array.from({length: rand(6,10)}, () => ({
-          a: Math.random()*Math.PI*2,
-          d: Math.random()*.7,
-          r: rand(35,70)
-        }))
+        r: rand(135,210)
       });
     }
   }
