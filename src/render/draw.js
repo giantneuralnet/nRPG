@@ -2,9 +2,9 @@ function draw() {
   ctx.clearRect(0,0,W,H);
   if (shake > 0) shake *= .75;
 
-  if (gameState === "menu") {
-    drawMenu("DROP RPG", "Swords, shields, potions, bombs, elites, ice, zombies, clouds, and curses.", "START");
-  } else {
+  updateMenuOverlay();
+
+  if (gameState !== "menu") {
     update();
     drawHeroUI();
 
@@ -15,9 +15,6 @@ function draw() {
 
     drawBoom();
     drawClouds();
-
-    if (gameState === "dead") drawMenu("YOU DIED", "Bombs can hurt you too.", "RESET");
-    if (gameState === "win") drawMenu("YOU WIN!", "You defeated 20 monsters.", "PLAY AGAIN");
 
     drawFloats();
   }

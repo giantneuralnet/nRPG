@@ -9,3 +9,83 @@ canvas {
   width: 100vw; height: 100vh;
   background: radial-gradient(circle at center, #282828, #080808);
 }
+
+.menu-overlay {
+  position: fixed;
+  inset: 0;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0,0,0,.78);
+  color: white;
+  z-index: 10;
+}
+
+.menu-overlay.is-visible {
+  display: flex;
+}
+
+.menu-panel {
+  width: min(420px, calc(100vw - 36px));
+  text-align: center;
+}
+
+.menu-panel h1 {
+  margin: 0 0 10px;
+  font-size: clamp(36px, 10vw, 50px);
+  line-height: 1;
+}
+
+.menu-panel p {
+  margin: 0 0 34px;
+  font-size: clamp(14px, 4vw, 18px);
+}
+
+.menu-group {
+  margin: 0 0 28px;
+}
+
+.menu-label {
+  margin-bottom: 12px;
+  font-size: clamp(18px, 5vw, 24px);
+  font-weight: 700;
+}
+
+.choice-controls,
+.difficulty-controls {
+  display: flex;
+  justify-content: center;
+  gap: 18px;
+}
+
+button {
+  min-height: 52px;
+  border: 2px solid white;
+  background: #eee;
+  color: #111;
+  font: 700 clamp(18px, 5vw, 24px) system-ui, sans-serif;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+button:focus-visible {
+  outline: 3px solid #72dfff;
+  outline-offset: 3px;
+}
+
+.choice-controls button {
+  width: 58px;
+}
+
+.difficulty-controls button {
+  width: min(120px, 26vw);
+}
+
+.difficulty-controls button.is-selected {
+  background: #ffd84a;
+}
+
+.menu-action {
+  width: min(360px, 80vw);
+  min-height: 78px;
+}

@@ -20,5 +20,3 @@ let settings = {
   choices: 5,
   difficulty: "normal"
 };
-
-let menuButtons = [];

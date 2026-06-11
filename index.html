@@ -8,6 +8,31 @@
 </head>
 <body>
 <canvas id="game"></canvas>
+<div id="menuOverlay" class="menu-overlay">
+  <div class="menu-panel" role="dialog" aria-labelledby="menuTitle" aria-describedby="menuSubtitle">
+    <h1 id="menuTitle">DROP RPG</h1>
+    <p id="menuSubtitle">Swords, shields, potions, bombs, elites, ice, zombies, clouds, and curses.</p>
+
+    <div class="menu-group">
+      <div id="choicesLabel" class="menu-label">N = number of choices: 5</div>
+      <div class="choice-controls" aria-label="Number of choices">
+        <button id="choiceDown" type="button">-</button>
+        <button id="choiceUp" type="button">+</button>
+      </div>
+    </div>
+
+    <div class="menu-group">
+      <div class="menu-label">Difficulty</div>
+      <div class="difficulty-controls" aria-label="Difficulty">
+        <button class="difficulty-button" type="button" data-difficulty="easy">easy</button>
+        <button class="difficulty-button" type="button" data-difficulty="normal">normal</button>
+        <button class="difficulty-button" type="button" data-difficulty="hard">hard</button>
+      </div>
+    </div>
+
+    <button id="menuAction" class="menu-action" type="button">START</button>
+  </div>
+</div>
 
 <script src="src/core.js"></script>
 <script src="src/systems/audio.js"></script>
@@ -19,6 +44,7 @@
 <script src="src/systems/items.js"></script>
 <script src="src/systems/combat.js"></script>
 <script src="src/systems/update.js"></script>
+<script src="src/menu.js"></script>
 <script src="src/render/ui.js"></script>
 <script src="src/render/entities.js"></script>
 <script src="src/render/effects.js"></script>

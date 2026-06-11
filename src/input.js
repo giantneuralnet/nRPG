@@ -21,31 +21,6 @@ canvas.addEventListener("pointerdown", e => {
   const x = e.clientX;
   const y = e.clientY;
 
-  if (gameState === "menu") {
-    for (const b of menuButtons) {
-      if (x > b.x && x < b.x+b.w && y > b.y && y < b.y+b.h) {
-        if (b.text === "-") settings.choices = Math.max(1, settings.choices - 1);
-        else if (b.text === "+") settings.choices = Math.min(9, settings.choices + 1);
-        else if (b.text === "easy" || b.text === "normal" || b.text === "hard") settings.difficulty = b.text;
-        else if (b.text === "START") resetGame();
-        return;
-      }
-    }
-    return;
-  }
-
-  if (gameState === "dead" || gameState === "win") {
-    for (const b of menuButtons) {
-      if (x > b.x && x < b.x+b.w && y > b.y && y < b.y+b.h) {
-        if (b.text === "RESET" || b.text === "PLAY AGAIN") {
-          gameState = "menu";
-          return;
-        }
-      }
-    }
-    return;
-  }
-
   if (gameState !== "playing") return;
 
   clearCloudAt(x,y);
