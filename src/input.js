@@ -18,8 +18,7 @@ canvas.addEventListener("pointerdown", e => {
   if (!audioCtx) audioCtx = new AudioContext();
   if (audioCtx.state === "suspended") audioCtx.resume();
 
-  const x = e.clientX;
-  const y = e.clientY;
+  const { x, y } = canvasPoint(e);
 
   if (gameState !== "playing") return;
 

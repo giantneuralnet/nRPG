@@ -2,12 +2,16 @@ html, body {
   margin: 0; width: 100%; height: 100%;
   overflow: hidden; background: #111;
   font-family: system-ui, sans-serif;
-  touch-action: manipulation;
+  touch-action: none;
+  overscroll-behavior: none;
 }
 canvas {
   display: block;
-  width: 100vw; height: 100vh;
+  position: fixed;
+  inset: 0;
   background: radial-gradient(circle at center, #282828, #080808);
+  touch-action: none;
+  user-select: none;
 }
 
 .menu-overlay {
