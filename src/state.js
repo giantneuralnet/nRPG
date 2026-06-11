@@ -1,0 +1,41 @@
+let gameState = "menu";
+let hero, board, kills, flash, shake, boom, floats, clouds, lastPoisonTick;
+
+function difficultyScale() {
+  if (settings.difficulty === "easy") return 0;
+  if (settings.difficulty === "hard") return 1.75;
+  return 1;
+}
+
+function resetGame() {
+  hero = {
+    hp: 100,
+    maxHp: 100,
+    atk: 9,
+    def: 0,
+    poison: 0,
+    level: 1,
+    xp: 0,
+    nextXp: 3,
+    alive: true,
+    powerAtkTurns: 0,
+    powerDefTurns: 0,
+    powerAtkBonus: 0,
+    powerDefBonus: 0,
+    regenTicks: 0,
+    regenPower: 0,
+    vampire: 0
+  };
+
+  board = [];
+  floats = [];
+  clouds = [];
+  kills = 0;
+  flash = "Tap monsters and items";
+  shake = 0;
+  boom = null;
+  lastPoisonTick = performance.now();
+
+  for (let i = 0; i < settings.choices; i++) board.push(spawnThing());
+  gameState = "playing";
+}
