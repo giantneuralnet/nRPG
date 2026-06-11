@@ -1,0 +1,1569 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Drop RPG</title>
+<style>
+html, body {
+  margin: 0; width: 100%; height: 100%;
+  overflow: hidden; background: #111;
+  font-family: system-ui, sans-serif;
+  touch-action: manipulation;
+}
+canvas {
+  display: block;
+  width: 100vw; height: 100vh;
+  background: radial-gradient(circle at center, #282828, #080808);
+}
+</style>
+</head>
+<body>
+<canvas id="game"></canvas>
+
+<script>
+const canvas = document.getElementById("game");
+const ctx = canvas.getContext("2d");
+
+let W, H;
+function resize() {
+  canvas.width = innerWidth * devicePixelRatio;
+  canvas.height = innerHeight * devicePixelRatio;
+  ctx.setTransform(devicePixelRatio, 0, 0, devicePixelRatio, 0, 0);
+  W = innerWidth;
+  H = innerHeight;
+}
+addEventListener("resize", resize);
+resize();
+
+function rand(a,b){ return Math.floor(Math.random()*(b-a+1))+a; }
+function pick(a){ return a[rand(0,a.length-1)]; }
+function dist(a,b,c,d){ return Math.hypot(a-c,b-d); }
+
+let settings = {
+  choices: 5,
+  difficulty: "normal"
+};
+
+let menuButtons = [];
+
+let audioCtx;
+function sound(type) {
+  if (!audioCtx) audioCtx = new AudioContext();
+  const o = audioCtx.createOscillator();
+  const g = audioCtx.createGain();
+  o.connect(g); g.connect(audioCtx.destination);
+  const now = audioCtx.currentTime;
+
+  if (type === "hit") {
+    o.type = "square";
+    o.frequency.setValueAtTime(170, now);
+    o.frequency.exponentialRampToValueAtTime(70, now+.12);
+    g.gain.setValueAtTime(.16, now);
+    g.gain.exponentialRampToValueAtTime(.001, now+.15);
+  }
+  if (type === "item") {
+    o.type = "sine";
+    o.frequency.setValueAtTime(440, now);
+    o.frequency.exponentialRampToValueAtTime(880, now+.18);
+    g.gain.setValueAtTime(.14, now);
+    g.gain.exponentialRampToValueAtTime(.001, now+.25);
+  }
+  if (type === "boom") {
+    o.type = "sawtooth";
+    o.frequency.setValueAtTime(90, now);
+    o.frequency.exponentialRampToValueAtTime(25, now+.35);
+    g.gain.setValueAtTime(.22, now);
+    g.gain.exponentialRampToValueAtTime(.001, now+.4);
+  }
+  if (type === "zap") {
+    o.type = "square";
+    o.frequency.setValueAtTime(900, now);
+    o.frequency.exponentialRampToValueAtTime(180, now+.18);
+    g.gain.setValueAtTime(.16, now);
+    g.gain.exponentialRampToValueAtTime(.001, now+.22);
+  }
+  if (type === "dead") {
+    o.type = "triangle";
+    o.frequency.setValueAtTime(260, now);
+    o.frequency.exponentialRampToValueAtTime(40, now+.45);
+    g.gain.setValueAtTime(.2, now);
+    g.gain.exponentialRampToValueAtTime(.001, now+.55);
+  }
+  if (type === "level") {
+    o.type = "sine";
+    o.frequency.setValueAtTime(520, now);
+    o.frequency.setValueAtTime(760, now+.1);
+    o.frequency.setValueAtTime(1000, now+.2);
+    g.gain.setValueAtTime(.16, now);
+    g.gain.exponentialRampToValueAtTime(.001, now+.45);
+  }
+
+  o.start(now);
+  o.stop(now+.7);
+}
+
+const icons = {};
+
+function makeIcon(type) {
+  const c = document.createElement("canvas");
+  c.width = c.height = 100;
+  const g = c.getContext("2d");
+  g.save();
+  g.lineCap = "round";
+  g.lineJoin = "round";
+  g.lineWidth = 5;
+  g.strokeStyle = "white";
+
+  if (type === "sword" || type === "poison" || type === "vampirePotion") {
+    g.fillStyle = type === "poison" ? "#72ff62" : type === "vampirePotion" ? "#7b003f" : "#d8e8ff";
+    g.beginPath();
+    g.moveTo(52,8); g.lineTo(68,18); g.lineTo(47,67); g.lineTo(35,61);
+    g.closePath(); g.fill(); g.stroke();
+    g.fillStyle = "#8a5a28"; g.fillRect(27,63,42,9);
+    g.strokeStyle = type === "poison" ? "#31cc33" : type === "vampirePotion" ? "#ff4f9a" : "#ffd45a";
+    g.lineWidth = 8;
+    g.beginPath(); g.moveTo(35,78); g.lineTo(22,91); g.stroke();
+    g.fillStyle = type === "poison" ? "#31cc33" : type === "vampirePotion" ? "#ff4f9a" : "#ffd45a";
+    g.beginPath(); g.arc(20,92,7,0,Math.PI*2); g.fill();
+  }
+
+  if (type === "shield") {
+    g.fillStyle = "#6aa8ff";
+    g.beginPath();
+    g.moveTo(50,8); g.lineTo(82,23); g.lineTo(75,68);
+    g.lineTo(50,92); g.lineTo(25,68); g.lineTo(18,23);
+    g.closePath(); g.fill(); g.stroke();
+    g.strokeStyle = "#d8ecff"; g.lineWidth = 6;
+    g.beginPath(); g.moveTo(50,18); g.lineTo(50,78); g.stroke();
+  }
+
+  if (type === "potion" || type === "regenPotion") {
+    g.fillStyle = type === "regenPotion" ? "#40ff96" : "#ff4f6d";
+    g.fillRect(39,8,22,22); g.strokeRect(39,8,22,22);
+    g.beginPath(); g.arc(50,60,30,0,Math.PI*2); g.fill(); g.stroke();
+    g.fillStyle = "rgba(255,255,255,.45)";
+    g.beginPath(); g.arc(39,49,8,0,Math.PI*2); g.fill();
+    if (type === "regenPotion") {
+      g.fillStyle = "#063";
+      g.font = "bold 22px system-ui";
+      g.textAlign = "center";
+      g.textBaseline = "middle";
+      g.fillText("RE",50,62);
+    }
+  }
+
+  if (type === "powerPotion") {
+    g.fillStyle = "#ffd84a";
+    g.fillRect(39,8,22,22); g.strokeRect(39,8,22,22);
+    g.beginPath(); g.arc(50,60,30,0,Math.PI*2); g.fill(); g.stroke();
+    g.fillStyle = "#111";
+    g.font = "bold 34px system-ui";
+    g.textAlign = "center";
+    g.textBaseline = "middle";
+    g.fillText("↑",50,62);
+  }
+
+  if (type === "stoneScroll") {
+    g.fillStyle = "#d8d1b0";
+    g.beginPath(); g.roundRect(20,20,60,60,8); g.fill(); g.stroke();
+    g.fillStyle = "#777";
+    g.font = "bold 35px system-ui";
+    g.textAlign = "center";
+    g.textBaseline = "middle";
+    g.fillText("▣",50,52);
+  }
+
+  if ([
+    "bomb","smallBomb","clearBomb","randomBomb","weakenBomb","strengthBomb",
+    "cloudBomb","poisonBomb","healBomb","lightningBomb","iceBomb","zombieBomb"
+  ].includes(type)) {
+    const colors = {
+      bomb:"#222",
+      smallBomb:"#333",
+      clearBomb:"#ffffff",
+      randomBomb:"#c86bff",
+      weakenBomb:"#555",
+      strengthBomb:"#ff9d3b",
+      cloudBomb:"#cfd6e6",
+      poisonBomb:"#2ee85f",
+      healBomb:"#ff5f8f",
+      lightningBomb:"#ffe65c",
+      iceBomb:"#72dfff",
+      zombieBomb:"#7aff7a"
+    };
+    g.fillStyle = colors[type];
+    g.beginPath(); g.arc(48,58,31,0,Math.PI*2); g.fill(); g.stroke();
+
+    g.strokeStyle = "#aaa"; g.lineWidth = 6;
+    g.beginPath(); g.moveTo(65,34); g.quadraticCurveTo(74,18,90,18); g.stroke();
+
+    g.fillStyle = "#ffdd44";
+    g.beginPath(); g.arc(91,18,8,0,Math.PI*2); g.fill();
+
+    g.fillStyle = type === "healBomb" || type === "clearBomb" || type === "lightningBomb" || type === "cloudBomb" ? "#111" : "white";
+    g.font = "bold 32px system-ui";
+    g.textAlign = "center";
+    g.textBaseline = "middle";
+    g.fillText(
+      type === "poisonBomb" ? "☠" :
+      type === "healBomb" ? "+" :
+      type === "lightningBomb" ? "⚡" :
+      type === "iceBomb" ? "❄" :
+      type === "zombieBomb" ? "Z" :
+      type === "smallBomb" ? "s" :
+      type === "clearBomb" ? "C" :
+      type === "randomBomb" ? "?" :
+      type === "weakenBomb" ? "↓" :
+      type === "strengthBomb" ? "↑" :
+      type === "cloudBomb" ? "☁" : "!",
+      48, 60
+    );
+  }
+
+  if (type === "chest") {
+    g.fillStyle = "#9b5a25";
+    g.fillRect(18,40,64,42); g.strokeRect(18,40,64,42);
+    g.fillStyle = "#c98235";
+    g.beginPath(); g.roundRect(18,24,64,34,10); g.fill(); g.stroke();
+    g.fillStyle = "#ffd45a"; g.fillRect(44,50,12,15);
+  }
+
+  g.restore();
+  return c;
+}
+
+[
+  "sword","shield","potion","poison","bomb","smallBomb","clearBomb","randomBomb",
+  "weakenBomb","strengthBomb","cloudBomb","poisonBomb","healBomb","lightningBomb",
+  "iceBomb","zombieBomb","chest","powerPotion","regenPotion","vampirePotion","stoneScroll"
+].forEach(t => icons[t] = makeIcon(t));
+
+let gameState = "menu";
+let hero, board, kills, flash, shake, boom, floats, clouds, lastPoisonTick;
+
+function difficultyScale() {
+  if (settings.difficulty === "easy") return 0;
+  if (settings.difficulty === "hard") return 1.75;
+  return 1;
+}
+
+function resetGame() {
+  hero = {
+    hp: 100,
+    maxHp: 100,
+    atk: 9,
+    def: 0,
+    poison: 0,
+    level: 1,
+    xp: 0,
+    nextXp: 3,
+    alive: true,
+    powerAtkTurns: 0,
+    powerDefTurns: 0,
+    powerAtkBonus: 0,
+    powerDefBonus: 0,
+    regenTicks: 0,
+    regenPower: 0,
+    vampire: 0
+  };
+
+  board = [];
+  floats = [];
+  clouds = [];
+  kills = 0;
+  flash = "Tap monsters and items";
+  shake = 0;
+  boom = null;
+  lastPoisonTick = performance.now();
+
+  for (let i = 0; i < settings.choices; i++) board.push(spawnThing());
+  gameState = "playing";
+}
+
+function floatText(x,y,text,color="white") {
+  floats.push({
+    x, y, text, color,
+    life: 75,
+    maxLife: 75,
+    vx: (Math.random() - .5) * 5,
+    vy: -rand(8, 13),
+    gravity: .42
+  });
+}
+
+function findFreePosition(radius) {
+  const top = 155;
+  const bottom = Math.max(top + 100, H - 95);
+
+  for (let tries = 0; tries < 100; tries++) {
+    const x = radius + 35 + Math.random() * Math.max(50, (W - radius * 2 - 70));
+    const y = top + Math.random() * Math.max(50, (bottom - top));
+    let ok = true;
+
+    for (const other of board) {
+      if (dist(x,y,other.x,other.y) < radius + other.r + 58) {
+        ok = false;
+        break;
+      }
+    }
+
+    if (ok) return {x,y};
+  }
+
+  return {
+    x: radius + 35 + Math.random() * Math.max(50, (W - radius * 2 - 70)),
+    y: top + Math.random() * Math.max(50, (bottom - top))
+  };
+}
+
+function spawnThing() {
+  const isMonster = Math.random() < .56;
+  const r = Math.min(W,H) * (isMonster ? .076 : .062);
+  const p = findFreePosition(r);
+
+  if (isMonster) return makeMonster(p.x, -120 - Math.random()*200, p.y, r);
+  return makeItem(p.x, -120 - Math.random()*200, p.y, r);
+}
+
+function makeMonster(x,y,targetY,r) {
+  const elite = Math.random() < .09 + Math.min(.08, kills * .002);
+
+  const hpType = Math.random();
+  const atkType = Math.random();
+
+  let hp =
+    hpType < .18 ? rand(25,45) :
+    hpType < .72 ? rand(55,95) :
+    rand(120,180);
+
+  let atk =
+    atkType < .2 ? rand(5,10) :
+    atkType < .78 ? rand(12,20) :
+    rand(24,36);
+
+  const s = difficultyScale();
+  hp += Math.floor((hero.level * rand(7,16) + kills * rand(0,4)) * s);
+  atk += Math.floor((hero.level * rand(1,4) + Math.floor(kills / rand(3,7))) * s);
+
+  if (settings.difficulty === "easy") {
+    hp = Math.floor(hp * .8);
+    atk = Math.floor(atk * .75);
+  }
+
+  if (settings.difficulty === "hard") {
+    hp = Math.floor(hp * 1.2);
+    atk = Math.floor(atk * 1.15);
+  }
+
+  if (elite) {
+    hp = Math.floor(hp * 2.8);
+    atk = Math.floor(atk * 2.1);
+    r *= 1.12;
+  }
+
+  const colors = ["#ff7070","#65d7ff","#ffcf4f","#b987ff","#ff8a4f","#ff6fd8","#8fa8ff"];
+
+  return {
+    type:"monster",
+    x,y,targetY,r,
+    vx:(Math.random()-.5)*1.5,
+    vy:0,
+    wander:Math.random()*999,
+    hp,maxHp:hp,
+    atk,
+    poison:0,
+    frozenUntil:0,
+    stoneUntil:0,
+    attackCooldownUntil:0,
+    fightCooldownUntil:0,
+    target:null,
+    elite,
+    zombie:false,
+    attacking:false,
+    parts:{
+      color:pick(colors),
+      originalColor:null,
+      head:pick(["circle","box","triangle","blob"]),
+      eyes:rand(1,4),
+      mouth:pick(["smile","fangs","void"]),
+      horns:Math.random()<.4,
+      legs:rand(1,4),
+      arms:rand(0,3)
+    }
+  };
+}
+
+function makeItem(x,y,targetY,r) {
+  const kind = pick([
+    "sword","shield","potion","potion","poison",
+    "bomb","smallBomb","clearBomb","randomBomb","weakenBomb","strengthBomb",
+    "cloudBomb","poisonBomb","healBomb","lightningBomb","iceBomb","zombieBomb",
+    "powerPotion","regenPotion","vampirePotion","stoneScroll","chest","chest"
+  ]);
+  return {
+    type:"item",
+    kind,x,y,targetY,r,
+    vx:0,vy:0,
+    value:
+      kind === "sword" ? rand(1,3) :
+      kind === "shield" ? rand(1,2) :
+      kind === "potion" ? rand(22,45) :
+      kind === "regenPotion" ? rand(5,9) :
+      kind === "vampirePotion" ? rand(2,4) :
+      kind === "powerPotion" ? rand(6,10) :
+      kind === "poison" ? rand(2,4) :
+      kind === "bomb" ? rand(25,45) :
+      kind === "smallBomb" ? rand(35,65) :
+      kind === "lightningBomb" ? rand(35,60) :
+      kind === "poisonBomb" ? rand(4,8) :
+      kind === "healBomb" ? rand(25,50) :
+      kind === "randomBomb" ? 0 :
+      kind === "clearBomb" ? 0 :
+      kind === "weakenBomb" ? rand(2,5) :
+      kind === "strengthBomb" ? rand(2,5) :
+      kind === "cloudBomb" ? 0 :
+      kind === "iceBomb" ? 4 :
+      kind === "zombieBomb" ? 0 :
+      kind === "stoneScroll" ? 0 :
+      0
+  };
+}
+
+function getHeroAtk() {
+  return hero.atk + (hero.powerAtkTurns > 0 ? hero.powerAtkBonus : 0);
+}
+
+function getHeroDef() {
+  return hero.def + (hero.powerDefTurns > 0 ? hero.powerDefBonus : 0);
+}
+
+function spendPowerTurn() {
+  if (hero.powerAtkTurns > 0) {
+    hero.powerAtkTurns--;
+    if (hero.powerAtkTurns <= 0) floatText(120,120,"ATK power faded","#ffd84a");
+  }
+  if (hero.powerDefTurns > 0) {
+    hero.powerDefTurns--;
+    if (hero.powerDefTurns <= 0) floatText(120,145,"DEF power faded","#85bdff");
+  }
+}
+
+function damage(target, amount, x, y, color="#ff6b6b") {
+  amount = Math.max(0, Math.floor(amount));
+
+  if (target.type === "monster" && performance.now() < target.stoneUntil) {
+    floatText(x, y, "STONE", "#bbbbbb");
+    sound("hit");
+    return 0;
+  }
+
+  target.hp -= amount;
+  shake = 7;
+  sound("hit");
+  floatText(x, y, "-" + amount, color);
+  return amount;
+}
+
+function heal(target, amount, x, y) {
+  amount = Math.max(0, Math.floor(amount));
+  target.hp = Math.min(target.maxHp, target.hp + amount);
+  sound("item");
+  floatText(x, y, "+" + amount, "#70ff8a");
+}
+
+function useItem(item, index) {
+  if (item.kind === "sword") {
+    hero.atk += item.value;
+    flash = `Sword +${item.value} ATK`;
+    floatText(item.x,item.y,`ATK +${item.value}`,"#ffffff");
+    sound("item");
+  }
+
+  if (item.kind === "shield") {
+    hero.def += item.value;
+    flash = `Shield +${item.value} DEF`;
+    floatText(item.x,item.y,`DEF +${item.value}`,"#85bdff");
+    sound("item");
+  }
+
+  if (item.kind === "potion") {
+    heal(hero, item.value, 120, 100);
+    flash = `Potion +${item.value} HP`;
+  }
+
+  if (item.kind === "regenPotion") {
+    hero.regenTicks += 6;
+    hero.regenPower += item.value;
+    flash = `Regen potion!`;
+    floatText(item.x,item.y,`REGEN +${item.value}`,"#40ff96");
+    sound("item");
+  }
+
+  if (item.kind === "vampirePotion") {
+    hero.vampire += item.value;
+    flash = `Vampire +${item.value}% life steal`;
+    floatText(item.x,item.y,`LIFE STEAL +${item.value}%`,"#ff4f9a");
+    sound("item");
+  }
+
+  if (item.kind === "powerPotion") {
+    if (Math.random() < .5) {
+      hero.powerAtkTurns = 3;
+      hero.powerAtkBonus = item.value;
+      flash = `Power up! +${item.value} ATK for 3 fights`;
+      floatText(item.x,item.y,`ATK +${item.value}`,"#ffd84a");
+    } else {
+      hero.powerDefTurns = 3;
+      hero.powerDefBonus = item.value;
+      flash = `Power up! +${item.value} DEF for 3 fights`;
+      floatText(item.x,item.y,`DEF +${item.value}`,"#85bdff");
+    }
+    sound("level");
+  }
+
+  if (item.kind === "poison") {
+    hero.poison += item.value;
+    flash = `Poison Sword +${item.value}`;
+    floatText(item.x,item.y,`POISON +${item.value}`,"#7cff4f");
+    sound("item");
+  }
+
+  if (item.kind === "bomb") explode(item.x, item.y, item.value, "normal");
+  if (item.kind === "smallBomb") explode(item.x, item.y, item.value, "small");
+  if (item.kind === "clearBomb") explode(item.x, item.y, item.value, "clear");
+  if (item.kind === "randomBomb") explode(item.x, item.y, item.value, "random");
+  if (item.kind === "weakenBomb") explode(item.x, item.y, item.value, "weaken");
+  if (item.kind === "strengthBomb") explode(item.x, item.y, item.value, "strength");
+  if (item.kind === "cloudBomb") explode(item.x, item.y, item.value, "cloud");
+  if (item.kind === "lightningBomb") explode(item.x, item.y, item.value, "lightning");
+  if (item.kind === "poisonBomb") explode(item.x, item.y, item.value, "poison");
+  if (item.kind === "healBomb") explode(item.x, item.y, item.value, "heal");
+  if (item.kind === "iceBomb") explode(item.x, item.y, item.value, "ice");
+  if (item.kind === "zombieBomb") explode(item.x, item.y, item.value, "zombie");
+
+  if (item.kind === "stoneScroll") stoneRandomMonster(item.x,item.y);
+
+  if (item.kind === "chest") openChest(item.x, item.y);
+
+  board[index] = spawnThing();
+}
+
+function openChest(x,y) {
+  const roll = Math.random();
+
+  if (roll < .13) {
+    const amount = rand(30,60);
+    heal(hero, amount, 120, 100);
+    flash = `Chest: +${amount} HP`;
+  } else if (roll < .26) {
+    const atk = rand(2,5);
+    hero.atk += atk;
+    flash = `Chest: +${atk} ATK`;
+    floatText(x,y,`ATK +${atk}`,"#ffffff");
+  } else if (roll < .39) {
+    const def = rand(1,4);
+    hero.def += def;
+    flash = `Chest: +${def} DEF`;
+    floatText(x,y,`DEF +${def}`,"#85bdff");
+  } else if (roll < .52) {
+    const psn = rand(3,6);
+    hero.poison += psn;
+    flash = `Chest: +${psn} Poison`;
+    floatText(x,y,`POISON +${psn}`,"#7cff4f");
+  } else if (roll < .62) {
+    hero.regenTicks += 6;
+    hero.regenPower += rand(5,9);
+    flash = "Chest: Regen!";
+    floatText(x,y,"REGEN","#40ff96");
+  } else if (roll < .72) {
+    hero.vampire += rand(2,4);
+    flash = "Chest: Vampire!";
+    floatText(x,y,"LIFE STEAL","#ff4f9a");
+  } else if (roll < .8) {
+    explode(x,y,rand(25,45),"normal");
+  } else if (roll < .87) {
+    explode(x,y,rand(35,60),"small");
+  } else if (roll < .93) {
+    explode(x,y,4,"ice");
+  } else {
+    explode(x,y,0,"zombie");
+  }
+
+  sound("item");
+}
+
+function stoneRandomMonster(x,y) {
+  const monsters = board.filter(t => t.type === "monster");
+  if (monsters.length <= 0) {
+    flash = "No monster to stone!";
+    floatText(x,y,"NO TARGET","#bbb");
+    sound("item");
+    return;
+  }
+
+  const m = pick(monsters);
+  m.stoneUntil = performance.now() + 20000;
+  m.attacking = false;
+  m.vx = 0;
+  m.vy = 0;
+  flash = "Stone scroll!";
+  floatText(m.x,m.y,"STONE 20s","#bbbbbb");
+  sound("boom");
+}
+
+function explode(x,y,power,kind) {
+  boom = { x,y, r: kind === "small" ? 170 : Math.max(W,H), t:20, kind };
+  shake = kind === "small" ? 10 : 20;
+
+  if (kind === "lightning") sound("zap");
+  else sound("boom");
+
+  if (kind === "normal") {
+    const heroDmg = Math.floor(power * .6);
+    hero.hp -= heroDmg;
+    floatText(120,100,"-"+heroDmg,"#ff6b6b");
+    flash = `Bomb hit everyone!`;
+
+    for (let i = board.length - 1; i >= 0; i--) {
+      const m = board[i];
+      if (m.type !== "monster") continue;
+      if (performance.now() < m.stoneUntil) {
+        floatText(m.x,m.y,"STONE","#bbbbbb");
+        continue;
+      }
+      m.hp -= power;
+      floatText(m.x,m.y,"-"+power,"#ff6b6b");
+      if (m.hp <= 0) killMonster(i, false);
+    }
+  }
+
+  if (kind === "small") {
+    const radius = 175;
+    flash = `Small bomb!`;
+    for (let i = board.length - 1; i >= 0; i--) {
+      const m = board[i];
+      if (m.type !== "monster") continue;
+      const d = dist(x,y,m.x,m.y);
+      if (d > radius) continue;
+      if (performance.now() < m.stoneUntil) {
+        floatText(m.x,m.y,"STONE","#bbbbbb");
+        continue;
+      }
+      const falloff = 1 - d / radius;
+      const dmg = Math.max(8, Math.floor(power * (.5 + falloff)));
+      m.hp -= dmg;
+      floatText(m.x,m.y,"-"+dmg,"#ffb15e");
+      if (m.hp <= 0) killMonster(i, false);
+    }
+  }
+
+  if (kind === "clear") {
+    flash = `Clear bomb! No kills.`;
+    for (let i = 0; i < board.length; i++) {
+      floatText(board[i].x, board[i].y, "CLEARED", "#ffffff");
+      board[i] = spawnThing();
+    }
+  }
+
+  if (kind === "random") {
+    hero.hp = rand(1, hero.maxHp);
+    floatText(120,100,"HP = " + hero.hp,"#c86bff");
+    flash = `Random bomb!`;
+
+    for (const m of board) {
+      if (m.type !== "monster") continue;
+      m.hp = rand(1, m.maxHp);
+      floatText(m.x,m.y,"HP = " + m.hp,"#c86bff");
+    }
+  }
+
+  if (kind === "weaken") {
+    const amount = power;
+    hero.atk = Math.max(1, hero.atk - amount);
+    floatText(120,100,`ATK -${amount}`,"#bbbbbb");
+    flash = `Weaken bomb!`;
+
+    for (const m of board) {
+      if (m.type !== "monster") continue;
+      m.atk = Math.max(1, m.atk - amount);
+      floatText(m.x,m.y,`ATK -${amount}`,"#bbbbbb");
+    }
+  }
+
+  if (kind === "strength") {
+    const amount = power;
+    hero.atk += amount;
+    floatText(120,100,`ATK +${amount}`,"#ffb15e");
+    flash = `Strength bomb!`;
+
+    for (const m of board) {
+      if (m.type !== "monster") continue;
+      m.atk += amount;
+      floatText(m.x,m.y,`ATK +${amount}`,"#ffb15e");
+    }
+  }
+
+  if (kind === "cloud") {
+    flash = `Cloudy bomb!`;
+    const count = rand(3,5);
+    clouds = [];
+    for (let i = 0; i < count; i++) {
+      clouds.push({
+        x: rand(80, Math.max(90, W-80)),
+        y: rand(150, Math.max(160, H-130)),
+        r: rand(95,150),
+        bumps: Array.from({length: rand(6,10)}, () => ({
+          a: Math.random()*Math.PI*2,
+          d: Math.random()*.7,
+          r: rand(35,70)
+        }))
+      });
+    }
+  }
+
+  if (kind === "lightning") {
+    const heroDmg = Math.floor(power * .35);
+    hero.hp -= heroDmg;
+    floatText(120,100,"-"+heroDmg,"#ffe65c");
+    flash = `Lightning bomb!`;
+
+    for (let i = board.length - 1; i >= 0; i--) {
+      const m = board[i];
+      if (m.type !== "monster") continue;
+      if (performance.now() < m.stoneUntil) {
+        floatText(m.x,m.y,"STONE","#bbbbbb");
+        continue;
+      }
+      const dmg = power + 12;
+      m.hp -= dmg;
+      floatText(m.x,m.y,"⚡ -" + dmg,"#ffe65c");
+      if (m.hp <= 0) killMonster(i, false);
+    }
+  }
+
+  if (kind === "poison") {
+    const heroDmg = Math.floor(power * 1.2);
+    hero.hp -= heroDmg;
+    hero.poison = Math.max(0, hero.poison - 1);
+    floatText(120,100,"-"+heroDmg,"#7cff4f");
+    flash = `Poison bomb!`;
+
+    for (const m of board) {
+      if (m.type !== "monster") continue;
+      if (performance.now() < m.stoneUntil) {
+        floatText(m.x,m.y,"STONE","#bbbbbb");
+        continue;
+      }
+      m.poison += power;
+      floatText(m.x,m.y,`POISON +${power}`,"#7cff4f");
+    }
+  }
+
+  if (kind === "heal") {
+    heal(hero, power, 120, 100);
+    flash = `Healing bomb!`;
+
+    for (const m of board) {
+      if (m.type !== "monster") continue;
+      const amount = Math.floor(power * .6);
+      m.hp = Math.min(m.maxHp, m.hp + amount);
+      floatText(m.x,m.y,"+"+amount,"#70ff8a");
+    }
+  }
+
+  if (kind === "ice") {
+    const now = performance.now();
+    flash = `Ice bomb!`;
+    for (const m of board) {
+      if (m.type !== "monster") continue;
+      if (now < m.stoneUntil) continue;
+      m.frozenUntil = now + 4000;
+      m.attacking = false;
+      floatText(m.x,m.y,"FROZEN","#72dfff");
+    }
+  }
+
+  if (kind === "zombie") {
+    flash = `Zombie bomb!`;
+    for (const m of board) {
+      if (m.type !== "monster") continue;
+      if (performance.now() < m.stoneUntil) continue;
+      m.zombie = true;
+      m.target = null;
+      m.parts.originalColor = m.parts.color;
+      m.parts.color = "#6cff6c";
+      m.attacking = false;
+      floatText(m.x,m.y,"ZOMBIE","#7aff7a");
+    }
+  }
+
+  if (hero.hp <= 0) die();
+}
+
+function poisonTick() {
+  if (gameState !== "playing") return;
+
+  if (hero.regenTicks > 0) {
+    const amount = Math.max(1, Math.floor(hero.regenPower));
+    heal(hero, amount, 120, 100);
+    hero.regenTicks--;
+    if (hero.regenTicks <= 0) hero.regenPower = 0;
+  }
+
+  for (let i = board.length - 1; i >= 0; i--) {
+    const m = board[i];
+    if (m.type !== "monster" || m.poison <= 0) continue;
+
+    if (performance.now() < m.stoneUntil) {
+      floatText(m.x, m.y, "STONE", "#bbbbbb");
+      continue;
+    }
+
+    const dmg = m.poison;
+    m.hp -= dmg;
+    m.poison = Math.max(0, m.poison - 1);
+    floatText(m.x, m.y, "☠ -" + dmg, "#7cff4f");
+
+    if (m.hp <= 0) killMonster(i, true);
+  }
+}
+
+function attackMonster(m,index) {
+  if (!hero.alive || m.attacking) return;
+
+  const now = performance.now();
+  if (now < m.attackCooldownUntil) return;
+
+  m.attackCooldownUntil = now + 450;
+
+  const dmg = getHeroAtk();
+  const dealt = damage(m,dmg,m.x,m.y);
+  spendPowerTurn();
+  flash = `Monster -${dealt}`;
+
+  if (dealt > 0 && hero.vampire > 0) {
+    const life = Math.max(1, Math.floor(dealt * hero.vampire / 100));
+    hero.hp = Math.min(hero.maxHp, hero.hp + life);
+    floatText(120,100,"VAMP +" + life,"#ff4f9a");
+  }
+
+  if (hero.poison > 0 && dealt > 0) {
+    m.poison += hero.poison;
+    flash = `Hit + poison`;
+    floatText(m.x,m.y,`POISON +${hero.poison}`,"#7cff4f");
+  }
+
+  if (m.hp <= 0) {
+    killMonster(index, true);
+    return;
+  }
+
+  if (m.zombie) return;
+  if (now < m.frozenUntil) {
+    flash = "Frozen monster cannot counter!";
+    return;
+  }
+  if (now < m.stoneUntil) {
+    flash = "Stone monster cannot counter!";
+    return;
+  }
+
+  m.attacking = true;
+
+  setTimeout(() => {
+    const now2 = performance.now();
+    if (gameState !== "playing" || !hero.alive || m.hp <= 0 || m.zombie) return;
+
+    if (now2 < m.frozenUntil || now2 < m.stoneUntil) {
+      m.attacking = false;
+      return;
+    }
+
+    const dmg = Math.max(1, m.atk - getHeroDef());
+    damage(hero,dmg,120,100);
+    flash = `Hero -${dmg}`;
+    m.attacking = false;
+
+    if (hero.hp <= 0) die();
+  }, 500);
+}
+
+function killMonster(index, giveXp = true) {
+  if (!board[index]) return;
+
+  kills++;
+  sound("dead");
+  floatText(board[index].x, board[index].y, "KO", "#ffffff");
+
+  if (giveXp) {
+    hero.xp += board[index].elite ? 3 : 1;
+    while (hero.xp >= hero.nextXp) {
+      hero.xp -= hero.nextXp;
+      levelUp();
+    }
+  }
+
+  if (kills >= 20) {
+    gameState = "win";
+    flash = "YOU WIN!";
+    sound("level");
+    return;
+  }
+
+  board[index] = spawnThing();
+}
+
+function levelUp() {
+  hero.level++;
+  hero.nextXp = Math.floor(hero.nextXp * 1.35 + 1);
+  hero.maxHp += 15;
+  hero.hp = Math.min(hero.maxHp, hero.hp + 35);
+  hero.atk += 2;
+
+  if (hero.level % 2 === 0) hero.def += 1;
+  if (hero.level % 3 === 0) hero.poison += 1;
+
+  flash = `LEVEL ${hero.level}!`;
+  floatText(W/2, H/2, `LEVEL ${hero.level}!`, "#ffe65c");
+  sound("level");
+}
+
+function die() {
+  hero.alive = false;
+  gameState = "dead";
+  flash = "YOU DIED";
+  sound("dead");
+}
+
+function zombieFights() {
+  const now = performance.now();
+
+  for (const z of board) {
+    if (z.type !== "monster" || !z.zombie || now < z.fightCooldownUntil || now < z.stoneUntil) continue;
+
+    let target = null;
+    let best = Infinity;
+
+    for (const m of board) {
+      if (m.type !== "monster" || m.zombie || now < m.frozenUntil || now < m.stoneUntil) continue;
+
+      const d = dist(z.x,z.y,m.x,m.y);
+      if (d < best) {
+        best = d;
+        target = m;
+      }
+    }
+
+    z.target = target;
+
+    if (!target) continue;
+
+    const dx = target.x - z.x;
+    const dy = target.y - z.y;
+    const d = Math.max(1, Math.hypot(dx,dy));
+
+    z.vx += dx / d * .62;
+    z.vy += dy / d * .62;
+
+    if (best < z.r + target.r + 70) {
+      z.fightCooldownUntil = now + 650;
+      target.fightCooldownUntil = now + 650;
+
+      const zdmg = z.atk;
+      const mdmg = target.atk;
+
+      target.hp -= zdmg;
+      z.hp -= mdmg;
+
+      floatText(target.x,target.y,"-"+zdmg,"#7aff7a");
+      floatText(z.x,z.y,"-"+mdmg,"#ff6b6b");
+      sound("hit");
+    }
+  }
+
+  for (let i = board.length - 1; i >= 0; i--) {
+    const m = board[i];
+    if (m.type === "monster" && m.hp <= 0) {
+      killMonster(i, m.zombie ? false : true);
+    }
+  }
+}
+
+function resolveOverlaps() {
+  for (let a=0;a<board.length;a++) {
+    for (let b=a+1;b<board.length;b++) {
+      const A = board[a], B = board[b];
+
+      if (
+        A.type === "monster" &&
+        B.type === "monster" &&
+        ((A.zombie && A.target === B) || (B.zombie && B.target === A))
+      ) {
+        continue;
+      }
+
+      const minD = A.r + B.r + 46;
+      const d = dist(A.x,A.y,B.x,B.y);
+
+      if (d > 0 && d < minD) {
+        const push = (minD-d)*.5;
+        const nx = (A.x-B.x)/d;
+        const ny = (A.y-B.y)/d;
+        A.x += nx*push;
+        A.y += ny*push;
+        B.x -= nx*push;
+        B.y -= ny*push;
+      }
+    }
+  }
+
+  for (const t of board) {
+    t.x = Math.max(t.r+20, Math.min(W-t.r-20, t.x));
+    t.y = Math.max(155, Math.min(H-t.r-80, t.y));
+  }
+}
+
+function update() {
+  const now = performance.now();
+
+  if (boom) {
+    boom.t--;
+    if (boom.t <= 0) boom = null;
+  }
+
+  for (let i = floats.length - 1; i >= 0; i--) {
+    const f = floats[i];
+
+    f.vy += f.gravity;
+    f.x += f.vx;
+    f.y += f.vy;
+
+    if (f.x < 20) { f.x = 20; f.vx *= -0.75; }
+    if (f.x > W - 20) { f.x = W - 20; f.vx *= -0.75; }
+    if (f.y < 20) { f.y = 20; f.vy *= -0.75; }
+    if (f.y > H - 40) { f.y = H - 40; f.vy *= -0.75; }
+
+    f.life--;
+    if (f.life <= 0) floats.splice(i,1);
+  }
+
+  if (gameState !== "playing") return;
+
+  if (now - lastPoisonTick >= 2000) {
+    lastPoisonTick = now;
+    poisonTick();
+  }
+
+  for (const t of board) {
+    if (t.y < t.targetY) {
+      t.vy += .35;
+      t.y += t.vy;
+      if (t.y > t.targetY) {
+        t.y = t.targetY;
+        t.vy = 0;
+      }
+      continue;
+    }
+
+    if (t.type === "monster") {
+      if (now < t.stoneUntil) {
+        t.vx *= .75;
+        t.vy *= .75;
+        continue;
+      }
+
+      if (now < t.frozenUntil) {
+        t.vx *= .9;
+        t.vy *= .9;
+        continue;
+      }
+
+      t.wander += .025;
+      t.vx += Math.sin(t.wander)*.04;
+      t.vy += Math.cos(t.wander*1.4)*.04;
+
+      const speed = (t.zombie ? 2.2 : 1) + hero.level*.035 + kills*.005;
+      t.vx = Math.max(-speed, Math.min(speed, t.vx));
+      t.vy = Math.max(-speed, Math.min(speed, t.vy));
+
+      t.x += t.vx;
+      t.y += t.vy;
+
+      if (t.x < t.r+20 || t.x > W-t.r-20) t.vx *= -1;
+      if (t.y < 160 || t.y > H-t.r-85) t.vy *= -1;
+    }
+  }
+
+  zombieFights();
+  resolveOverlaps();
+}
+
+function drawHeroUI() {
+  ctx.save();
+
+  ctx.fillStyle = "white";
+  ctx.textAlign = "left";
+  ctx.font = "bold 18px system-ui";
+  ctx.fillText(`Kills ${kills}/20  LV ${hero.level}  XP ${hero.xp}/${hero.nextXp}`,18,30);
+  ctx.fillText(`ATK ${getHeroAtk()}  DEF ${getHeroDef()}  POISON ${hero.poison}`,18,58);
+
+  let status = [];
+  if (hero.powerAtkTurns > 0) status.push(`ATK UP ${hero.powerAtkTurns}`);
+  if (hero.powerDefTurns > 0) status.push(`DEF UP ${hero.powerDefTurns}`);
+  if (hero.regenTicks > 0) status.push(`REGEN ${hero.regenTicks}`);
+  if (hero.vampire > 0) status.push(`VAMP ${hero.vampire}%`);
+  if (status.length) {
+    ctx.font = "bold 14px system-ui";
+    ctx.fillStyle = "#ffe65c";
+    ctx.fillText(status.join("  "),18,120);
+  }
+
+  const bw = Math.min(360,W-36);
+  ctx.fillStyle = "#333";
+  ctx.fillRect(18,76,bw,24);
+  ctx.fillStyle = "#e84444";
+  ctx.fillRect(18,76,bw*Math.max(0,hero.hp/hero.maxHp),24);
+  ctx.strokeStyle = "white";
+  ctx.lineWidth = 1;
+  ctx.strokeRect(18,76,bw,24);
+
+  ctx.fillStyle = "white";
+  ctx.textAlign = "center";
+  ctx.font = "14px system-ui";
+  ctx.fillText(`HP ${Math.max(0,hero.hp)} / ${hero.maxHp}`,18+bw/2,94);
+
+  ctx.font = `bold ${Math.min(31,W*.075)}px system-ui`;
+  ctx.fillText(flash,W/2,H-35);
+
+  ctx.restore();
+}
+
+function drawMonster(m) {
+  const x = m.x + rand(-shake,shake);
+  const y = m.y + rand(-shake,shake);
+  const r = m.r;
+  const p = m.parts;
+  const now = performance.now();
+  const frozen = now < m.frozenUntil;
+  const stone = now < m.stoneUntil;
+
+  ctx.save();
+  ctx.translate(x,y);
+  ctx.scale(r/75,r/75);
+  ctx.fillStyle = stone ? "#888888" : frozen ? "#72dfff" : p.color;
+
+  if (p.head === "circle") {
+    ctx.beginPath(); ctx.arc(0,0,70,0,Math.PI*2); ctx.fill();
+  } else if (p.head === "box") {
+    ctx.fillRect(-70,-60,140,120);
+  } else if (p.head === "triangle") {
+    ctx.beginPath(); ctx.moveTo(0,-85); ctx.lineTo(85,70); ctx.lineTo(-85,70); ctx.closePath(); ctx.fill();
+  } else {
+    ctx.beginPath();
+    for (let i=0;i<14;i++) {
+      const a = i/14*Math.PI*2;
+      const rr = 60 + Math.sin(i*3)*18;
+      ctx.lineTo(Math.cos(a)*rr, Math.sin(a)*rr);
+    }
+    ctx.closePath(); ctx.fill();
+  }
+
+  if (p.horns) {
+    ctx.fillStyle = stone ? "#666" : "#eee";
+    ctx.beginPath(); ctx.moveTo(-40,-50); ctx.lineTo(-80,-115); ctx.lineTo(-8,-70); ctx.fill();
+    ctx.beginPath(); ctx.moveTo(40,-50); ctx.lineTo(80,-115); ctx.lineTo(8,-70); ctx.fill();
+  }
+
+  if (m.elite) {
+    ctx.fillStyle = stone ? "#aaa" : "#ffd84a";
+    ctx.beginPath();
+    ctx.moveTo(-32,-82); ctx.lineTo(-16,-112); ctx.lineTo(0,-82);
+    ctx.lineTo(16,-112); ctx.lineTo(32,-82); ctx.closePath();
+    ctx.fill();
+    ctx.strokeStyle = "white"; ctx.lineWidth = 4; ctx.stroke();
+  }
+
+  ctx.fillStyle = "white";
+  for (let i=0;i<p.eyes;i++) {
+    const ex = (i-(p.eyes-1)/2)*25;
+    ctx.beginPath(); ctx.arc(ex,-20,11,0,Math.PI*2); ctx.fill();
+    ctx.fillStyle = m.zombie ? "#111" : "black";
+    ctx.beginPath(); ctx.arc(ex,-20,5,0,Math.PI*2); ctx.fill();
+    ctx.fillStyle = "white";
+  }
+
+  if (p.mouth === "smile") {
+    ctx.strokeStyle = "black"; ctx.lineWidth = 6;
+    ctx.beginPath(); ctx.arc(0,15,30,0,Math.PI); ctx.stroke();
+  }
+  if (p.mouth === "fangs") {
+    ctx.fillStyle = "black"; ctx.fillRect(-35,20,70,16);
+    ctx.fillStyle = "white";
+    ctx.beginPath(); ctx.moveTo(-20,20); ctx.lineTo(-8,52); ctx.lineTo(3,20); ctx.fill();
+    ctx.beginPath(); ctx.moveTo(20,20); ctx.lineTo(8,52); ctx.lineTo(-3,20); ctx.fill();
+  }
+  if (p.mouth === "void") {
+    ctx.fillStyle = "black";
+    ctx.beginPath(); ctx.arc(0,25,25,0,Math.PI*2); ctx.fill();
+  }
+
+  ctx.strokeStyle = stone ? "#666" : frozen ? "#72dfff" : p.color;
+  ctx.lineWidth = 10;
+
+  for (let i=0;i<p.arms;i++) {
+    const side = i%2 ? 1 : -1;
+    ctx.beginPath();
+    ctx.moveTo(side*55,18);
+    ctx.lineTo(side*115,rand(-20,65));
+    ctx.stroke();
+  }
+
+  for (let i=0;i<p.legs;i++) {
+    const lx = (i-(p.legs-1)/2)*21;
+    ctx.beginPath();
+    ctx.moveTo(lx,58);
+    ctx.lineTo(lx+rand(-10,10),112);
+    ctx.stroke();
+  }
+
+  ctx.restore();
+
+  ctx.save();
+
+  const barW = r*2.1;
+  const barH = 9;
+  const bx = m.x-barW/2;
+  const by = m.y-r-32;
+
+  ctx.fillStyle = "#222";
+  ctx.fillRect(bx,by,barW,barH);
+  ctx.fillStyle = stone ? "#bbbbbb" : m.zombie ? "#7aff7a" : "#e84444";
+  ctx.fillRect(bx,by,barW*Math.max(0,m.hp/m.maxHp),barH);
+  ctx.strokeStyle = "white";
+  ctx.lineWidth = 1;
+  ctx.strokeRect(bx,by,barW,barH);
+
+  if (m.poison > 0) {
+    ctx.fillStyle = "#7cff4f";
+    ctx.fillRect(bx,by+barH+3,barW*Math.min(1,m.poison/30),5);
+  }
+
+  if (frozen) {
+    ctx.fillStyle = "#72dfff";
+    ctx.fillRect(bx,by+barH+10,barW*Math.max(0,(m.frozenUntil-now)/4000),5);
+  }
+
+  if (stone) {
+    ctx.fillStyle = "#bbbbbb";
+    ctx.fillRect(bx,by+barH+17,barW*Math.max(0,(m.stoneUntil-now)/20000),5);
+  }
+
+  ctx.textAlign = "center";
+  ctx.textBaseline = "bottom";
+  ctx.font = "bold 14px system-ui";
+  ctx.fillStyle = "white";
+  ctx.fillText(`${stone ? "STONE " : ""}${m.zombie ? "ZOMBIE " : ""}${m.elite ? "ELITE " : ""}ATK ${m.atk}`,m.x,by-4);
+
+  if (m.attacking) {
+    ctx.fillStyle = "#ff6666";
+    ctx.fillText("attacking...",m.x,m.y+m.r+28);
+  }
+
+  ctx.restore();
+}
+
+function drawItem(item) {
+  ctx.save();
+
+  if (item.kind === "smallBomb") {
+    ctx.strokeStyle = "rgba(255,180,80,.45)";
+    ctx.lineWidth = 4;
+    ctx.setLineDash([10,10]);
+    ctx.beginPath();
+    ctx.arc(item.x,item.y,175,0,Math.PI*2);
+    ctx.stroke();
+    ctx.setLineDash([]);
+  }
+
+  const size = item.r*2.1;
+  ctx.drawImage(icons[item.kind], item.x-size/2, item.y-size/2, size, size);
+
+  ctx.textAlign = "center";
+  ctx.textBaseline = "top";
+  ctx.font = "bold 15px system-ui";
+  ctx.fillStyle = "white";
+
+  if (item.kind === "sword") ctx.fillText(`ATK +${item.value}`, item.x, item.y+item.r+10);
+  if (item.kind === "shield") ctx.fillText(`DEF +${item.value}`, item.x, item.y+item.r+10);
+  if (item.kind === "potion") ctx.fillText(`HP +${item.value}`, item.x, item.y+item.r+10);
+  if (item.kind === "regenPotion") ctx.fillText(`REGEN`, item.x, item.y+item.r+10);
+  if (item.kind === "vampirePotion") ctx.fillText(`VAMPIRE`, item.x, item.y+item.r+10);
+  if (item.kind === "powerPotion") ctx.fillText(`POWER UP`, item.x, item.y+item.r+10);
+  if (item.kind === "poison") ctx.fillText(`POISON +${item.value}`, item.x, item.y+item.r+10);
+  if (item.kind === "bomb") ctx.fillText(`BOMB ${item.value}`, item.x, item.y+item.r+10);
+  if (item.kind === "smallBomb") ctx.fillText(`SMALL BOMB`, item.x, item.y+item.r+10);
+  if (item.kind === "clearBomb") ctx.fillText(`CLEAR BOMB`, item.x, item.y+item.r+10);
+  if (item.kind === "randomBomb") ctx.fillText(`RANDOM BOMB`, item.x, item.y+item.r+10);
+  if (item.kind === "weakenBomb") ctx.fillText(`WEAKEN`, item.x, item.y+item.r+10);
+  if (item.kind === "strengthBomb") ctx.fillText(`STRENGTH`, item.x, item.y+item.r+10);
+  if (item.kind === "cloudBomb") ctx.fillText(`CLOUDY BOMB`, item.x, item.y+item.r+10);
+  if (item.kind === "lightningBomb") ctx.fillText(`LIGHTNING ${item.value}`, item.x, item.y+item.r+10);
+  if (item.kind === "poisonBomb") ctx.fillText(`POISON BOMB`, item.x, item.y+item.r+10);
+  if (item.kind === "healBomb") ctx.fillText(`HEAL BOMB`, item.x, item.y+item.r+10);
+  if (item.kind === "iceBomb") ctx.fillText(`ICE BOMB`, item.x, item.y+item.r+10);
+  if (item.kind === "zombieBomb") ctx.fillText(`ZOMBIE BOMB`, item.x, item.y+item.r+10);
+  if (item.kind === "stoneScroll") ctx.fillText(`STONE SCROLL`, item.x, item.y+item.r+10);
+  if (item.kind === "chest") ctx.fillText("CHEST", item.x, item.y+item.r+10);
+
+  ctx.restore();
+}
+
+function drawFloats() {
+  ctx.save();
+
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+
+  for (const f of floats) {
+    const alpha = Math.max(0, f.life / f.maxLife);
+    const scale = 1 + Math.sin((1 - alpha) * Math.PI) * .25;
+
+    ctx.globalAlpha = alpha;
+    ctx.font = `bold ${Math.floor(34 * scale)}px system-ui`;
+    ctx.lineWidth = 7;
+    ctx.strokeStyle = "black";
+    ctx.fillStyle = f.color;
+    ctx.strokeText(f.text, f.x, f.y);
+    ctx.fillText(f.text, f.x, f.y);
+  }
+
+  ctx.restore();
+}
+
+function drawClouds() {
+  if (!clouds || clouds.length <= 0) return;
+
+  ctx.save();
+  for (const c of clouds) {
+    ctx.fillStyle = "rgba(225,232,245,.96)";
+    ctx.strokeStyle = "rgba(255,255,255,.95)";
+    ctx.lineWidth = 5;
+
+    ctx.beginPath();
+    ctx.arc(c.x,c.y,c.r,0,Math.PI*2);
+    for (const b of c.bumps) {
+      ctx.moveTo(c.x + Math.cos(b.a)*c.r*b.d + b.r, c.y + Math.sin(b.a)*c.r*b.d);
+      ctx.arc(c.x + Math.cos(b.a)*c.r*b.d, c.y + Math.sin(b.a)*c.r*b.d, b.r,0,Math.PI*2);
+    }
+    ctx.fill();
+    ctx.stroke();
+
+    ctx.fillStyle = "#556";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.font = "bold 22px system-ui";
+    ctx.fillText("tap cloud", c.x, c.y);
+  }
+  ctx.restore();
+}
+
+function menuButton(x,y,w,h,text,selected=false) {
+  ctx.fillStyle = selected ? "#ffd84a" : "#eee";
+  ctx.fillRect(x,y,w,h);
+  ctx.strokeStyle = "white";
+  ctx.lineWidth = 2;
+  ctx.strokeRect(x,y,w,h);
+
+  ctx.fillStyle = "#111";
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  ctx.font = `bold ${Math.min(24,W*.05)}px system-ui`;
+  ctx.fillText(text,x+w/2,y+h/2);
+
+  menuButtons.push({x,y,w,h,text});
+}
+
+function drawMenu(title, subtitle, button) {
+  ctx.save();
+  menuButtons = [];
+
+  ctx.fillStyle = "rgba(0,0,0,.78)";
+  ctx.fillRect(0,0,W,H);
+
+  ctx.fillStyle = "white";
+  ctx.textAlign = "center";
+  ctx.font = `bold ${Math.min(50,W*.105)}px system-ui`;
+  ctx.fillText(title,W/2,H*.17);
+
+  ctx.font = `${Math.min(18,W*.04)}px system-ui`;
+  ctx.fillText(subtitle,W/2,H*.23);
+
+  ctx.font = `bold ${Math.min(24,W*.05)}px system-ui`;
+  ctx.fillText(`N = number of choices: ${settings.choices}`, W/2, H*.32);
+
+  const small = 58;
+  const gap = 18;
+  const cy = H*.36;
+  menuButton(W/2 - small - gap, cy, small, 52, "-");
+  menuButton(W/2 + gap, cy, small, 52, "+");
+
+  ctx.fillStyle = "white";
+  ctx.font = `bold ${Math.min(23,W*.05)}px system-ui`;
+  ctx.fillText("Difficulty", W/2, H*.50);
+
+  const bw = Math.min(120,W*.26);
+  const bh = 54;
+  const y = H*.54;
+  const total = bw*3 + 18*2;
+  const sx = W/2 - total/2;
+
+  menuButton(sx, y, bw, bh, "easy", settings.difficulty === "easy");
+  menuButton(sx + bw + 18, y, bw, bh, "normal", settings.difficulty === "normal");
+  menuButton(sx + bw*2 + 36, y, bw, bh, "hard", settings.difficulty === "hard");
+
+  const startW = Math.min(360,W*.8);
+  const startH = 78;
+  const startX = W/2-startW/2;
+  const startY = H*.73;
+
+  menuButton(startX,startY,startW,startH,button);
+
+  ctx.restore();
+}
+
+function drawBoom() {
+  if (!boom) return;
+
+  ctx.save();
+
+  const progress = 1 - boom.t / 20;
+
+  if (boom.kind === "normal") ctx.strokeStyle = "rgba(255,220,80,.85)";
+  if (boom.kind === "small") ctx.strokeStyle = "rgba(255,180,80,.85)";
+  if (boom.kind === "clear") ctx.strokeStyle = "rgba(255,255,255,.85)";
+  if (boom.kind === "random") ctx.strokeStyle = "rgba(200,100,255,.85)";
+  if (boom.kind === "weaken") ctx.strokeStyle = "rgba(180,180,180,.85)";
+  if (boom.kind === "strength") ctx.strokeStyle = "rgba(255,160,60,.85)";
+  if (boom.kind === "cloud") ctx.strokeStyle = "rgba(220,230,255,.85)";
+  if (boom.kind === "lightning") ctx.strokeStyle = "rgba(255,245,100,.9)";
+  if (boom.kind === "poison") ctx.strokeStyle = "rgba(120,255,90,.85)";
+  if (boom.kind === "heal") ctx.strokeStyle = "rgba(255,100,150,.85)";
+  if (boom.kind === "ice") ctx.strokeStyle = "rgba(100,220,255,.9)";
+  if (boom.kind === "zombie") ctx.strokeStyle = "rgba(120,255,120,.9)";
+
+  ctx.lineWidth = 7;
+  ctx.beginPath();
+  ctx.arc(boom.x,boom.y,boom.r*progress,0,Math.PI*2);
+  ctx.stroke();
+
+  if (boom.kind === "lightning") {
+    ctx.lineWidth = 4;
+    for (let i = 0; i < 8; i++) {
+      const a = Math.random() * Math.PI * 2;
+      ctx.beginPath();
+      ctx.moveTo(boom.x, boom.y);
+      ctx.lineTo(boom.x + Math.cos(a) * W, boom.y + Math.sin(a) * H);
+      ctx.stroke();
+    }
+  }
+
+  ctx.restore();
+}
+
+function draw() {
+  ctx.clearRect(0,0,W,H);
+  if (shake > 0) shake *= .75;
+
+  if (gameState === "menu") {
+    drawMenu("DROP RPG", "Swords, shields, potions, bombs, elites, ice, zombies, clouds, and curses.", "START");
+  } else {
+    update();
+    drawHeroUI();
+
+    for (const t of board) {
+      if (t.type === "monster") drawMonster(t);
+      else drawItem(t);
+    }
+
+    drawBoom();
+    drawClouds();
+
+    if (gameState === "dead") drawMenu("YOU DIED", "Bombs can hurt you too.", "RESET");
+    if (gameState === "win") drawMenu("YOU WIN!", "You defeated 20 monsters.", "PLAY AGAIN");
+
+    drawFloats();
+  }
+
+  requestAnimationFrame(draw);
+}
+
+function clearCloudAt(x,y) {
+  if (!clouds || clouds.length <= 0) return false;
+
+  for (let i = clouds.length - 1; i >= 0; i--) {
+    const c = clouds[i];
+    if (dist(x,y,c.x,c.y) < c.r * 1.15) {
+      clouds.splice(i,1);
+      floatText(x,y,"CLOUD CLEARED","#ffffff");
+      sound("item");
+      return true;
+    }
+  }
+
+  return false;
+}
+
+canvas.addEventListener("pointerdown", e => {
+  if (!audioCtx) audioCtx = new AudioContext();
+  if (audioCtx.state === "suspended") audioCtx.resume();
+
+  const x = e.clientX;
+  const y = e.clientY;
+
+  if (gameState === "menu") {
+    for (const b of menuButtons) {
+      if (x > b.x && x < b.x+b.w && y > b.y && y < b.y+b.h) {
+        if (b.text === "-") settings.choices = Math.max(1, settings.choices - 1);
+        else if (b.text === "+") settings.choices = Math.min(9, settings.choices + 1);
+        else if (b.text === "easy" || b.text === "normal" || b.text === "hard") settings.difficulty = b.text;
+        else if (b.text === "START") resetGame();
+        return;
+      }
+    }
+    return;
+  }
+
+  if (gameState === "dead" || gameState === "win") {
+    for (const b of menuButtons) {
+      if (x > b.x && x < b.x+b.w && y > b.y && y < b.y+b.h) {
+        if (b.text === "RESET" || b.text === "PLAY AGAIN") {
+          gameState = "menu";
+          return;
+        }
+      }
+    }
+    return;
+  }
+
+  if (gameState !== "playing") return;
+
+  clearCloudAt(x,y);
+
+  for (let i=board.length-1;i>=0;i--) {
+    const t = board[i];
+    const dx = x-t.x;
+    const dy = y-t.y;
+    const hitR = t.r*1.55;
+
+    if (dx*dx+dy*dy < hitR*hitR) {
+      if (t.type === "item") useItem(t,i);
+      else attackMonster(t,i);
+      break;
+    }
+  }
+});
+
+draw();
+</script>
+</body>
+</html>
