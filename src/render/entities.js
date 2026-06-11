@@ -5,7 +5,7 @@ function drawMonster(m) {
   const p = m.parts;
   const now = performance.now();
   const frozen = now < m.frozenUntil;
-  const stone = now < m.stoneUntil;
+  const stone = m.stone;
 
   ctx.save();
   ctx.translate(x,y);
@@ -116,8 +116,7 @@ function drawMonster(m) {
 
   if (stone) {
     ctx.fillStyle = "#bbbbbb";
-    const stoneProgress = m.stoneUntil === Infinity ? 1 : Math.max(0,(m.stoneUntil-now)/20000);
-    ctx.fillRect(bx,by+barH+17,barW*stoneProgress,5);
+    ctx.fillRect(bx,by+barH+17,barW,5);
   }
 
   ctx.textAlign = "center";
@@ -165,6 +164,9 @@ function drawItem(item) {
   if (item.kind === "zombieBomb") ctx.fillText(`ZOMBIE BOMB`, item.x, item.y+item.r+10);
   if (item.kind === "stoneScroll") ctx.fillText(`STONE SCROLL`, item.x, item.y+item.r+10);
   if (item.kind === "hauntedScroll") ctx.fillText(`CURSE SCROLL`, item.x, item.y+item.r+10);
+  if (item.kind === "killRandomItem") ctx.fillText(`KILL RANDOM`, item.x, item.y+item.r+10);
+  if (item.kind === "healRandomItem") ctx.fillText(`HEAL RANDOM`, item.x, item.y+item.r+10);
+  if (item.kind === "flashBang") ctx.fillText(`FLASH BANG`, item.x, item.y+item.r+10);
   if (item.kind === "chest") ctx.fillText("CHEST", item.x, item.y+item.r+10);
 
   ctx.restore();

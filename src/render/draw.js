@@ -17,6 +17,7 @@ function draw() {
     drawClouds();
 
     drawFloats();
+    drawBlind();
   }
 
   requestAnimationFrame(draw);

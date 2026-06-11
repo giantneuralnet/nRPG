@@ -35,3 +35,13 @@ function drawBoom() {
 
   ctx.restore();
 }
+
+function drawBlind() {
+  const remaining = blindUntil - performance.now();
+  if (remaining <= 0) return;
+
+  ctx.save();
+  ctx.fillStyle = `rgba(255,255,255,${Math.min(.96, .25 + remaining / 6500)})`;
+  ctx.fillRect(0,0,W,H);
+  ctx.restore();
+}

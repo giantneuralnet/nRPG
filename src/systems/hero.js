@@ -20,7 +20,7 @@ function spendPowerTurn() {
 function damage(target, amount, x, y, color="#ff6b6b") {
   amount = Math.max(0, Math.floor(amount));
 
-  if (target.type === "monster" && performance.now() < target.stoneUntil) {
+  if (target.type === "monster" && target.stone) {
     floatText(x, y, "STONE", "#bbbbbb");
     sound("hit");
     return 0;

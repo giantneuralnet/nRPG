@@ -19,7 +19,7 @@ function useItem(item, index) {
   }
 
   if (item.kind === "regenPotion") {
-    hero.regenTicks += 6;
+    hero.regenTicks += 8;
     hero.regenPower += item.value;
     flash = `Regen potion!`;
     floatText(item.x,item.y,`REGEN +${item.value}`,"#40ff96");
@@ -69,6 +69,9 @@ function useItem(item, index) {
 
   if (item.kind === "stoneScroll") stoneRandomMonster(item.x,item.y);
   if (item.kind === "hauntedScroll") hauntMonsters(item.x,item.y);
+  if (item.kind === "killRandomItem") killRandomTarget(item.x,item.y);
+  if (item.kind === "healRandomItem") healRandomTarget(item.x,item.y);
+  if (item.kind === "flashBang") flashBang(item.x,item.y);
 
   if (item.kind === "chest") openChest(item.x, item.y);
 
@@ -98,12 +101,12 @@ function openChest(x,y) {
     flash = `Chest: +${psn} Poison`;
     floatText(x,y,`POISON +${psn}`,"#7cff4f");
   } else if (roll < .62) {
-    hero.regenTicks += 6;
-    hero.regenPower += rand(5,9);
+    hero.regenTicks += 8;
+    hero.regenPower += rand(10,16);
     flash = "Chest: Regen!";
     floatText(x,y,"REGEN","#40ff96");
   } else if (roll < .72) {
-    hero.vampire += rand(2,4);
+    hero.vampire += rand(6,10);
     flash = "Chest: Vampire!";
     floatText(x,y,"LIFE STEAL","#ff4f9a");
   } else if (roll < .8) {
@@ -127,13 +130,62 @@ function stoneRandomMonster(x,y) {
   }
 
   const m = pick(monsters);
-  m.stoneUntil = Infinity;
+  m.stone = true;
   m.attacking = false;
   m.vx = 0;
   m.vy = 0;
   flash = "Stone scroll!";
   floatText(m.x,m.y,"STONE","#bbbbbb");
   sound("boom");
+}
+
+function randomLivingTargets() {
+  return [hero, ...board.filter(t => t.type === "monster")];
+}
+
+function killRandomTarget(x,y) {
+  const target = pick(randomLivingTargets());
+
+  if (target === hero) {
+    hero.hp = 0;
+    floatText(120,100,"DOOM","#ff6b6b");
+    flash = "Kill charm backfired!";
+    sound("dead");
+    die();
+    return;
+  }
+
+  const index = board.indexOf(target);
+  floatText(target.x,target.y,"KILL","#ffffff");
+  flash = "Kill charm!";
+  killMonster(index, true);
+}
+
+function healRandomTarget(x,y) {
+  const target = pick(randomLivingTargets());
+
+  if (target === hero) {
+    heal(hero, hero.maxHp, 120, 100);
+    flash = "Random heal: hero!";
+    return;
+  }
+
+  target.hp = target.maxHp;
+  floatText(target.x,target.y,"FULL HP","#70ff8a");
+  flash = "Random heal: monster!";
+  sound("item");
+}
+
+function flashBang(x,y) {
+  blindUntil = performance.now() + 5000;
+  for (const m of board) {
+    if (m.type !== "monster") continue;
+    m.attacking = false;
+    m.target = null;
+  }
+  flash = "FLASH BANG!";
+  floatText(x,y,"BLIND","#ffffff");
+  sound("zap");
 }
 
 function hauntMonsters(x,y) {
@@ -170,7 +222,7 @@ function explode(x,y,power,kind) {
     for (let i = board.length - 1; i >= 0; i--) {
       const m = board[i];
       if (m.type !== "monster") continue;
-      if (performance.now() < m.stoneUntil) {
+      if (m.stone) {
         floatText(m.x,m.y,"STONE","#bbbbbb");
         continue;
       }
@@ -235,7 +287,7 @@ function explode(x,y,power,kind) {
       clouds.push({
         x: rand(80, Math.max(90, W-80)),
         y: rand(150, Math.max(160, H-130)),
-        r: rand(135,210)
+        r: rand(190,285)
       });
     }
   }
@@ -249,7 +301,7 @@ function explode(x,y,power,kind) {
     for (let i = board.length - 1; i >= 0; i--) {
       const m = board[i];
       if (m.type !== "monster") continue;
-      if (performance.now() < m.stoneUntil) {
+      if (m.stone) {
         floatText(m.x,m.y,"STONE","#bbbbbb");
         continue;
       }
@@ -269,7 +321,7 @@ function explode(x,y,power,kind) {
 
     for (const m of board) {
       if (m.type !== "monster") continue;
-      if (performance.now() < m.stoneUntil) {
+      if (m.stone) {
         floatText(m.x,m.y,"STONE","#bbbbbb");
         continue;
       }
@@ -295,7 +347,7 @@ function explode(x,y,power,kind) {
     flash = `Ice bomb!`;
     for (const m of board) {
       if (m.type !== "monster") continue;
-      if (now < m.stoneUntil) continue;
+      if (m.stone) continue;
       m.frozenUntil = now + 4000;
       m.attacking = false;
       floatText(m.x,m.y,"FROZEN","#72dfff");
@@ -306,7 +358,7 @@ function explode(x,y,power,kind) {
     flash = `Zombie bomb!`;
     for (const m of board) {
       if (m.type !== "monster") continue;
-      if (performance.now() < m.stoneUntil) continue;
+      if (m.stone) continue;
       m.zombie = true;
       m.target = null;
       m.parts.originalColor = m.parts.color;

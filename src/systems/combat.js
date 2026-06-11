@@ -2,7 +2,7 @@ function poisonTick() {
   if (gameState !== "playing") return;
 
   if (hero.regenTicks > 0) {
-    const amount = Math.max(1, Math.floor(hero.regenPower));
+    const amount = Math.max(1, Math.floor(hero.regenPower * 1.25));
     heal(hero, amount, 120, 100);
     hero.regenTicks--;
     if (hero.regenTicks <= 0) hero.regenPower = 0;
@@ -12,7 +12,7 @@ function poisonTick() {
     const m = board[i];
     if (m.type !== "monster" || m.poison <= 0) continue;
 
-    if (performance.now() < m.stoneUntil) {
+    if (m.stone) {
       floatText(m.x, m.y, "STONE", "#bbbbbb");
       continue;
     }
@@ -40,7 +40,7 @@ function attackMonster(m,index) {
   flash = `Monster -${dealt}`;
 
   if (dealt > 0 && hero.vampire > 0) {
-    const life = Math.max(1, Math.floor(dealt * hero.vampire / 100));
+    const life = Math.max(1, Math.floor(dealt * hero.vampire * 1.5 / 100));
     hero.hp = Math.min(hero.maxHp, hero.hp + life);
     floatText(120,100,"VAMP +" + life,"#ff4f9a");
   }
@@ -60,8 +60,12 @@ function attackMonster(m,index) {
     flash = "Frozen monster cannot counter!";
     return;
   }
-  if (now < m.stoneUntil) {
+  if (m.stone) {
     flash = "Stone monster cannot counter!";
+    return;
+  }
+  if (now < blindUntil) {
+    flash = "Blinded monster cannot counter!";
     return;
   }
 
@@ -71,7 +75,7 @@ function attackMonster(m,index) {
     const now2 = performance.now();
     if (gameState !== "playing" || !hero.alive || m.hp <= 0) return;
 
-    if (now2 < m.frozenUntil || now2 < m.stoneUntil) {
+    if (now2 < m.frozenUntil || m.stone || now2 < blindUntil) {
       m.attacking = false;
       return;
     }
@@ -127,23 +131,16 @@ function makeGhost(dead) {
     hp: Math.max(1, Math.floor(dead.maxHp * .55)),
     maxHp: Math.max(1, Math.floor(dead.maxHp * .55)),
     atk: Math.max(1, Math.floor(dead.atk * .85)),
-    poison: 0,
-    frozenUntil: 0,
-    stoneUntil: 0,
+    stone: dead.stone,
     attackCooldownUntil: 0,
     fightCooldownUntil: 0,
-    target: null,
-    zombie: false,
+    target: dead.zombie ? null : dead.target,
     ghost: true,
     haunted: false,
     attacking: false,
     vx: (Math.random() - .5) * 2,
     vy: (Math.random() - .5) * 2,
-    parts: {
-      ...dead.parts,
-      originalColor: null,
-      color: "#d8ecff"
-    }
+    parts: { ...dead.parts }
   };
 }
 
@@ -171,15 +168,16 @@ function die() {
 
 function zombieFights() {
   const now = performance.now();
+  if (now < blindUntil) return;
 
   for (const z of board) {
-    if (z.type !== "monster" || !z.zombie || now < z.fightCooldownUntil || now < z.stoneUntil) continue;
+    if (z.type !== "monster" || !z.zombie || now < z.fightCooldownUntil || z.stone) continue;
 
     let target = null;
     let best = Infinity;
 
     for (const m of board) {
-      if (m.type !== "monster" || m.zombie || now < m.frozenUntil || now < m.stoneUntil) continue;
+      if (m.type !== "monster" || m.zombie || now < m.frozenUntil || m.stone) continue;
 
       const d = dist(z.x,z.y,m.x,m.y);
       if (d < best) {

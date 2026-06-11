@@ -79,8 +79,8 @@ function makeMonster(x,y,targetY,r) {
     hp,maxHp:hp,
     atk,
     poison:0,
+    stone:false,
     frozenUntil:0,
-    stoneUntil:0,
     attackCooldownUntil:0,
     fightCooldownUntil:0,
     target:null,
@@ -107,7 +107,8 @@ function makeItem(x,y,targetY,r) {
     "sword","shield","potion","potion","poison",
     "bomb","clearBomb","randomBomb","weakenBomb","strengthBomb",
     "cloudBomb","poisonBomb","healBomb","lightningBomb","iceBomb","zombieBomb",
-    "powerPotion","regenPotion","vampirePotion","stoneScroll","hauntedScroll","chest","chest"
+    "powerPotion","regenPotion","vampirePotion","stoneScroll","hauntedScroll",
+    "killRandomItem","healRandomItem","flashBang","chest","chest"
   ]);
   return {
     type:"item",
@@ -117,8 +118,8 @@ function makeItem(x,y,targetY,r) {
       kind === "sword" ? rand(1,3) :
       kind === "shield" ? rand(1,2) :
       kind === "potion" ? rand(22,45) :
-      kind === "regenPotion" ? rand(5,9) :
-      kind === "vampirePotion" ? rand(2,4) :
+      kind === "regenPotion" ? rand(10,16) :
+      kind === "vampirePotion" ? rand(6,10) :
       kind === "powerPotion" ? rand(6,10) :
       kind === "poison" ? rand(2,4) :
       kind === "bomb" ? rand(25,45) :
@@ -134,6 +135,9 @@ function makeItem(x,y,targetY,r) {
       kind === "zombieBomb" ? 0 :
       kind === "stoneScroll" ? 0 :
       kind === "hauntedScroll" ? 0 :
+      kind === "killRandomItem" ? 0 :
+      kind === "healRandomItem" ? 0 :
+      kind === "flashBang" ? 0 :
       0
   };
 }

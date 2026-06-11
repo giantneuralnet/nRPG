@@ -59,6 +59,19 @@ function makeIcon(type) {
     g.fillText("↑",50,62);
   }
 
+  if (type === "killRandomItem" || type === "healRandomItem" || type === "flashBang") {
+    g.fillStyle =
+      type === "killRandomItem" ? "#151515" :
+      type === "healRandomItem" ? "#70ff8a" :
+      "#ffffff";
+    g.beginPath(); g.roundRect(18,18,64,64,10); g.fill(); g.stroke();
+    g.fillStyle = type === "flashBang" || type === "healRandomItem" ? "#111" : "#ff4f4f";
+    g.font = "bold 34px system-ui";
+    g.textAlign = "center";
+    g.textBaseline = "middle";
+    g.fillText(type === "killRandomItem" ? "X" : type === "healRandomItem" ? "+" : "!",50,52);
+  }
+
   if (type === "stoneScroll" || type === "hauntedScroll") {
     g.fillStyle = "#d8d1b0";
     g.beginPath(); g.roundRect(20,20,60,60,8); g.fill(); g.stroke();
@@ -129,5 +142,6 @@ function makeIcon(type) {
 [
   "sword","shield","potion","poison","bomb","clearBomb","randomBomb",
   "weakenBomb","strengthBomb","cloudBomb","poisonBomb","healBomb","lightningBomb",
-  "iceBomb","zombieBomb","chest","powerPotion","regenPotion","vampirePotion","stoneScroll","hauntedScroll"
+  "iceBomb","zombieBomb","chest","powerPotion","regenPotion","vampirePotion","stoneScroll",
+  "hauntedScroll","killRandomItem","healRandomItem","flashBang"
 ].forEach(t => icons[t] = makeIcon(t));

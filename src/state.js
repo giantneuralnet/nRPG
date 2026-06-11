@@ -1,5 +1,5 @@
 let gameState = "menu";
-let hero, board, kills, flash, shake, boom, floats, clouds, lastPoisonTick;
+let hero, board, kills, flash, shake, boom, floats, clouds, lastPoisonTick, blindUntil;
 
 function difficultyScale() {
   if (settings.difficulty === "easy") return 0;
@@ -34,6 +34,7 @@ function resetGame() {
   flash = "Tap monsters and items";
   shake = 0;
   boom = null;
+  blindUntil = 0;
   lastPoisonTick = performance.now();
 
   for (let i = 0; i < settings.choices; i++) board.push(spawnThing());

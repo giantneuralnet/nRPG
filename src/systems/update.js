@@ -75,7 +75,7 @@ function update() {
     }
 
     if (t.type === "monster") {
-      if (now < t.stoneUntil) {
+      if (t.stone) {
         t.vx *= .75;
         t.vy *= .75;
         continue;
