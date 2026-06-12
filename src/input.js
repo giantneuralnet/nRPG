@@ -31,6 +31,7 @@ canvas.addEventListener("pointerdown", e => {
 
     if (dx*dx+dy*dy < hitR*hitR) {
       if (t.type === "item") useItem(t,i);
+      else if (t.type === "door") switchRoom(t.room);
       else attackMonster(t,i);
       break;
     }

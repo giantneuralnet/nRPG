@@ -72,6 +72,8 @@ function useItem(item, index) {
   if (item.kind === "killRandomItem") killRandomTarget(item.x,item.y);
   if (item.kind === "healRandomItem") healRandomTarget(item.x,item.y);
   if (item.kind === "flashBang") flashBang(item.x,item.y);
+  if (item.kind === "exileItem") exileMonsters(item.x,item.y);
+  if (item.kind === "swapHealthItem") swapRandomHealth(item.x,item.y);
 
   if (item.kind === "chest") openChest(item.x, item.y);
 
@@ -186,6 +188,47 @@ function flashBang(x,y) {
   flash = "FLASH BANG!";
   floatText(x,y,"BLIND","#ffffff");
   sound("zap");
+}
+
+function exileMonsters(x,y) {
+  let count = 0;
+  for (let i = 0; i < board.length; i++) {
+    const t = board[i];
+    if (t.type !== "monster") continue;
+    exileQueue.push(t);
+    board[i] = spawnThing(false);
+    count++;
+  }
+
+  flash = count ? `Exiled ${count} monsters` : "No monsters to exile!";
+  floatText(x,y,count ? "EXILE" : "NO TARGET","#d8ecff");
+  sound(count ? "zap" : "item");
+}
+
+function swapRandomHealth(x,y) {
+  const targets = randomLivingTargets();
+  if (targets.length < 2) {
+    flash = "No health to swap!";
+    sound("item");
+    return;
+  }
+
+  const hp = targets.map(t => t.hp);
+  for (let i = hp.length - 1; i > 0; i--) {
+    const j = rand(0, i);
+    const tmp = hp[i];
+    hp[i] = hp[j];
+    hp[j] = tmp;
+  }
+
+  for (let i = 0; i < targets.length; i++) {
+    const t = targets[i];
+    t.hp = Math.max(1, Math.min(t.maxHp, hp[i]));
+    floatText(t === hero ? 120 : t.x, t === hero ? 100 : t.y, "SWAP","#c86bff");
+  }
+
+  flash = "Health swap!";
+  sound("item");
 }
 
 function hauntMonsters(x,y) {

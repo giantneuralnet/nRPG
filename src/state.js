@@ -1,5 +1,5 @@
 let gameState = "menu";
-let hero, board, kills, flash, shake, boom, floats, clouds, lastPoisonTick, blindUntil;
+let hero, board, rooms, currentRoom, exileQueue, kills, flash, shake, boom, floats, clouds, lastPoisonTick, blindUntil;
 
 function difficultyScale() {
   if (settings.difficulty === "easy") return 0;
@@ -29,7 +29,9 @@ function resetGame() {
     vampire: 0
   };
 
-  board = [];
+  rooms = [null, null, null, null];
+  currentRoom = 1;
+  exileQueue = [];
   floats = [];
   clouds = [];
   kills = 0;
@@ -39,6 +41,26 @@ function resetGame() {
   blindUntil = 0;
   lastPoisonTick = performance.now();
 
-  for (let i = 0; i < settings.choices; i++) board.push(spawnThing());
+  board = fillRoom();
+  rooms[currentRoom] = board;
   gameState = "playing";
+}
+
+function fillRoom() {
+  const contents = [];
+  const previousBoard = board;
+  board = contents;
+  for (let i = 0; i < settings.choices; i++) contents.push(spawnThing());
+  board = previousBoard;
+  return contents;
+}
+
+function switchRoom(roomNumber) {
+  rooms[currentRoom] = board;
+  currentRoom = roomNumber;
+  board = rooms[currentRoom] || fillRoom();
+  rooms[currentRoom] = board;
+  clouds = [];
+  floats = [];
+  flash = `Room ${currentRoom}`;
 }

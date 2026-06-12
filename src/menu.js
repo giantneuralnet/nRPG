@@ -6,6 +6,9 @@ const choiceDown = document.getElementById("choiceDown");
 const choiceUp = document.getElementById("choiceUp");
 const difficultyButtons = Array.from(document.querySelectorAll(".difficulty-button"));
 const seedInput = document.getElementById("seedInput");
+const infoButton = document.getElementById("infoButton");
+const infoOverlay = document.getElementById("infoOverlay");
+const infoClose = document.getElementById("infoClose");
 const menuAction = document.getElementById("menuAction");
 
 function resumeAudio() {
@@ -65,6 +68,16 @@ for (const button of difficultyButtons) {
     updateMenuOverlay();
   });
 }
+
+infoButton.addEventListener("click", () => {
+  infoOverlay.classList.add("is-visible");
+  infoOverlay.setAttribute("aria-hidden", "false");
+});
+
+infoClose.addEventListener("click", () => {
+  infoOverlay.classList.remove("is-visible");
+  infoOverlay.setAttribute("aria-hidden", "true");
+});
 
 menuAction.addEventListener("click", () => {
   resumeAudio();

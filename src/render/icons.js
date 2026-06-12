@@ -59,17 +59,26 @@ function makeIcon(type) {
     g.fillText("↑",50,62);
   }
 
-  if (type === "killRandomItem" || type === "healRandomItem" || type === "flashBang") {
+  if (type === "killRandomItem" || type === "healRandomItem" || type === "flashBang" || type === "exileItem" || type === "swapHealthItem") {
     g.fillStyle =
       type === "killRandomItem" ? "#151515" :
       type === "healRandomItem" ? "#70ff8a" :
+      type === "exileItem" ? "#d8ecff" :
+      type === "swapHealthItem" ? "#c86bff" :
       "#ffffff";
     g.beginPath(); g.roundRect(18,18,64,64,10); g.fill(); g.stroke();
-    g.fillStyle = type === "flashBang" || type === "healRandomItem" ? "#111" : "#ff4f4f";
+    g.fillStyle = type === "flashBang" || type === "healRandomItem" || type === "exileItem" || type === "swapHealthItem" ? "#111" : "#ff4f4f";
     g.font = "bold 34px system-ui";
     g.textAlign = "center";
     g.textBaseline = "middle";
-    g.fillText(type === "killRandomItem" ? "X" : type === "healRandomItem" ? "+" : "!",50,52);
+    g.fillText(
+      type === "killRandomItem" ? "X" :
+      type === "healRandomItem" ? "+" :
+      type === "exileItem" ? "E" :
+      type === "swapHealthItem" ? "⇄" :
+      "!",
+      50,52
+    );
   }
 
   if (type === "stoneScroll" || type === "hauntedScroll") {
@@ -143,5 +152,5 @@ function makeIcon(type) {
   "sword","shield","potion","poison","bomb","clearBomb","randomBomb",
   "weakenBomb","strengthBomb","cloudBomb","poisonBomb","healBomb","lightningBomb",
   "iceBomb","zombieBomb","chest","powerPotion","regenPotion","vampirePotion","stoneScroll",
-  "hauntedScroll","killRandomItem","healRandomItem","flashBang"
+  "hauntedScroll","killRandomItem","healRandomItem","flashBang","exileItem","swapHealthItem"
 ].forEach(t => icons[t] = makeIcon(t));

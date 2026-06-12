@@ -110,7 +110,74 @@ button:focus-visible {
   outline-offset: 3px;
 }
 
+.info-button,
 .menu-action {
   width: min(360px, 80vw);
+}
+
+.info-button {
+  min-height: 52px;
+  margin-bottom: 14px;
+  background: #d8ecff;
+}
+
+.menu-action {
   min-height: 78px;
+}
+
+.info-overlay {
+  position: fixed;
+  inset: 0;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0,0,0,.86);
+  color: white;
+  z-index: 20;
+}
+
+.info-overlay.is-visible {
+  display: flex;
+}
+
+.info-panel {
+  box-sizing: border-box;
+  width: min(760px, calc(100vw - 28px));
+  max-height: calc(100vh - 28px);
+  overflow: auto;
+  border: 2px solid white;
+  background: #111;
+  padding: 18px;
+}
+
+.info-panel h2,
+.info-panel h3 {
+  margin: 0 0 12px;
+}
+
+.info-panel p {
+  margin: 0 0 12px;
+  line-height: 1.35;
+}
+
+.info-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 22px;
+}
+
+.info-close {
+  float: right;
+  min-height: 42px;
+  font-size: 16px;
+}
+
+@media (max-width: 640px) {
+  .menu-group {
+    margin-bottom: 18px;
+  }
+
+  .info-grid {
+    grid-template-columns: 1fr;
+  }
 }

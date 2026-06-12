@@ -4,7 +4,7 @@ function drawHeroUI() {
   ctx.fillStyle = "white";
   ctx.textAlign = "left";
   ctx.font = "bold 18px system-ui";
-  ctx.fillText(`Kills ${kills}/20  LV ${hero.level}  XP ${hero.xp}/${hero.nextXp}`,18,30);
+  ctx.fillText(`Room ${currentRoom}  Kills ${kills}/20  LV ${hero.level}  XP ${hero.xp}/${hero.nextXp}`,18,30);
   ctx.fillText(`ATK ${getHeroAtk()}  DEF ${getHeroDef()}  POISON ${hero.poison}`,18,58);
 
   let status = [];

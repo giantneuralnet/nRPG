@@ -89,6 +89,24 @@ function drawMonster(m) {
 
   ctx.restore();
 
+  if (m.shielded && !m.shieldBroken) {
+    ctx.save();
+    ctx.fillStyle = "rgba(120,190,255,.55)";
+    ctx.strokeStyle = "#d8ecff";
+    ctx.lineWidth = 4;
+    ctx.beginPath();
+    ctx.moveTo(m.x, m.y - r * .85);
+    ctx.lineTo(m.x + r * .75, m.y - r * .45);
+    ctx.lineTo(m.x + r * .55, m.y + r * .65);
+    ctx.lineTo(m.x, m.y + r * .95);
+    ctx.lineTo(m.x - r * .55, m.y + r * .65);
+    ctx.lineTo(m.x - r * .75, m.y - r * .45);
+    ctx.closePath();
+    ctx.fill();
+    ctx.stroke();
+    ctx.restore();
+  }
+
   ctx.save();
 
   const barW = r*2.1;
@@ -123,13 +141,45 @@ function drawMonster(m) {
   ctx.textBaseline = "bottom";
   ctx.font = "bold 14px system-ui";
   ctx.fillStyle = "white";
-  ctx.fillText(`${stone ? "STONE " : ""}${m.ghost ? "GHOST " : ""}${m.haunted ? "HAUNTED " : ""}${m.zombie ? "ZOMBIE " : ""}${m.elite ? "ELITE " : ""}ATK ${m.atk}`,m.x,by-4);
+  ctx.fillText(`${stone ? "STONE " : ""}${m.shielded && !m.shieldBroken ? "SHIELDED " : ""}${m.ghost ? "GHOST " : ""}${m.haunted ? "HAUNTED " : ""}${m.zombie ? "ZOMBIE " : ""}${m.elite ? "ELITE " : ""}ATK ${m.atk}`,m.x,by-4);
 
   if (m.attacking) {
     ctx.fillStyle = "#ff6666";
     ctx.fillText("attacking...",m.x,m.y+m.r+28);
   }
 
+  ctx.restore();
+}
+
+function drawDoor(door) {
+  ctx.save();
+  const w = door.r * 1.45;
+  const h = door.r * 2.15;
+  const x = door.x - w / 2;
+  const y = door.y - h / 2;
+
+  ctx.fillStyle = "#6b3f24";
+  ctx.strokeStyle = "white";
+  ctx.lineWidth = 4;
+  ctx.beginPath();
+  ctx.roundRect(x,y,w,h,8);
+  ctx.fill();
+  ctx.stroke();
+
+  ctx.fillStyle = "#ffd84a";
+  ctx.beginPath();
+  ctx.arc(door.x + w * .28, door.y, 5, 0, Math.PI * 2);
+  ctx.fill();
+
+  ctx.fillStyle = "white";
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  ctx.font = `bold ${Math.floor(door.r * .9)}px system-ui`;
+  ctx.fillText(door.room, door.x, door.y - door.r * .2);
+
+  ctx.textBaseline = "top";
+  ctx.font = "bold 15px system-ui";
+  ctx.fillText(`ROOM ${door.room}`, door.x, door.y + door.r + 10);
   ctx.restore();
 }
 
@@ -167,6 +217,8 @@ function drawItem(item) {
   if (item.kind === "killRandomItem") ctx.fillText(`KILL RANDOM`, item.x, item.y+item.r+10);
   if (item.kind === "healRandomItem") ctx.fillText(`HEAL RANDOM`, item.x, item.y+item.r+10);
   if (item.kind === "flashBang") ctx.fillText(`FLASH BANG`, item.x, item.y+item.r+10);
+  if (item.kind === "exileItem") ctx.fillText(`EXILE`, item.x, item.y+item.r+10);
+  if (item.kind === "swapHealthItem") ctx.fillText(`HP SWAP`, item.x, item.y+item.r+10);
   if (item.kind === "chest") ctx.fillText("CHEST", item.x, item.y+item.r+10);
 
   ctx.restore();

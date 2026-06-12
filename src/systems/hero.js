@@ -26,6 +26,13 @@ function damage(target, amount, x, y, color="#ff6b6b") {
     return 0;
   }
 
+  if (target.type === "monster" && target.shielded && !target.shieldBroken) {
+    target.shieldBroken = true;
+    floatText(x, y, "SHIELD", "#85bdff");
+    sound("hit");
+    return 0;
+  }
+
   target.hp -= amount;
   shake = 7;
   sound("hit");

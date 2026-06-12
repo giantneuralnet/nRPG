@@ -23,13 +23,44 @@ function findFreePosition(radius) {
   };
 }
 
-function spawnThing() {
+function spawnThing(allowExileReturn = true) {
+  if (allowExileReturn && exileQueue.length > 0 && rng() < .28) return popExiledMonster();
+
+  if (rng() < .08) {
+    const room = pick([1,2,3].filter(n => n !== currentRoom));
+    const r = Math.min(W,H) * .07;
+    const p = findFreePosition(r);
+    return makeDoor(p.x, -120 - rng()*200, p.y, r, room);
+  }
+
   const isMonster = rng() < .56;
   const r = Math.min(W,H) * (isMonster ? .076 : .062);
   const p = findFreePosition(r);
 
   if (isMonster) return makeMonster(p.x, -120 - rng()*200, p.y, r);
   return makeItem(p.x, -120 - rng()*200, p.y, r);
+}
+
+function popExiledMonster() {
+  const m = exileQueue.shift();
+  const p = findFreePosition(m.r);
+  m.x = p.x;
+  m.y = -120 - rng()*200;
+  m.targetY = p.y;
+  m.vx = (rng() - .5) * 1.5;
+  m.vy = 0;
+  m.attacking = false;
+  m.target = null;
+  return m;
+}
+
+function makeDoor(x,y,targetY,r,room) {
+  return {
+    type:"door",
+    x,y,targetY,r,
+    vx:0,vy:0,
+    room
+  };
 }
 
 function makeMonster(x,y,targetY,r) {
@@ -85,6 +116,8 @@ function makeMonster(x,y,targetY,r) {
     fightCooldownUntil:0,
     target:null,
     elite,
+    shielded:rng()<.18,
+    shieldBroken:false,
     zombie:false,
     ghost:false,
     haunted:false,
@@ -108,7 +141,7 @@ function makeItem(x,y,targetY,r) {
     "bomb","clearBomb","randomBomb","weakenBomb","strengthBomb",
     "cloudBomb","poisonBomb","healBomb","lightningBomb","iceBomb","zombieBomb",
     "powerPotion","regenPotion","vampirePotion","stoneScroll","hauntedScroll",
-    "killRandomItem","healRandomItem","flashBang","chest","chest"
+    "killRandomItem","healRandomItem","flashBang","exileItem","swapHealthItem","chest","chest"
   ]);
   return {
     type:"item",
@@ -138,6 +171,8 @@ function makeItem(x,y,targetY,r) {
       kind === "killRandomItem" ? 0 :
       kind === "healRandomItem" ? 0 :
       kind === "flashBang" ? 0 :
+      kind === "exileItem" ? 0 :
+      kind === "swapHealthItem" ? 0 :
       0
   };
 }

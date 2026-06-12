@@ -10,6 +10,7 @@ function draw() {
 
     for (const t of board) {
       if (t.type === "monster") drawMonster(t);
+      else if (t.type === "door") drawDoor(t);
       else drawItem(t);
     }
 
