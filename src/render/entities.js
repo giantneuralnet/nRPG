@@ -1,97 +1,113 @@
-function drawMonster(m) {
-  const x = m.x + visualRand(-shake,shake);
-  const y = m.y + visualRand(-shake,shake);
-  const r = m.r;
+function drawMonsterBodyOn(renderCtx, m, x, y, r, shakeAmount = 0) {
   const p = m.parts;
   const now = performance.now();
   const frozen = now < m.frozenUntil;
   const stone = m.stone;
 
-  ctx.save();
-  ctx.translate(x,y);
-  ctx.scale(r/75,r/75);
-  if (m.ghost) ctx.globalAlpha = .68;
-  ctx.fillStyle = stone ? "#888888" : frozen ? "#72dfff" : p.color;
+  renderCtx.save();
+  renderCtx.translate(x + visualRand(-shakeAmount,shakeAmount), y + visualRand(-shakeAmount,shakeAmount));
+  renderCtx.scale(r/75,r/75);
+  if (m.ghost) renderCtx.globalAlpha = .68;
+  renderCtx.fillStyle = stone ? "#888888" : frozen ? "#72dfff" : p.color;
 
   if (p.head === "circle") {
-    ctx.beginPath(); ctx.arc(0,0,70,0,Math.PI*2); ctx.fill();
+    renderCtx.beginPath(); renderCtx.arc(0,0,70,0,Math.PI*2); renderCtx.fill();
   } else if (p.head === "box") {
-    ctx.fillRect(-70,-60,140,120);
+    renderCtx.fillRect(-70,-60,140,120);
   } else if (p.head === "triangle") {
-    ctx.beginPath(); ctx.moveTo(0,-85); ctx.lineTo(85,70); ctx.lineTo(-85,70); ctx.closePath(); ctx.fill();
+    renderCtx.beginPath(); renderCtx.moveTo(0,-85); renderCtx.lineTo(85,70); renderCtx.lineTo(-85,70); renderCtx.closePath(); renderCtx.fill();
   } else {
-    ctx.beginPath();
+    renderCtx.beginPath();
     for (let i=0;i<14;i++) {
       const a = i/14*Math.PI*2;
       const rr = 60 + Math.sin(i*3)*18;
-      ctx.lineTo(Math.cos(a)*rr, Math.sin(a)*rr);
+      renderCtx.lineTo(Math.cos(a)*rr, Math.sin(a)*rr);
     }
-    ctx.closePath(); ctx.fill();
+    renderCtx.closePath(); renderCtx.fill();
   }
 
   if (p.horns) {
-    ctx.fillStyle = stone ? "#666" : "#eee";
-    ctx.beginPath(); ctx.moveTo(-40,-50); ctx.lineTo(-80,-115); ctx.lineTo(-8,-70); ctx.fill();
-    ctx.beginPath(); ctx.moveTo(40,-50); ctx.lineTo(80,-115); ctx.lineTo(8,-70); ctx.fill();
+    renderCtx.fillStyle = stone ? "#666" : "#eee";
+    renderCtx.beginPath(); renderCtx.moveTo(-40,-50); renderCtx.lineTo(-80,-115); renderCtx.lineTo(-8,-70); renderCtx.fill();
+    renderCtx.beginPath(); renderCtx.moveTo(40,-50); renderCtx.lineTo(80,-115); renderCtx.lineTo(8,-70); renderCtx.fill();
   }
 
   if (m.elite) {
-    ctx.fillStyle = stone ? "#aaa" : "#ffd84a";
-    ctx.beginPath();
-    ctx.moveTo(-32,-82); ctx.lineTo(-16,-112); ctx.lineTo(0,-82);
-    ctx.lineTo(16,-112); ctx.lineTo(32,-82); ctx.closePath();
-    ctx.fill();
-    ctx.strokeStyle = "white"; ctx.lineWidth = 4; ctx.stroke();
+    renderCtx.fillStyle = stone ? "#aaa" : "#ffd84a";
+    renderCtx.beginPath();
+    renderCtx.moveTo(-32,-82); renderCtx.lineTo(-16,-112); renderCtx.lineTo(0,-82);
+    renderCtx.lineTo(16,-112); renderCtx.lineTo(32,-82); renderCtx.closePath();
+    renderCtx.fill();
+    renderCtx.strokeStyle = "white"; renderCtx.lineWidth = 4; renderCtx.stroke();
   }
 
-  ctx.fillStyle = "white";
+  renderCtx.fillStyle = "white";
   for (let i=0;i<p.eyes;i++) {
     const ex = (i-(p.eyes-1)/2)*25;
-    ctx.beginPath(); ctx.arc(ex,-20,11,0,Math.PI*2); ctx.fill();
-    ctx.fillStyle = m.zombie ? "#111" : "black";
-    ctx.beginPath(); ctx.arc(ex,-20,5,0,Math.PI*2); ctx.fill();
-    ctx.fillStyle = "white";
+    renderCtx.beginPath(); renderCtx.arc(ex,-20,11,0,Math.PI*2); renderCtx.fill();
+    renderCtx.fillStyle = m.zombie ? "#111" : "black";
+    renderCtx.beginPath(); renderCtx.arc(ex,-20,5,0,Math.PI*2); renderCtx.fill();
+    renderCtx.fillStyle = "white";
   }
 
   if (p.mouth === "smile") {
-    ctx.strokeStyle = "black"; ctx.lineWidth = 6;
-    ctx.beginPath(); ctx.arc(0,15,30,0,Math.PI); ctx.stroke();
+    renderCtx.strokeStyle = "black"; renderCtx.lineWidth = 6;
+    renderCtx.beginPath(); renderCtx.arc(0,15,30,0,Math.PI); renderCtx.stroke();
   }
   if (p.mouth === "fangs") {
-    ctx.fillStyle = "black"; ctx.fillRect(-35,20,70,16);
-    ctx.fillStyle = "white";
-    ctx.beginPath(); ctx.moveTo(-20,20); ctx.lineTo(-8,52); ctx.lineTo(3,20); ctx.fill();
-    ctx.beginPath(); ctx.moveTo(20,20); ctx.lineTo(8,52); ctx.lineTo(-3,20); ctx.fill();
+    renderCtx.fillStyle = "black"; renderCtx.fillRect(-35,20,70,16);
+    renderCtx.fillStyle = "white";
+    renderCtx.beginPath(); renderCtx.moveTo(-20,20); renderCtx.lineTo(-8,52); renderCtx.lineTo(3,20); renderCtx.fill();
+    renderCtx.beginPath(); renderCtx.moveTo(20,20); renderCtx.lineTo(8,52); renderCtx.lineTo(-3,20); renderCtx.fill();
   }
   if (p.mouth === "void") {
-    ctx.fillStyle = "black";
-    ctx.beginPath(); ctx.arc(0,25,25,0,Math.PI*2); ctx.fill();
+    renderCtx.fillStyle = "black";
+    renderCtx.beginPath(); renderCtx.arc(0,25,25,0,Math.PI*2); renderCtx.fill();
   }
 
-  ctx.strokeStyle = stone ? "#666" : frozen ? "#72dfff" : p.color;
-  ctx.lineWidth = 10;
+  renderCtx.strokeStyle = stone ? "#666" : frozen ? "#72dfff" : p.color;
+  renderCtx.lineWidth = 10;
 
   for (let i=0;i<p.arms;i++) {
     const side = i%2 ? 1 : -1;
-    ctx.beginPath();
-    ctx.moveTo(side*55,18);
-    ctx.lineTo(side*115,visualRand(-20,65));
-    ctx.stroke();
+    renderCtx.beginPath();
+    renderCtx.moveTo(side*55,18);
+    renderCtx.lineTo(side*115,visualRand(-20,65));
+    renderCtx.stroke();
   }
 
   for (let i=0;i<p.legs;i++) {
     const lx = (i-(p.legs-1)/2)*21;
-    ctx.beginPath();
-    ctx.moveTo(lx,58);
-    ctx.lineTo(lx+visualRand(-10,10),112);
-    ctx.stroke();
+    renderCtx.beginPath();
+    renderCtx.moveTo(lx,58);
+    renderCtx.lineTo(lx+visualRand(-10,10),112);
+    renderCtx.stroke();
   }
 
-  ctx.restore();
+  renderCtx.restore();
+}
+
+function drawMonster(m) {
+  const r = m.r;
+  const now = performance.now();
+  const frozen = now < m.frozenUntil;
+  const stone = m.stone;
+
+  drawMonsterBodyOn(ctx, m, m.x, m.y, r, shake);
+
+  if (m.haunted) {
+    ctx.save();
+    ctx.strokeStyle = "#b987ff";
+    ctx.lineWidth = 5;
+    ctx.beginPath();
+    ctx.arc(m.x,m.y,r*1.35,0,Math.PI*2);
+    ctx.stroke();
+    ctx.restore();
+  }
 
   if (m.shielded && !m.shieldBroken) {
-    const shieldSize = r * 1.15;
-    ctx.drawImage(icons.monsterShield, m.x - shieldSize * .5, m.y - shieldSize * .25, shieldSize, shieldSize);
+    const shieldSize = r * 1.35;
+    ctx.drawImage(icons.monsterShield, m.x + r * .25 - shieldSize * .5, m.y - shieldSize * .25, shieldSize, shieldSize);
   }
 
   ctx.save();
@@ -138,33 +154,41 @@ function drawMonster(m) {
   ctx.restore();
 }
 
-function drawDoor(door) {
-  ctx.save();
+function drawDoorOn(renderCtx, door) {
+  renderCtx.save();
   const w = door.r * 1.45;
   const h = door.r * 2.15;
   const x = door.x - w / 2;
   const y = door.y - h / 2;
 
-  ctx.fillStyle = "#6b3f24";
-  ctx.strokeStyle = "white";
-  ctx.lineWidth = 4;
-  ctx.beginPath();
-  ctx.roundRect(x,y,w,h,8);
-  ctx.fill();
-  ctx.stroke();
+  renderCtx.fillStyle = "#6b3f24";
+  renderCtx.strokeStyle = "white";
+  renderCtx.lineWidth = 4;
+  renderCtx.beginPath();
+  renderCtx.roundRect(x,y,w,h,8);
+  renderCtx.fill();
+  renderCtx.stroke();
 
-  ctx.fillStyle = "#ffd84a";
-  ctx.beginPath();
-  ctx.arc(door.x + w * .28, door.y, 5, 0, Math.PI * 2);
-  ctx.fill();
+  renderCtx.fillStyle = "#ffd84a";
+  renderCtx.beginPath();
+  renderCtx.arc(door.x + w * .28, door.y, 5, 0, Math.PI * 2);
+  renderCtx.fill();
 
-  ctx.fillStyle = "white";
-  ctx.textAlign = "center";
-  ctx.textBaseline = "middle";
-  ctx.font = `bold ${Math.floor(door.r * .9)}px system-ui`;
-  ctx.fillText(door.room, door.x, door.y - door.r * .2);
+  renderCtx.fillStyle = "white";
+  renderCtx.textAlign = "center";
+  renderCtx.textBaseline = "middle";
+  renderCtx.font = `bold ${Math.floor(door.r * .9)}px system-ui`;
+  renderCtx.fillText(door.room, door.x, door.y - door.r * .2);
+  renderCtx.restore();
+}
 
+function drawDoor(door) {
+  drawDoorOn(ctx, door);
+
+  ctx.save();
   ctx.textBaseline = "top";
+  ctx.textAlign = "center";
+  ctx.fillStyle = "white";
   ctx.font = "bold 15px system-ui";
   ctx.fillText(`ROOM ${door.room}`, door.x, door.y + door.r + 10);
   ctx.restore();

@@ -17,6 +17,7 @@ function draw() {
     drawBoom();
     drawClouds();
 
+    drawParticles();
     drawFloats();
     drawBlind();
   }

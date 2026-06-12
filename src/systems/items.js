@@ -138,6 +138,7 @@ function stoneRandomMonster(x,y) {
   m.vy = 0;
   flash = "Stone scroll!";
   floatText(m.x,m.y,"STONE","#bbbbbb");
+  burst(m.x,m.y,"#bbbbbb",16,4);
   sound("boom");
 }
 
@@ -187,6 +188,7 @@ function flashBang(x,y) {
   }
   flash = "FLASH BANG!";
   floatText(x,y,"BLIND","#ffffff");
+  burst(x,y,"#ffffff",44,10);
   sound("zap");
 }
 
@@ -202,6 +204,7 @@ function exileMonsters(x,y) {
 
   flash = count ? `Exiled ${count} monsters` : "No monsters to exile!";
   floatText(x,y,count ? "EXILE" : "NO TARGET","#d8ecff");
+  if (count) burst(x,y,"#d8ecff",28,8);
   sound(count ? "zap" : "item");
 }
 
@@ -228,6 +231,7 @@ function swapRandomHealth(x,y) {
   }
 
   flash = "Health swap!";
+  burst(x,y,"#c86bff",26,7);
   sound("item");
 }
 
@@ -243,6 +247,7 @@ function hauntMonsters(x,y) {
   for (const m of monsters) {
     m.haunted = true;
     floatText(m.x,m.y,"HAUNTED","#b987ff");
+    burst(m.x,m.y,"#b987ff",12,4);
   }
 
   flash = "Haunted curse!";
@@ -281,6 +286,7 @@ function explode(x,y,power,kind) {
       board[i] = spawnThing();
     }
     clouds = [];
+    burst(x,y,"#ffffff",30,8);
   }
 
   if (kind === "random") {
@@ -325,6 +331,7 @@ function explode(x,y,power,kind) {
     flash = `Cloudy bomb!`;
     const count = rand(3,5);
     clouds = [];
+    burst(x,y,"#d8ecff",24,7);
     for (let i = 0; i < count; i++) {
       clouds.push({
         x: rand(80, Math.max(90, W-80)),
@@ -368,6 +375,7 @@ function explode(x,y,power,kind) {
       }
       m.poison += power;
       floatText(m.x,m.y,`POISON +${power}`,"#7cff4f");
+      burst(m.x,m.y,"#7cff4f",10,4);
     }
   }
 
@@ -392,6 +400,7 @@ function explode(x,y,power,kind) {
       m.frozenUntil = now + 4000;
       m.attacking = false;
       floatText(m.x,m.y,"FROZEN","#72dfff");
+      burst(m.x,m.y,"#72dfff",12,4);
     }
   }
 
@@ -406,6 +415,7 @@ function explode(x,y,power,kind) {
       m.parts.color = "#6cff6c";
       m.attacking = false;
       floatText(m.x,m.y,"ZOMBIE","#7aff7a");
+      burst(m.x,m.y,"#7aff7a",12,4);
     }
   }
 

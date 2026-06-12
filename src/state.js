@@ -1,5 +1,5 @@
 let gameState = "menu";
-let hero, board, rooms, currentRoom, exileQueue, kills, flash, shake, boom, floats, clouds, lastPoisonTick, blindUntil;
+let hero, board, rooms, currentRoom, exileQueue, kills, flash, shake, boom, floats, particles, clouds, lastPoisonTick, blindUntil;
 
 function difficultyScale() {
   if (settings.difficulty === "easy") return 0;
@@ -33,6 +33,7 @@ function resetGame() {
   currentRoom = 1;
   exileQueue = [];
   floats = [];
+  particles = [];
   clouds = [];
   kills = 0;
   flash = "Tap monsters and items";
@@ -63,4 +64,6 @@ function switchRoom(roomNumber) {
   clouds = [];
   floats = [];
   flash = `Room ${currentRoom}`;
+  sound("door");
+  burst(W/2,H/2,"#ffd84a",28,7);
 }

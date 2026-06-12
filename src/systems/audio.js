@@ -49,6 +49,14 @@ function sound(type) {
     g.gain.setValueAtTime(.16, now);
     g.gain.exponentialRampToValueAtTime(.001, now+.45);
   }
+  if (type === "door") {
+    o.type = "triangle";
+    o.frequency.setValueAtTime(180, now);
+    o.frequency.exponentialRampToValueAtTime(520, now+.16);
+    o.frequency.exponentialRampToValueAtTime(130, now+.34);
+    g.gain.setValueAtTime(.18, now);
+    g.gain.exponentialRampToValueAtTime(.001, now+.42);
+  }
 
   o.start(now);
   o.stop(now+.7);

@@ -43,15 +43,16 @@ const itemInfo = [
 ];
 
 const monsterInfo = [
-  ["ELITE","Elite","Stronger monster worth more XP."],
-  ["SHLD","Shielded","Wood shield absorbs the next damage from any source."],
-  ["ZOMB","Zombie","Fights other monsters and counters you."],
-  ["GHOST","Ghost","A resurrected haunted monster."],
-  ["HAUNT","Haunted","Rises as a ghost when killed."],
-  ["STONE","Stone","Cannot move or take damage."],
-  ["ICE","Frozen","Cannot counter while frozen."],
-  ["PSN","Poisoned","Takes periodic poison damage."],
-  ["DOOR","Door","Switches to one of the three remembered rooms."]
+  ["normal","Monster","Random monster that attacks back."],
+  ["elite","Elite","Stronger monster worth more XP."],
+  ["shielded","Shielded","Wood shield absorbs the next damage from any source."],
+  ["zombie","Zombie","Fights other monsters and counters you."],
+  ["ghostZombie","Ghost zombie","Transparent zombie resurrected by a haunt."],
+  ["haunted","Haunted","Purple border; rises as a ghost when killed."],
+  ["stone","Stone","Cannot move or take damage."],
+  ["frozen","Frozen","Cannot counter while frozen."],
+  ["poisoned","Poisoned","Takes periodic poison damage."],
+  ["door","Door","Switches to one of the three remembered rooms."]
 ];
 
 function resumeAudio() {
@@ -106,6 +107,10 @@ function addInfoRow(icon, name, description, isItem = true) {
   const row = document.createElement("div");
   row.className = "info-row";
 
+  if (isItem && !icons[icon] && typeof makeIcon === "function") {
+    icons[icon] = makeIcon(icon);
+  }
+
   if (isItem && icons[icon]) {
     const img = document.createElement("img");
     img.className = "info-icon";
@@ -126,11 +131,72 @@ function addInfoRow(icon, name, description, isItem = true) {
   infoList.appendChild(row);
 }
 
+function infoMonster(kind) {
+  const m = {
+    type:"monster",
+    x:50,y:50,targetY:50,r:26,
+    hp:10,maxHp:10,atk:1,poison:0,stone:false,frozenUntil:0,
+    elite:kind === "elite",
+    shielded:kind === "shielded",
+    shieldBroken:false,
+    zombie:kind === "zombie" || kind === "ghostZombie",
+    ghost:kind === "ghostZombie",
+    haunted:kind === "haunted",
+    attacking:false,
+    parts:{
+      color:kind === "zombie" || kind === "ghostZombie" ? "#6cff6c" : "#ff7070",
+      head:kind === "stone" ? "box" : "circle",
+      eyes:2,
+      mouth:kind === "zombie" || kind === "ghostZombie" ? "void" : "fangs",
+      horns:kind === "elite",
+      legs:2,
+      arms:2
+    }
+  };
+  if (kind === "stone") m.stone = true;
+  if (kind === "frozen") m.frozenUntil = performance.now() + 10000;
+  if (kind === "poisoned") m.poison = 12;
+  return m;
+}
+
+function makeMonsterInfoIcon(kind) {
+  const c = document.createElement("canvas");
+  c.width = c.height = 100;
+  const g = c.getContext("2d");
+  if (kind === "door") {
+    drawDoorOn(g, { x:50, y:48, r:24, room:2 });
+    return c;
+  }
+
+  const m = infoMonster(kind);
+  drawMonsterBodyOn(g, m, 50, 50, m.r, 0);
+  if (m.haunted) {
+    g.strokeStyle = "#b987ff";
+    g.lineWidth = 5;
+    g.beginPath();
+    g.arc(50,50,m.r*1.35,0,Math.PI*2);
+    g.stroke();
+  }
+  if (m.shielded && !m.shieldBroken && icons.monsterShield) {
+    const shieldSize = m.r * 1.35;
+    g.drawImage(icons.monsterShield, 50 + m.r * .25 - shieldSize * .5, 50 - shieldSize * .25, shieldSize, shieldSize);
+  }
+  return c;
+}
+
 function buildInfoList() {
   addInfoTitle("Items");
   for (const item of itemInfo) addInfoRow(item[0], item[1], item[2], true);
   addInfoTitle("Monsters and rooms");
-  for (const monster of monsterInfo) addInfoRow(monster[0], monster[1], monster[2], false);
+  for (const monster of monsterInfo) {
+    try {
+      const icon = makeMonsterInfoIcon(monster[0]);
+      icons[`info_${monster[0]}`] = icon;
+      addInfoRow(`info_${monster[0]}`, monster[1], monster[2], true);
+    } catch {
+      addInfoRow(monster[0].slice(0, 4).toUpperCase(), monster[1], monster[2], false);
+    }
+  }
 }
 
 choiceDown.addEventListener("click", () => {

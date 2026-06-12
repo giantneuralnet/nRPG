@@ -48,6 +48,7 @@ function attackMonster(m,index) {
     m.poison += hero.poison;
     flash = `Hit + poison`;
     floatText(m.x,m.y,`POISON +${hero.poison}`,"#7cff4f");
+    burst(m.x,m.y,"#7cff4f",12,4);
   }
 
   if (m.hp <= 0) {
@@ -96,6 +97,7 @@ function killMonster(index, giveXp = true) {
     board[index] = makeGhost(dead);
     sound("dead");
     floatText(dead.x, dead.y, "GHOST", "#d8ecff");
+    burst(dead.x,dead.y,"#d8ecff",24,6);
     flash = "A ghost rises!";
     return;
   }
@@ -103,6 +105,7 @@ function killMonster(index, giveXp = true) {
   kills++;
   sound("dead");
   floatText(dead.x, dead.y, "KO", "#ffffff");
+  burst(dead.x,dead.y,"#ffffff",24,7);
 
   if (giveXp) {
     hero.xp += dead.elite ? 3 : 1;
@@ -155,6 +158,7 @@ function levelUp() {
 
   flash = `LEVEL ${hero.level}!`;
   floatText(W/2, H/2, `LEVEL ${hero.level}!`, "#ffe65c");
+  burst(W/2,H/2,"#ffe65c",36,8);
   sound("level");
 }
 
