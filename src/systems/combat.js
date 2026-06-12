@@ -138,8 +138,8 @@ function makeGhost(dead) {
     ghost: true,
     haunted: false,
     attacking: false,
-    vx: (Math.random() - .5) * 2,
-    vy: (Math.random() - .5) * 2,
+    vx: (rng() - .5) * 2,
+    vy: (rng() - .5) * 2,
     parts: { ...dead.parts }
   };
 }

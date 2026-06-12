@@ -1,6 +1,6 @@
 function drawMonster(m) {
-  const x = m.x + rand(-shake,shake);
-  const y = m.y + rand(-shake,shake);
+  const x = m.x + visualRand(-shake,shake);
+  const y = m.y + visualRand(-shake,shake);
   const r = m.r;
   const p = m.parts;
   const now = performance.now();
@@ -75,7 +75,7 @@ function drawMonster(m) {
     const side = i%2 ? 1 : -1;
     ctx.beginPath();
     ctx.moveTo(side*55,18);
-    ctx.lineTo(side*115,rand(-20,65));
+    ctx.lineTo(side*115,visualRand(-20,65));
     ctx.stroke();
   }
 
@@ -83,7 +83,7 @@ function drawMonster(m) {
     const lx = (i-(p.legs-1)/2)*21;
     ctx.beginPath();
     ctx.moveTo(lx,58);
-    ctx.lineTo(lx+rand(-10,10),112);
+    ctx.lineTo(lx+visualRand(-10,10),112);
     ctx.stroke();
   }
 

@@ -8,6 +8,8 @@ function difficultyScale() {
 }
 
 function resetGame() {
+  setGameSeed(settings.seed);
+
   hero = {
     hp: 100,
     maxHp: 100,

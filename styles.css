@@ -89,6 +89,27 @@ button:focus-visible {
   background: #ffd84a;
 }
 
+.seed-input {
+  box-sizing: border-box;
+  width: min(360px, 80vw);
+  min-height: 54px;
+  border: 2px solid white;
+  border-radius: 0;
+  background: #111;
+  color: white;
+  text-align: center;
+  font: 700 22px system-ui, sans-serif;
+}
+
+.seed-input::placeholder {
+  color: rgba(255,255,255,.62);
+}
+
+.seed-input:focus-visible {
+  outline: 3px solid #72dfff;
+  outline-offset: 3px;
+}
+
 .menu-action {
   width: min(360px, 80vw);
   min-height: 78px;

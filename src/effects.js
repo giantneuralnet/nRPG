@@ -4,7 +4,7 @@ function floatText(x,y,text,color="white") {
     life: 75,
     maxLife: 75,
     vx: (Math.random() - .5) * 5,
-    vy: -rand(8, 13),
+    vy: -visualRand(8, 13),
     gravity: .42
   });
 }

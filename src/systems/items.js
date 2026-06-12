@@ -34,7 +34,7 @@ function useItem(item, index) {
   }
 
   if (item.kind === "powerPotion") {
-    if (Math.random() < .5) {
+    if (rng() < .5) {
       hero.powerAtkTurns = 3;
       hero.powerAtkBonus = item.value;
       flash = `Power up! +${item.value} ATK for 3 fights`;
@@ -79,7 +79,7 @@ function useItem(item, index) {
 }
 
 function openChest(x,y) {
-  const roll = Math.random();
+  const roll = rng();
 
   if (roll < .13) {
     const amount = rand(30,60);

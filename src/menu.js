@@ -5,6 +5,7 @@ const choicesLabel = document.getElementById("choicesLabel");
 const choiceDown = document.getElementById("choiceDown");
 const choiceUp = document.getElementById("choiceUp");
 const difficultyButtons = Array.from(document.querySelectorAll(".difficulty-button"));
+const seedInput = document.getElementById("seedInput");
 const menuAction = document.getElementById("menuAction");
 
 function resumeAudio() {
@@ -19,11 +20,11 @@ function updateMenuOverlay() {
 
   if (gameState === "dead") {
     menuTitle.textContent = "YOU DIED";
-    menuSubtitle.textContent = "Bombs can hurt you too.";
+    menuSubtitle.textContent = `Seed ${activeSeed}`;
     menuAction.textContent = "RESET";
   } else if (gameState === "win") {
     menuTitle.textContent = "YOU WIN!";
-    menuSubtitle.textContent = "You defeated 20 monsters.";
+    menuSubtitle.textContent = `Seed ${activeSeed}`;
     menuAction.textContent = "PLAY AGAIN";
   } else {
     menuTitle.textContent = "DROP RPG";
@@ -32,11 +33,19 @@ function updateMenuOverlay() {
   }
 
   choicesLabel.textContent = `N = number of choices: ${settings.choices}`;
+  seedInput.placeholder = `${currentSeed}`;
   choiceDown.disabled = settings.choices <= 1;
   choiceUp.disabled = settings.choices >= 9;
 
   for (const button of difficultyButtons) {
     button.classList.toggle("is-selected", button.dataset.difficulty === settings.difficulty);
+  }
+}
+
+function updateSeedPlaceholder() {
+  refreshCurrentSeed();
+  if (!seedInput.value.trim()) {
+    seedInput.placeholder = `${currentSeed}`;
   }
 }
 
@@ -61,6 +70,8 @@ menuAction.addEventListener("click", () => {
   resumeAudio();
 
   if (gameState === "menu") {
+    const typedSeed = seedInput.value.trim();
+    settings.seed = typedSeed ? normalizeSeed(typedSeed) : currentSeed;
     resetGame();
   } else if (gameState === "dead" || gameState === "win") {
     gameState = "menu";
@@ -69,4 +80,5 @@ menuAction.addEventListener("click", () => {
   updateMenuOverlay();
 });
 
+setInterval(updateSeedPlaceholder, 1000);
 updateMenuOverlay();

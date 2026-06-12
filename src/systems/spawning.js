@@ -3,8 +3,8 @@ function findFreePosition(radius) {
   const bottom = Math.max(top + 100, H - 95);
 
   for (let tries = 0; tries < 100; tries++) {
-    const x = radius + 35 + Math.random() * Math.max(50, (W - radius * 2 - 70));
-    const y = top + Math.random() * Math.max(50, (bottom - top));
+    const x = radius + 35 + rng() * Math.max(50, (W - radius * 2 - 70));
+    const y = top + rng() * Math.max(50, (bottom - top));
     let ok = true;
 
     for (const other of board) {
@@ -18,25 +18,25 @@ function findFreePosition(radius) {
   }
 
   return {
-    x: radius + 35 + Math.random() * Math.max(50, (W - radius * 2 - 70)),
-    y: top + Math.random() * Math.max(50, (bottom - top))
+    x: radius + 35 + rng() * Math.max(50, (W - radius * 2 - 70)),
+    y: top + rng() * Math.max(50, (bottom - top))
   };
 }
 
 function spawnThing() {
-  const isMonster = Math.random() < .56;
+  const isMonster = rng() < .56;
   const r = Math.min(W,H) * (isMonster ? .076 : .062);
   const p = findFreePosition(r);
 
-  if (isMonster) return makeMonster(p.x, -120 - Math.random()*200, p.y, r);
-  return makeItem(p.x, -120 - Math.random()*200, p.y, r);
+  if (isMonster) return makeMonster(p.x, -120 - rng()*200, p.y, r);
+  return makeItem(p.x, -120 - rng()*200, p.y, r);
 }
 
 function makeMonster(x,y,targetY,r) {
-  const elite = Math.random() < .09 + Math.min(.08, kills * .002);
+  const elite = rng() < .09 + Math.min(.08, kills * .002);
 
-  const hpType = Math.random();
-  const atkType = Math.random();
+  const hpType = rng();
+  const atkType = rng();
 
   let hp =
     hpType < .18 ? rand(25,45) :
@@ -73,9 +73,9 @@ function makeMonster(x,y,targetY,r) {
   return {
     type:"monster",
     x,y,targetY,r,
-    vx:(Math.random()-.5)*1.5,
+    vx:(rng()-.5)*1.5,
     vy:0,
-    wander:Math.random()*999,
+    wander:rng()*999,
     hp,maxHp:hp,
     atk,
     poison:0,
@@ -95,7 +95,7 @@ function makeMonster(x,y,targetY,r) {
       head:pick(["circle","box","triangle","blob"]),
       eyes:rand(1,4),
       mouth:pick(["smile","fangs","void"]),
-      horns:Math.random()<.4,
+      horns:rng()<.4,
       legs:rand(1,4),
       arms:rand(0,3)
     }

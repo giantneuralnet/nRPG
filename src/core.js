@@ -39,11 +39,36 @@ if (window.visualViewport) {
 }
 resize();
 
-function rand(a,b){ return Math.floor(Math.random()*(b-a+1))+a; }
+let activeSeed = 0;
+let currentSeed = Math.floor(Date.now() / 1000);
+let rngState = 1;
+
+function normalizeSeed(value) {
+  const seed = Number.parseInt(value, 10);
+  return Number.isFinite(seed) ? seed >>> 0 : 0;
+}
+
+function refreshCurrentSeed() {
+  currentSeed = Math.floor(Date.now() / 1000) >>> 0;
+}
+
+function setGameSeed(seed) {
+  activeSeed = normalizeSeed(seed);
+  rngState = activeSeed || 1;
+}
+
+function rng() {
+  rngState = (rngState * 1664525 + 1013904223) >>> 0;
+  return rngState / 4294967296;
+}
+
+function rand(a,b){ return Math.floor(rng()*(b-a+1))+a; }
 function pick(a){ return a[rand(0,a.length-1)]; }
+function visualRand(a,b){ return Math.floor(Math.random()*(b-a+1))+a; }
 function dist(a,b,c,d){ return Math.hypot(a-c,b-d); }
 
 let settings = {
   choices: 5,
-  difficulty: "normal"
+  difficulty: "normal",
+  seed: currentSeed
 };
