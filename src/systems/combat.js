@@ -323,12 +323,21 @@ function allyFights() {
 
     if (d < k.r + target.r + 42 && now >= k.attackCooldownUntil) {
       k.attackCooldownUntil = now + 720;
+      target.fightCooldownUntil = now + 720;
       const dealt = damage(target, k.atk, target.x, target.y, "#d8ecff");
+      if (target.hp > 0) damage(k, target.atk, k.x, k.y, "#ff6b6b");
+
       if (target.hp <= 0) {
         const index = board.indexOf(target);
         if (index >= 0) killMonster(index, true);
         k.target = null;
-      } else if (dealt <= 0) {
+      }
+      if (k.hp <= 0) {
+        const index = board.indexOf(k);
+        if (index >= 0) killMonster(index, false);
+        continue;
+      }
+      if (dealt <= 0) {
         k.target = null;
       }
     }
