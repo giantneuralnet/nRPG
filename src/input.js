@@ -1,16 +1,20 @@
 function clearCloudAt(x,y) {
   if (!clouds || clouds.length <= 0) return false;
 
-  for (let i = clouds.length - 1; i >= 0; i--) {
-    const c = clouds[i];
-    if (dist(x,y,c.x,c.y) < c.r * 1.15) {
-      clouds.splice(i,1);
-      sound("item");
-      return true;
+  const cloud = clouds[0];
+  const now = performance.now();
+  if (now - cloud.lastTap >= 220) {
+    cloud.lastTap = now;
+    cloud.hits--;
+    flash = `Cloud ${cloud.hits}/6`;
+    sound("item");
+    if (cloud.hits <= 0) {
+      clouds = [];
+      flash = "Cloud cleared";
     }
   }
 
-  return false;
+  return true;
 }
 
 canvas.addEventListener("pointerdown", e => {

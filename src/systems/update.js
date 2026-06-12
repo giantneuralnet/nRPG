@@ -42,9 +42,18 @@ function update() {
 
   if (lavaPools) {
     for (let i = lavaPools.length - 1; i >= 0; i--) {
-      lavaPools[i].r *= .995;
+      lavaPools[i].r *= .998;
       lavaPools[i].life--;
       if (lavaPools[i].life <= 0 || lavaPools[i].r < 18) lavaPools.splice(i,1);
+    }
+  }
+
+  if (soulLinks) {
+    for (let i = soulLinks.length - 1; i >= 0; i--) {
+      const link = soulLinks[i];
+      if (!board.includes(link.a) || !board.includes(link.b) || link.a.hp <= 0 || link.b.hp <= 0) {
+        soulLinks.splice(i,1);
+      }
     }
   }
 

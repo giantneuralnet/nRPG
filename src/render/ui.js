@@ -65,16 +65,17 @@ function drawClouds() {
   if (!clouds || clouds.length <= 0) return;
 
   ctx.save();
-  for (const c of clouds) {
-    ctx.strokeStyle = "#777777";
-    ctx.lineWidth = c.border || 8;
-    ctx.fillStyle = "#ffffff";
-
-    ctx.beginPath();
-    ctx.arc(c.x,c.y,c.r,0,Math.PI*2);
-    ctx.fill();
-    ctx.stroke();
-  }
+  const cloud = clouds[0];
+  ctx.fillStyle = "rgba(130,130,130,.62)";
+  ctx.fillRect(0,0,W,H);
+  ctx.fillStyle = "rgba(255,255,255,.86)";
+  ctx.strokeStyle = "rgba(40,40,40,.8)";
+  ctx.lineWidth = 4;
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  ctx.font = "bold 42px system-ui";
+  ctx.strokeText(`${cloud.hits}`, W/2, H/2);
+  ctx.fillText(`${cloud.hits}`, W/2, H/2);
   ctx.restore();
 }
 
@@ -91,6 +92,33 @@ function drawLavaPools() {
     ctx.arc(l.x,l.y,l.r,0,Math.PI*2);
     ctx.fill();
     ctx.stroke();
+  }
+  ctx.restore();
+}
+
+function drawSoulLinks() {
+  if (!soulLinks || soulLinks.length <= 0) return;
+
+  ctx.save();
+  ctx.strokeStyle = "rgba(255,45,45,.82)";
+  ctx.lineWidth = 5;
+  ctx.lineCap = "round";
+  for (const link of soulLinks) {
+    const a = link.a;
+    const b = link.b;
+    if (!a || !b || !board.includes(a) || !board.includes(b)) continue;
+    const midX = (a.x + b.x) / 2;
+    const midY = (a.y + b.y) / 2 + Math.min(120, Math.max(35, dist(a.x,a.y,b.x,b.y) * .18));
+    ctx.beginPath();
+    ctx.moveTo(a.x,a.y);
+    ctx.quadraticCurveTo(midX,midY,b.x,b.y);
+    ctx.stroke();
+
+    ctx.fillStyle = "#ff3333";
+    ctx.beginPath();
+    ctx.arc(a.x,a.y,6,0,Math.PI*2);
+    ctx.arc(b.x,b.y,6,0,Math.PI*2);
+    ctx.fill();
   }
   ctx.restore();
 }

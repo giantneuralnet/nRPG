@@ -171,11 +171,12 @@ function drawMonster(m) {
 
   if (m.haunted) {
     ctx.save();
-    ctx.strokeStyle = "#b987ff";
-    ctx.lineWidth = 5;
-    ctx.beginPath();
-    ctx.arc(m.x,m.y,r*1.35,0,Math.PI*2);
-    ctx.stroke();
+    ctx.globalCompositeOperation = "destination-over";
+    ctx.shadowColor = "#b987ff";
+    ctx.shadowBlur = 18;
+    for (const [ox,oy] of [[0,-5],[5,0],[0,5],[-5,0],[4,4],[-4,4],[4,-4],[-4,-4]]) {
+      drawMonsterBodyOn(ctx, m, m.x + ox, m.y + oy, r, 0);
+    }
     ctx.restore();
   }
 
@@ -308,6 +309,7 @@ function drawItem(item) {
   if (item.kind === "poisonBomb") ctx.fillText(`POISON BOMB`, item.x, item.y+item.r+10);
   if (item.kind === "fireBomb") ctx.fillText(`FIRE BOMB`, item.x, item.y+item.r+10);
   if (item.kind === "lavaBomb") ctx.fillText(`LAVA BOMB`, item.x, item.y+item.r+10);
+  if (item.kind === "soulBomb") ctx.fillText(`SOUL LINK`, item.x, item.y+item.r+10);
   if (item.kind === "healBomb") ctx.fillText(`HEAL BOMB`, item.x, item.y+item.r+10);
   if (item.kind === "iceBomb") ctx.fillText(`ICE BOMB`, item.x, item.y+item.r+10);
   if (item.kind === "zombieBomb") ctx.fillText(`ZOMBIE BOMB`, item.x, item.y+item.r+10);

@@ -70,6 +70,7 @@ function useItem(item, index) {
   if (item.kind === "poisonBomb") explode(item.x, item.y, item.value, "poison");
   if (item.kind === "fireBomb") explode(item.x, item.y, item.value, "fire");
   if (item.kind === "lavaBomb") explode(item.x, item.y, item.value, "lava");
+  if (item.kind === "soulBomb") explode(item.x, item.y, item.value, "soul");
   if (item.kind === "healBomb") explode(item.x, item.y, item.value, "heal");
   if (item.kind === "iceBomb") explode(item.x, item.y, item.value, "ice");
   if (item.kind === "zombieBomb") explode(item.x, item.y, item.value, "zombie");
@@ -385,6 +386,7 @@ function explode(x,y,power,kind) {
     }
     clouds = [];
     lavaPools = [];
+    soulLinks = [];
     burst(x,y,"#ffffff",20,6);
   }
 
@@ -399,6 +401,7 @@ function explode(x,y,power,kind) {
     }
     clouds = [];
     lavaPools = [];
+    soulLinks = [];
     burst(x,y,"#d8ecff",18,5);
   }
 
@@ -442,17 +445,8 @@ function explode(x,y,power,kind) {
 
   if (kind === "cloud") {
     flash = `Cloudy bomb!`;
-    const count = rand(3,5);
-    clouds = [];
+    clouds = [{ hits: 6, lastTap: 0 }];
     burst(x,y,"#d8ecff",16,5);
-    for (let i = 0; i < count; i++) {
-      clouds.push({
-        x: rand(80, Math.max(90, W-80)),
-        y: rand(150, Math.max(160, H-130)),
-        r: rand(260,420),
-        border: rand(5,14)
-      });
-    }
   }
 
   if (kind === "lightning") {
@@ -512,16 +506,38 @@ function explode(x,y,power,kind) {
     lavaPools = [];
     for (const m of board) {
       if (!isCombatant(m)) continue;
+      if (m.team === "hero") continue;
       lavaPools.push({
         x: m.x,
         y: m.y,
         r: rand(75,130),
-        life: rand(430,620),
-        damage: Math.max(2, Math.floor(power * .35))
+        life: rand(900,1300),
+        fire: Math.max(1, Math.floor(power * .18))
       });
       floatText(m.x,m.y,"LAVA","#ff7a2f");
     }
     burst(x,y,"#ff7a2f",20,7);
+  }
+
+  if (kind === "soul") {
+    const monsters = board.filter(t => t.type === "monster" && t.team !== "hero");
+    if (monsters.length < 2) {
+      flash = "Need two souls!";
+      floatText(x,y,"NO LINK","#ff4f4f");
+      sound("item");
+    } else {
+      const a = pick(monsters);
+      let b = pick(monsters);
+      while (b === a) b = pick(monsters);
+      const avg = Math.floor((a.hp + b.hp) / 2);
+      a.hp = Math.max(1, Math.min(a.maxHp, avg));
+      b.hp = Math.max(1, Math.min(b.maxHp, avg));
+      soulLinks.push({ a, b });
+      flash = "Soul connection!";
+      floatText(a.x,a.y,"SOUL","#ff3333");
+      floatText(b.x,b.y,"SOUL","#ff3333");
+      burst(x,y,"#ff3333",18,6);
+    }
   }
 
   if (kind === "heal") {

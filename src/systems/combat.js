@@ -39,12 +39,11 @@ function statusTick() {
     for (let j = board.length - 1; j >= 0; j--) {
       const t = board[j];
       if (t.type !== "monster") continue;
+      if (t.team === "hero") continue;
       if (t.stone) continue;
       if (dist(t.x,t.y,pool.x,pool.y) > pool.r + t.r * .65) continue;
-      damage(t, pool.damage, t.x, t.y, "#ff7a2f", true);
-      if (t.hp <= 0) {
-        killMonster(j, t.team !== "hero");
-      }
+      t.fire += pool.fire;
+      floatText(t.x,t.y,`FIRE +${pool.fire}`,"#ff7a2f");
     }
   }
 }

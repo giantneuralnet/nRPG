@@ -8,6 +8,7 @@ function draw() {
     update();
     drawHeroUI();
     drawLavaPools();
+    drawSoulLinks();
 
     for (const t of board) {
       if (t.type === "monster") drawMonster(t);
