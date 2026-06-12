@@ -134,7 +134,7 @@ function drawMonster(m) {
 
   ctx.fillStyle = "#222";
   ctx.fillRect(bx,by,barW,barH);
-  ctx.fillStyle = stone ? "#bbbbbb" : m.ghost ? "#d8ecff" : m.zombie ? "#7aff7a" : "#e84444";
+  ctx.fillStyle = stone ? "#bbbbbb" : m.team === "hero" ? "#d8ecff" : m.ghost ? "#d8ecff" : m.zombie ? "#7aff7a" : "#e84444";
   ctx.fillRect(bx,by,barW*Math.max(0,m.hp/m.maxHp),barH);
   ctx.strokeStyle = "white";
   ctx.lineWidth = 1;
@@ -159,114 +159,13 @@ function drawMonster(m) {
   ctx.textBaseline = "bottom";
   ctx.font = "bold 14px system-ui";
   ctx.fillStyle = "white";
-  ctx.fillText(`${stone ? "STONE " : ""}${m.rage ? "RAGE " : ""}${m.blind ? "BLIND " : ""}${m.shielded && !m.shieldBroken ? "SHIELDED " : ""}${m.ghost ? "GHOST " : ""}${m.haunted ? "HAUNTED " : ""}${m.zombie ? "ZOMBIE " : ""}${m.elite ? "ELITE " : ""}ATK ${m.atk}`,m.x,by-4);
+  ctx.fillText(`${m.team === "hero" ? "ALLY " : ""}${stone ? "STONE " : ""}${m.rage ? "RAGE " : ""}${m.blind ? "BLIND " : ""}${m.shielded && !m.shieldBroken ? "SHIELDED " : ""}${m.ghost ? "GHOST " : ""}${m.haunted ? "HAUNTED " : ""}${m.zombie ? "ZOMBIE " : ""}${m.elite ? "ELITE " : ""}ATK ${m.atk}`,m.x,by-4);
 
   if (m.attacking) {
     ctx.fillStyle = "#ff6666";
     ctx.fillText("attacking...",m.x,m.y+m.r+28);
   }
 
-  ctx.restore();
-}
-
-function drawKnightOn(renderCtx, k) {
-  const now = performance.now();
-  renderCtx.save();
-  renderCtx.translate(k.x, k.y);
-  renderCtx.scale(k.r/55, k.r/55);
-
-  renderCtx.fillStyle = k.stone ? "#888888" : now < k.frozenUntil ? "#72dfff" : k.zombie ? "#7aff7a" : k.rage ? "#ff3b3b" : "#cfd6e6";
-  renderCtx.strokeStyle = "white";
-  renderCtx.lineWidth = 5;
-  renderCtx.beginPath();
-  renderCtx.roundRect(-34,-40,68,80,12);
-  renderCtx.fill();
-  renderCtx.stroke();
-
-  renderCtx.fillStyle = k.blind ? "#dddddd" : "#6aa8ff";
-  renderCtx.beginPath();
-  renderCtx.roundRect(-28,-62,56,34,10);
-  renderCtx.fill();
-  renderCtx.stroke();
-
-  renderCtx.strokeStyle = "#111";
-  renderCtx.lineWidth = k.blind ? 6 : 0;
-  if (k.blind) {
-    renderCtx.beginPath();
-    renderCtx.moveTo(-18,-45);
-    renderCtx.lineTo(18,-45);
-    renderCtx.stroke();
-  } else {
-    renderCtx.fillStyle = "#111";
-    renderCtx.fillRect(-18,-48,36,8);
-  }
-
-  renderCtx.strokeStyle = "#ffd84a";
-  renderCtx.lineWidth = 8;
-  renderCtx.beginPath();
-  renderCtx.moveTo(34,-6);
-  renderCtx.lineTo(70,-42);
-  renderCtx.stroke();
-
-  renderCtx.fillStyle = "#9b5a25";
-  renderCtx.beginPath();
-  renderCtx.moveTo(-36,-6);
-  renderCtx.lineTo(-62,10);
-  renderCtx.lineTo(-48,48);
-  renderCtx.lineTo(-24,26);
-  renderCtx.closePath();
-  renderCtx.fill();
-  renderCtx.strokeStyle = "#d69a55";
-  renderCtx.stroke();
-
-  renderCtx.restore();
-}
-
-function drawKnight(k) {
-  const now = performance.now();
-  drawKnightOn(ctx, k);
-
-  ctx.save();
-  const r = k.r;
-  const barW = r*2.1;
-  const barH = 9;
-  const bx = k.x-barW/2;
-  const by = k.y-r-32;
-
-  ctx.fillStyle = "#222";
-  ctx.fillRect(bx,by,barW,barH);
-  ctx.fillStyle = k.stone ? "#bbbbbb" : k.zombie ? "#7aff7a" : k.rage ? "#ff3b3b" : "#d8ecff";
-  ctx.fillRect(bx,by,barW*Math.max(0,k.hp/k.maxHp),barH);
-  ctx.strokeStyle = "white";
-  ctx.lineWidth = 1;
-  ctx.strokeRect(bx,by,barW,barH);
-
-  if (k.poison > 0) {
-    ctx.fillStyle = "#7cff4f";
-    ctx.fillRect(bx,by+barH+3,barW*Math.min(1,k.poison/30),5);
-  }
-  if (k.fire > 0) {
-    ctx.fillStyle = "#ff7a2f";
-    ctx.fillRect(bx,by+barH+10,barW*Math.min(1,k.fire/30),5);
-  }
-  if (now < k.frozenUntil) {
-    ctx.fillStyle = "#72dfff";
-    ctx.fillRect(bx,by+barH+17,barW*Math.max(0,(k.frozenUntil-now)/4000),5);
-  }
-
-  ctx.textAlign = "center";
-  ctx.textBaseline = "bottom";
-  ctx.font = "bold 14px system-ui";
-  ctx.fillStyle = "#d8ecff";
-  ctx.fillText(`${k.stone ? "STONE " : ""}${k.rage ? "RAGE " : ""}${k.blind ? "BLIND " : ""}${k.shielded && !k.shieldBroken ? "SHIELDED " : ""}${k.zombie ? "ZOMBIE " : ""}ALLY ATK ${k.atk}`, k.x, by-4);
-
-  if (k.shielded && !k.shieldBroken) {
-    const shieldSize = r * 1.35;
-    if (!icons.monsterShield && typeof makeIcon === "function") icons.monsterShield = makeIcon("monsterShield");
-    if (icons.monsterShield) {
-      ctx.drawImage(icons.monsterShield, k.x + r * .45 - shieldSize * .5, k.y - shieldSize * .2, shieldSize, shieldSize);
-    }
-  }
   ctx.restore();
 }
 

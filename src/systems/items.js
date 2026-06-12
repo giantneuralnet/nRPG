@@ -1,5 +1,5 @@
 function isCombatant(t) {
-  return t.type === "monster" || t.type === "knight";
+  return t.type === "monster";
 }
 
 function useItem(item, index) {
@@ -220,11 +220,7 @@ function zombifyMonster(m) {
 function replaceDefeated(index, giveXp = false) {
   const t = board[index];
   if (!t) return;
-  if (t.type === "monster") killMonster(index, giveXp);
-  else if (t.type === "knight") {
-    floatText(t.x,t.y,"DOWN","#d8ecff");
-    board[index] = spawnThing();
-  }
+  if (t.type === "monster") killMonster(index, giveXp && t.team !== "hero");
 }
 
 function randomLivingTargets() {
@@ -400,11 +396,6 @@ function explode(x,y,power,kind) {
       if (!isCombatant(m)) continue;
       cleanMonster(m);
       floatText(m.x,m.y,"CLEAN","#d8ecff");
-    }
-    for (const k of board) {
-      if (k.type !== "knight") continue;
-      k.rage = false;
-      k.target = null;
     }
     clouds = [];
     lavaPools = [];
@@ -596,12 +587,6 @@ function explode(x,y,power,kind) {
     hero.rage = true;
     flash = `Enrage bomb!`;
     floatText(120,100,"RAGE","#ff3b3b");
-    for (const k of board) {
-      if (k.type === "knight") {
-        k.rage = true;
-        floatText(k.x,k.y,"RAGE","#ff3b3b");
-      }
-    }
     for (const m of board) {
       if (!isCombatant(m)) continue;
       m.rage = true;

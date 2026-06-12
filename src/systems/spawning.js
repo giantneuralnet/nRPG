@@ -112,6 +112,7 @@ function makeMonster(x,y,targetY,r) {
     attackCooldownUntil:0,
     fightCooldownUntil:0,
     target:null,
+    team:"enemy",
     elite,
     shielded:rng()<.18,
     shieldBroken:false,
@@ -135,26 +136,22 @@ function makeMonster(x,y,targetY,r) {
 }
 
 function makeKnight(x,y,targetY,r) {
-  return {
-    type:"knight",
-    x,y,targetY,r,
-    vx:(rng()-.5)*1.3,
-    vy:0,
-    hp:70,
-    maxHp:70,
-    atk:12,
-    poison:0,
-    fire:0,
-    stone:false,
-    frozenUntil:0,
-    fightCooldownUntil:0,
-    shielded:false,
-    shieldBroken:false,
-    blind:false,
-    attackCooldownUntil:0,
-    target:null,
-    rage:false
-  };
+  const k = makeMonster(x,y,targetY,r);
+  k.team = "hero";
+  k.elite = false;
+  k.hp = 70;
+  k.maxHp = 70;
+  k.atk = 12;
+  k.shielded = false;
+  k.parts.color = "#cfd6e6";
+  k.parts.originalColor = null;
+  k.parts.head = "box";
+  k.parts.eyes = 2;
+  k.parts.mouth = "void";
+  k.parts.horns = false;
+  k.parts.legs = 2;
+  k.parts.arms = 2;
+  return k;
 }
 
 function makeItem(x,y,targetY,r) {

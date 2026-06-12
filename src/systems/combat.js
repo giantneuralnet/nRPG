@@ -10,7 +10,7 @@ function statusTick() {
 
   for (let i = board.length - 1; i >= 0; i--) {
     const m = board[i];
-    if (m.type !== "monster" && m.type !== "knight") continue;
+    if (m.type !== "monster") continue;
 
     if (m.stone && (m.poison > 0 || m.fire > 0)) {
       floatText(m.x, m.y, "STONE", "#bbbbbb");
@@ -30,8 +30,7 @@ function statusTick() {
     }
 
     if (m.hp <= 0) {
-      if (m.type === "monster") killMonster(i, true);
-      else removeDeadKnights();
+      killMonster(i, m.team !== "hero");
     }
   }
 
@@ -39,13 +38,12 @@ function statusTick() {
     const pool = lavaPools[i];
     for (let j = board.length - 1; j >= 0; j--) {
       const t = board[j];
-      if (t.type !== "monster" && t.type !== "knight") continue;
+      if (t.type !== "monster") continue;
       if (t.stone) continue;
       if (dist(t.x,t.y,pool.x,pool.y) > pool.r + t.r * .65) continue;
       damage(t, pool.damage, t.x, t.y, "#ff7a2f", true);
       if (t.hp <= 0) {
-        if (t.type === "monster") killMonster(j, true);
-        else removeDeadKnights();
+        killMonster(j, t.team !== "hero");
       }
     }
   }
@@ -53,6 +51,10 @@ function statusTick() {
 
 function attackMonster(m,index) {
   if (!hero.alive || m.attacking) return;
+  if (m.team === "hero") {
+    flash = "Ally is on your side!";
+    return;
+  }
 
   const now = performance.now();
   if (now < m.attackCooldownUntil) return;
@@ -61,7 +63,7 @@ function attackMonster(m,index) {
 
   const dmg = getHeroAtk();
   const dealt = damage(m,dmg,m.x,m.y);
-  setKnightTargets(m);
+  setAllyTargets(m);
   spendPowerTurn();
   flash = `Monster -${dealt}`;
 
@@ -113,7 +115,6 @@ function attackMonster(m,index) {
     m.attacking = false;
 
     if (hero.hp <= 0) die();
-    removeDeadKnights();
   }, 500);
 }
 
@@ -121,6 +122,14 @@ function killMonster(index, giveXp = true) {
   if (!board[index]) return;
 
   const dead = board[index];
+  if (dead.team === "hero") {
+    sound("dead");
+    floatText(dead.x, dead.y, "DOWN", "#d8ecff");
+    burst(dead.x,dead.y,"#d8ecff",14,5);
+    board[index] = spawnThing();
+    return;
+  }
+
   if (dead.haunted && !dead.ghost) {
     board[index] = makeGhost(dead);
     sound("dead");
@@ -228,16 +237,7 @@ function zombieFights() {
     let best = Infinity;
 
     for (const m of board) {
-      if (z.rage && m.type === "knight") {
-        const d = dist(z.x,z.y,m.x,m.y);
-        if (d < best) {
-          best = d;
-          target = m;
-        }
-        continue;
-      }
-
-      if (m.type !== "monster" || m === z || (!z.rage && m.zombie) || now < m.frozenUntil || m.stone) continue;
+      if (m.type !== "monster" || m === z || m.team === z.team || (!z.rage && m.zombie) || now < m.frozenUntil || m.stone) continue;
 
       const d = dist(z.x,z.y,m.x,m.y);
       if (d < best) {
@@ -262,10 +262,8 @@ function zombieFights() {
       target.fightCooldownUntil = now + 650;
 
       const zdmg = z.atk;
-      const mdmg = target.type === "monster" ? target.atk : 0;
-
       damage(target, zdmg, target.x, target.y, "#7aff7a");
-      if (mdmg > 0) damage(z, mdmg, z.x, z.y, "#ff6b6b");
+      damage(z, target.atk, z.x, z.y, "#ff6b6b");
     }
   }
 
@@ -277,38 +275,28 @@ function zombieFights() {
   }
 }
 
-function setKnightTargets(target) {
+function setAllyTargets(target) {
   for (const k of board) {
-    if (k.type === "knight") k.target = target;
+    if (k.type === "monster" && k.team === "hero") k.target = target;
   }
 }
 
 function pickCounterTarget(attacker) {
   if (!attacker.blind) return hero;
-  const targets = [hero, ...board.filter(t => t !== attacker && (t.type === "monster" || t.type === "knight"))];
+  const targets = [hero, ...board.filter(t => t !== attacker && t.type === "monster")];
   return pick(targets);
 }
 
-function removeDeadKnights() {
-  for (let i = board.length - 1; i >= 0; i--) {
-    const t = board[i];
-    if (t.type === "knight" && t.hp <= 0) {
-      floatText(t.x,t.y,"DOWN","#d8ecff");
-      board[i] = spawnThing();
-    }
-  }
-}
-
-function knightFights() {
+function allyFights() {
   const now = performance.now();
   for (const k of board) {
-    if (k.type !== "knight") continue;
+    if (k.type !== "monster" || k.team !== "hero") continue;
     if (k.stone || now < k.frozenUntil) continue;
     if (k.rage && (!k.target || k.target.hp <= 0 || !board.includes(k.target))) {
       let nearest = null;
       let best = Infinity;
       for (const m of board) {
-        if (m.type !== "monster" || m.stone) continue;
+        if (m.type !== "monster" || m.team === k.team || m.stone) continue;
         const d = dist(k.x,k.y,m.x,m.y);
         if (d < best) {
           best = d;

@@ -110,30 +110,10 @@ function update() {
       if (t.y < 160 || t.y > H-t.r-85) t.vy *= -1;
     }
 
-    if (t.type === "knight") {
-      if (t.stone) {
-        t.vx *= .75;
-        t.vy *= .75;
-        continue;
-      }
-      if (now < t.frozenUntil) {
-        t.vx *= .9;
-        t.vy *= .9;
-        continue;
-      }
-      const speed = 1.8 + hero.level*.02;
-      t.vx = Math.max(-speed, Math.min(speed, t.vx));
-      t.vy = Math.max(-speed, Math.min(speed, t.vy));
-      t.x += t.vx;
-      t.y += t.vy;
-      if (t.x < t.r+20 || t.x > W-t.r-20) t.vx *= -1;
-      if (t.y < 160 || t.y > H-t.r-85) t.vy *= -1;
-    }
   }
 
-  knightFights();
+  allyFights();
   zombieFights();
-  removeDeadKnights();
   resolveOverlaps();
   checkStoneLock();
 }
