@@ -106,8 +106,8 @@ function drawMonster(m) {
   }
 
   if (m.shielded && !m.shieldBroken) {
-    const shieldSize = r * 1.35;
-    ctx.drawImage(icons.monsterShield, m.x + r * .25 - shieldSize * .5, m.y - shieldSize * .25, shieldSize, shieldSize);
+    const shieldSize = r * 1.55;
+    ctx.drawImage(icons.monsterShield, m.x + r * .45 - shieldSize * .5, m.y - shieldSize * .25, shieldSize, shieldSize);
   }
 
   ctx.save();
@@ -223,6 +223,7 @@ function drawItem(item) {
   if (item.kind === "healBomb") ctx.fillText(`HEAL BOMB`, item.x, item.y+item.r+10);
   if (item.kind === "iceBomb") ctx.fillText(`ICE BOMB`, item.x, item.y+item.r+10);
   if (item.kind === "zombieBomb") ctx.fillText(`ZOMBIE BOMB`, item.x, item.y+item.r+10);
+  if (item.kind === "shieldBomb") ctx.fillText(`SHIELD BOMB`, item.x, item.y+item.r+10);
   if (item.kind === "stoneScroll") ctx.fillText(`STONE SCROLL`, item.x, item.y+item.r+10);
   if (item.kind === "hauntedScroll") ctx.fillText(`CURSE SCROLL`, item.x, item.y+item.r+10);
   if (item.kind === "killRandomItem") ctx.fillText(`KILL RANDOM`, item.x, item.y+item.r+10);

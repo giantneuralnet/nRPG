@@ -32,6 +32,7 @@ const itemInfo = [
   ["lightningBomb","Lightning bomb","Damages all monsters and you."],
   ["iceBomb","Ice bomb","Freezes monsters temporarily."],
   ["zombieBomb","Zombie bomb","Turns monsters into zombies."],
+  ["shieldBomb","Shield all bomb","Gives every current monster a fresh shield."],
   ["stoneScroll","Stone scroll","Makes one monster permanently stone."],
   ["hauntedScroll","Curse scroll","Haunts monsters so they rise once as ghosts."],
   ["killRandomItem","Kill random","Kills a random monster or backfires on you."],
@@ -178,8 +179,8 @@ function makeMonsterInfoIcon(kind) {
     g.stroke();
   }
   if (m.shielded && !m.shieldBroken && icons.monsterShield) {
-    const shieldSize = m.r * 1.35;
-    g.drawImage(icons.monsterShield, 50 + m.r * .25 - shieldSize * .5, 50 - shieldSize * .25, shieldSize, shieldSize);
+    const shieldSize = m.r * 1.55;
+    g.drawImage(icons.monsterShield, 50 + m.r * .45 - shieldSize * .5, 50 - shieldSize * .25, shieldSize, shieldSize);
   }
   return c;
 }

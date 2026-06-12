@@ -93,7 +93,7 @@ function makeIcon(type) {
 
   if ([
     "bomb","clearBomb","randomBomb","weakenBomb","strengthBomb",
-    "cloudBomb","poisonBomb","healBomb","lightningBomb","iceBomb","zombieBomb"
+    "cloudBomb","poisonBomb","healBomb","lightningBomb","iceBomb","zombieBomb","shieldBomb"
   ].includes(type)) {
     const colors = {
       bomb:"#222",
@@ -106,7 +106,8 @@ function makeIcon(type) {
       healBomb:"#ff5f8f",
       lightningBomb:"#ffe65c",
       iceBomb:"#72dfff",
-      zombieBomb:"#7aff7a"
+      zombieBomb:"#7aff7a",
+      shieldBomb:"#9b5a25"
     };
     g.fillStyle = colors[type];
     g.beginPath(); g.arc(48,58,31,0,Math.PI*2); g.fill(); g.stroke();
@@ -127,6 +128,7 @@ function makeIcon(type) {
       type === "lightningBomb" ? "⚡" :
       type === "iceBomb" ? "❄" :
       type === "zombieBomb" ? "Z" :
+      type === "shieldBomb" ? "S" :
       type === "clearBomb" ? "C" :
       type === "randomBomb" ? "?" :
       type === "weakenBomb" ? "↓" :
@@ -152,5 +154,5 @@ function makeIcon(type) {
   "sword","shield","potion","poison","bomb","clearBomb","randomBomb",
   "weakenBomb","strengthBomb","cloudBomb","poisonBomb","healBomb","lightningBomb",
   "iceBomb","zombieBomb","chest","powerPotion","regenPotion","vampirePotion","stoneScroll",
-  "hauntedScroll","killRandomItem","healRandomItem","flashBang","exileItem","swapHealthItem","monsterShield"
+  "hauntedScroll","killRandomItem","healRandomItem","flashBang","exileItem","swapHealthItem","shieldBomb","monsterShield"
 ].forEach(t => icons[t] = makeIcon(t));

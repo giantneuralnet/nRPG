@@ -19,7 +19,7 @@ function poisonTick() {
 
     const dmg = m.poison;
     m.poison = Math.max(0, m.poison - 1);
-    damage(m, dmg, m.x, m.y, "#7cff4f");
+    damage(m, dmg, m.x, m.y, "#7cff4f", true);
 
     if (m.hp <= 0) killMonster(i, true);
   }
@@ -48,7 +48,6 @@ function attackMonster(m,index) {
     m.poison += hero.poison;
     flash = `Hit + poison`;
     floatText(m.x,m.y,`POISON +${hero.poison}`,"#7cff4f");
-    burst(m.x,m.y,"#7cff4f",12,4);
   }
 
   if (m.hp <= 0) {
@@ -97,15 +96,15 @@ function killMonster(index, giveXp = true) {
     board[index] = makeGhost(dead);
     sound("dead");
     floatText(dead.x, dead.y, "GHOST", "#d8ecff");
-    burst(dead.x,dead.y,"#d8ecff",24,6);
+    burst(dead.x,dead.y,"#ff4f4f",18,5);
     flash = "A ghost rises!";
     return;
   }
 
   kills++;
   sound("dead");
-  floatText(dead.x, dead.y, "KO", "#ffffff");
-  burst(dead.x,dead.y,"#ffffff",24,7);
+  floatText(dead.x, dead.y, "KO", "#ff4f4f");
+  burst(dead.x,dead.y,"#ff4f4f",18,6);
 
   if (giveXp) {
     hero.xp += dead.elite ? 3 : 1;
@@ -158,7 +157,7 @@ function levelUp() {
 
   flash = `LEVEL ${hero.level}!`;
   floatText(W/2, H/2, `LEVEL ${hero.level}!`, "#ffe65c");
-  burst(W/2,H/2,"#ffe65c",36,8);
+  burst(W/2,H/2,"#ffe65c",24,7);
   sound("level");
 }
 

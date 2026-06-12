@@ -65,5 +65,4 @@ function switchRoom(roomNumber) {
   floats = [];
   flash = `Room ${currentRoom}`;
   sound("door");
-  burst(W/2,H/2,"#ffd84a",28,7);
 }

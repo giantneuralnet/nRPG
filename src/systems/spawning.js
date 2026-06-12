@@ -26,13 +26,6 @@ function findFreePosition(radius) {
 function spawnThing(allowExileReturn = true) {
   if (allowExileReturn && exileQueue.length > 0 && rng() < .28) return popExiledMonster();
 
-  if (rng() < .08) {
-    const room = pick([1,2,3].filter(n => n !== currentRoom));
-    const r = Math.min(W,H) * .07;
-    const p = findFreePosition(r);
-    return makeDoor(p.x, -120 - rng()*200, p.y, r, room);
-  }
-
   const isMonster = rng() < .56;
   const r = Math.min(W,H) * (isMonster ? .076 : .062);
   const p = findFreePosition(r);
@@ -138,11 +131,17 @@ function makeMonster(x,y,targetY,r) {
 function makeItem(x,y,targetY,r) {
   const kind = pick([
     "sword","shield","potion","potion","poison",
-    "bomb","clearBomb","randomBomb","weakenBomb","strengthBomb",
+    "bomb","clearBomb","randomBomb","weakenBomb","strengthBomb","shieldBomb",
     "cloudBomb","poisonBomb","healBomb","lightningBomb","iceBomb","zombieBomb",
     "powerPotion","regenPotion","vampirePotion","stoneScroll","hauntedScroll",
-    "killRandomItem","healRandomItem","flashBang","exileItem","swapHealthItem","chest","chest"
+    "killRandomItem","healRandomItem","flashBang","exileItem","swapHealthItem","door","chest","chest"
   ]);
+
+  if (kind === "door") {
+    const room = pick([1,2,3].filter(n => n !== currentRoom));
+    return makeDoor(x,y,targetY,r * 1.12,room);
+  }
+
   return {
     type:"item",
     kind,x,y,targetY,r,
@@ -166,6 +165,7 @@ function makeItem(x,y,targetY,r) {
       kind === "cloudBomb" ? 0 :
       kind === "iceBomb" ? 4 :
       kind === "zombieBomb" ? 0 :
+      kind === "shieldBomb" ? 0 :
       kind === "stoneScroll" ? 0 :
       kind === "hauntedScroll" ? 0 :
       kind === "killRandomItem" ? 0 :

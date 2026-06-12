@@ -17,17 +17,17 @@ function spendPowerTurn() {
   }
 }
 
-function damage(target, amount, x, y, color="#ff6b6b") {
+function damage(target, amount, x, y, color="#ff6b6b", useParticles = false) {
   amount = Math.max(0, Math.floor(amount));
 
   if (target.type === "monster" && target.stone) {
     floatText(x, y, "STONE", "#bbbbbb");
-    burst(x,y,"#bbbbbb",10,3);
+    if (useParticles) burst(x,y,"#bbbbbb",8,3);
     sound("hit");
     return 0;
   }
 
-  if (target.type === "monster" && absorbShield(target, x, y)) {
+  if (target.type === "monster" && absorbShield(target, x, y, useParticles)) {
     return 0;
   }
 
@@ -35,15 +35,15 @@ function damage(target, amount, x, y, color="#ff6b6b") {
   shake = 7;
   sound("hit");
   floatText(x, y, "-" + amount, color);
-  burst(x,y,color,16,6);
+  if (useParticles) burst(x,y,color,12,5);
   return amount;
 }
 
-function absorbShield(target, x, y) {
+function absorbShield(target, x, y, useParticles = false) {
   if (target.shielded && !target.shieldBroken) {
     target.shieldBroken = true;
     floatText(x, y, "SHIELD", "#85bdff");
-    burst(x,y,"#d69a55",18,5);
+    if (useParticles) burst(x,y,"#d69a55",12,4);
     sound("hit");
     return true;
   }

@@ -9,8 +9,12 @@ function floatText(x,y,text,color="white") {
   });
 }
 
+const MAX_PARTICLES = 220;
+
 function burst(x,y,color="white",count=14,power=5) {
   if (!particles) return;
+  const openSlots = Math.max(0, MAX_PARTICLES - particles.length);
+  count = Math.min(count, openSlots);
   for (let i = 0; i < count; i++) {
     const a = Math.random() * Math.PI * 2;
     const speed = Math.random() * power + 1;
@@ -18,9 +22,9 @@ function burst(x,y,color="white",count=14,power=5) {
       x,y,color,
       vx: Math.cos(a) * speed,
       vy: Math.sin(a) * speed,
-      r: Math.random() * 4 + 2,
-      life: visualRand(22,42),
-      maxLife: 42,
+      r: Math.random() * 3 + 2,
+      life: visualRand(18,34),
+      maxLife: 34,
       gravity: .12
     });
   }

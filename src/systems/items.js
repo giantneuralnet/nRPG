@@ -66,6 +66,7 @@ function useItem(item, index) {
   if (item.kind === "healBomb") explode(item.x, item.y, item.value, "heal");
   if (item.kind === "iceBomb") explode(item.x, item.y, item.value, "ice");
   if (item.kind === "zombieBomb") explode(item.x, item.y, item.value, "zombie");
+  if (item.kind === "shieldBomb") shieldAllMonsters(item.x,item.y);
 
   if (item.kind === "stoneScroll") stoneRandomMonster(item.x,item.y);
   if (item.kind === "hauntedScroll") hauntMonsters(item.x,item.y);
@@ -188,8 +189,24 @@ function flashBang(x,y) {
   }
   flash = "FLASH BANG!";
   floatText(x,y,"BLIND","#ffffff");
-  burst(x,y,"#ffffff",44,10);
+  burst(x,y,"#ffffff",30,8);
   sound("zap");
+}
+
+function shieldAllMonsters(x,y) {
+  let count = 0;
+  for (const m of board) {
+    if (m.type !== "monster") continue;
+    m.shielded = true;
+    m.shieldBroken = false;
+    floatText(m.x,m.y,"SHIELD","#85bdff");
+    count++;
+  }
+
+  flash = count ? "Shield all!" : "No monsters to shield!";
+  floatText(x,y,count ? "SHIELD ALL" : "NO TARGET","#85bdff");
+  if (count) burst(x,y,"#d69a55",14,4);
+  sound("item");
 }
 
 function exileMonsters(x,y) {
@@ -274,7 +291,7 @@ function explode(x,y,power,kind) {
         floatText(m.x,m.y,"STONE","#bbbbbb");
         continue;
       }
-      damage(m,power,m.x,m.y,"#ff6b6b");
+      damage(m,power,m.x,m.y,"#ff6b6b", true);
       if (m.hp <= 0) killMonster(i, false);
     }
   }
@@ -286,7 +303,7 @@ function explode(x,y,power,kind) {
       board[i] = spawnThing();
     }
     clouds = [];
-    burst(x,y,"#ffffff",30,8);
+    burst(x,y,"#ffffff",20,6);
   }
 
   if (kind === "random") {
@@ -331,7 +348,7 @@ function explode(x,y,power,kind) {
     flash = `Cloudy bomb!`;
     const count = rand(3,5);
     clouds = [];
-    burst(x,y,"#d8ecff",24,7);
+    burst(x,y,"#d8ecff",16,5);
     for (let i = 0; i < count; i++) {
       clouds.push({
         x: rand(80, Math.max(90, W-80)),
@@ -355,7 +372,7 @@ function explode(x,y,power,kind) {
         continue;
       }
       const dmg = power + 12;
-      damage(m,dmg,m.x,m.y,"#ffe65c");
+      damage(m,dmg,m.x,m.y,"#ffe65c", true);
       if (m.hp <= 0) killMonster(i, false);
     }
   }
