@@ -26,10 +26,7 @@ function damage(target, amount, x, y, color="#ff6b6b") {
     return 0;
   }
 
-  if (target.type === "monster" && target.shielded && !target.shieldBroken) {
-    target.shieldBroken = true;
-    floatText(x, y, "SHIELD", "#85bdff");
-    sound("hit");
+  if (target.type === "monster" && absorbShield(target, x, y)) {
     return 0;
   }
 
@@ -38,6 +35,16 @@ function damage(target, amount, x, y, color="#ff6b6b") {
   sound("hit");
   floatText(x, y, "-" + amount, color);
   return amount;
+}
+
+function absorbShield(target, x, y) {
+  if (target.shielded && !target.shieldBroken) {
+    target.shieldBroken = true;
+    floatText(x, y, "SHIELD", "#85bdff");
+    sound("hit");
+    return true;
+  }
+  return false;
 }
 
 function heal(target, amount, x, y) {

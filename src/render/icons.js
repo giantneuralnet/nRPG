@@ -23,13 +23,13 @@ function makeIcon(type) {
     g.beginPath(); g.arc(20,92,7,0,Math.PI*2); g.fill();
   }
 
-  if (type === "shield") {
-    g.fillStyle = "#6aa8ff";
+  if (type === "shield" || type === "monsterShield") {
+    g.fillStyle = type === "monsterShield" ? "#9b5a25" : "#6aa8ff";
     g.beginPath();
     g.moveTo(50,8); g.lineTo(82,23); g.lineTo(75,68);
     g.lineTo(50,92); g.lineTo(25,68); g.lineTo(18,23);
     g.closePath(); g.fill(); g.stroke();
-    g.strokeStyle = "#d8ecff"; g.lineWidth = 6;
+    g.strokeStyle = type === "monsterShield" ? "#d69a55" : "#d8ecff"; g.lineWidth = 6;
     g.beginPath(); g.moveTo(50,18); g.lineTo(50,78); g.stroke();
   }
 
@@ -152,5 +152,5 @@ function makeIcon(type) {
   "sword","shield","potion","poison","bomb","clearBomb","randomBomb",
   "weakenBomb","strengthBomb","cloudBomb","poisonBomb","healBomb","lightningBomb",
   "iceBomb","zombieBomb","chest","powerPotion","regenPotion","vampirePotion","stoneScroll",
-  "hauntedScroll","killRandomItem","healRandomItem","flashBang","exileItem","swapHealthItem"
+  "hauntedScroll","killRandomItem","healRandomItem","flashBang","exileItem","swapHealthItem","monsterShield"
 ].forEach(t => icons[t] = makeIcon(t));

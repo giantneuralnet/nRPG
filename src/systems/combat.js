@@ -18,9 +18,8 @@ function poisonTick() {
     }
 
     const dmg = m.poison;
-    m.hp -= dmg;
     m.poison = Math.max(0, m.poison - 1);
-    floatText(m.x, m.y, "☠ -" + dmg, "#7cff4f");
+    damage(m, dmg, m.x, m.y, "#7cff4f");
 
     if (m.hp <= 0) killMonster(i, true);
   }
@@ -204,12 +203,8 @@ function zombieFights() {
       const zdmg = z.atk;
       const mdmg = target.atk;
 
-      target.hp -= zdmg;
-      z.hp -= mdmg;
-
-      floatText(target.x,target.y,"-"+zdmg,"#7aff7a");
-      floatText(z.x,z.y,"-"+mdmg,"#ff6b6b");
-      sound("hit");
+      damage(target, zdmg, target.x, target.y, "#7aff7a");
+      damage(z, mdmg, z.x, z.y, "#ff6b6b");
     }
   }
 

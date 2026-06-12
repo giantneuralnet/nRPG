@@ -90,21 +90,8 @@ function drawMonster(m) {
   ctx.restore();
 
   if (m.shielded && !m.shieldBroken) {
-    ctx.save();
-    ctx.fillStyle = "rgba(120,190,255,.55)";
-    ctx.strokeStyle = "#d8ecff";
-    ctx.lineWidth = 4;
-    ctx.beginPath();
-    ctx.moveTo(m.x, m.y - r * .85);
-    ctx.lineTo(m.x + r * .75, m.y - r * .45);
-    ctx.lineTo(m.x + r * .55, m.y + r * .65);
-    ctx.lineTo(m.x, m.y + r * .95);
-    ctx.lineTo(m.x - r * .55, m.y + r * .65);
-    ctx.lineTo(m.x - r * .75, m.y - r * .45);
-    ctx.closePath();
-    ctx.fill();
-    ctx.stroke();
-    ctx.restore();
+    const shieldSize = r * 1.15;
+    ctx.drawImage(icons.monsterShield, m.x - shieldSize * .5, m.y - shieldSize * .25, shieldSize, shieldSize);
   }
 
   ctx.save();

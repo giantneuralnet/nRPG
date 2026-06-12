@@ -269,8 +269,7 @@ function explode(x,y,power,kind) {
         floatText(m.x,m.y,"STONE","#bbbbbb");
         continue;
       }
-      m.hp -= power;
-      floatText(m.x,m.y,"-"+power,"#ff6b6b");
+      damage(m,power,m.x,m.y,"#ff6b6b");
       if (m.hp <= 0) killMonster(i, false);
     }
   }
@@ -349,8 +348,7 @@ function explode(x,y,power,kind) {
         continue;
       }
       const dmg = power + 12;
-      m.hp -= dmg;
-      floatText(m.x,m.y,"⚡ -" + dmg,"#ffe65c");
+      damage(m,dmg,m.x,m.y,"#ffe65c");
       if (m.hp <= 0) killMonster(i, false);
     }
   }
