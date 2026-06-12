@@ -1,3 +1,7 @@
+function isCombatant(t) {
+  return t.type === "monster" || t.type === "knight";
+}
+
 function useItem(item, index) {
   if (item.kind === "sword") {
     hero.atk += item.value;
@@ -65,6 +69,7 @@ function useItem(item, index) {
   if (item.kind === "lightningBomb") explode(item.x, item.y, item.value, "lightning");
   if (item.kind === "poisonBomb") explode(item.x, item.y, item.value, "poison");
   if (item.kind === "fireBomb") explode(item.x, item.y, item.value, "fire");
+  if (item.kind === "lavaBomb") explode(item.x, item.y, item.value, "lava");
   if (item.kind === "healBomb") explode(item.x, item.y, item.value, "heal");
   if (item.kind === "iceBomb") explode(item.x, item.y, item.value, "ice");
   if (item.kind === "zombieBomb") explode(item.x, item.y, item.value, "zombie");
@@ -170,13 +175,13 @@ function cleanMonster(m) {
   m.shieldBroken = false;
   m.attacking = false;
   m.target = null;
-  if (m.parts.originalColor && !m.zombie) {
+  if (m.parts && m.parts.originalColor && !m.zombie) {
     m.parts.color = m.parts.originalColor;
     m.parts.originalColor = null;
   }
   if (m.zombie) {
     m.zombie = false;
-    if (m.parts.originalColor) {
+    if (m.parts && m.parts.originalColor) {
       m.parts.color = m.parts.originalColor;
       m.parts.originalColor = null;
     }
@@ -205,13 +210,25 @@ function zombifyMonster(m) {
   }
   m.zombie = true;
   m.target = null;
-  m.parts.originalColor = m.parts.originalColor || m.parts.color;
-  m.parts.color = "#6cff6c";
+  if (m.parts) {
+    m.parts.originalColor = m.parts.originalColor || m.parts.color;
+    m.parts.color = "#6cff6c";
+  }
   m.attacking = false;
 }
 
+function replaceDefeated(index, giveXp = false) {
+  const t = board[index];
+  if (!t) return;
+  if (t.type === "monster") killMonster(index, giveXp);
+  else if (t.type === "knight") {
+    floatText(t.x,t.y,"DOWN","#d8ecff");
+    board[index] = spawnThing();
+  }
+}
+
 function randomLivingTargets() {
-  return [hero, ...board.filter(t => t.type === "monster")];
+  return [hero, ...board.filter(isCombatant)];
 }
 
 function killRandomTarget(x,y) {
@@ -250,7 +267,7 @@ function healRandomTarget(x,y) {
 function flashBang(x,y) {
   blindUntil = performance.now() + 5000;
   for (const m of board) {
-    if (m.type !== "monster") continue;
+    if (!isCombatant(m)) continue;
     m.attacking = false;
     m.target = null;
   }
@@ -263,7 +280,7 @@ function flashBang(x,y) {
 function shieldAllMonsters(x,y) {
   let count = 0;
   for (const m of board) {
-    if (m.type !== "monster") continue;
+    if (!isCombatant(m)) continue;
     m.shielded = true;
     m.shieldBroken = false;
     floatText(m.x,m.y,"SHIELD","#85bdff");
@@ -354,13 +371,13 @@ function explode(x,y,power,kind) {
 
     for (let i = board.length - 1; i >= 0; i--) {
       const m = board[i];
-      if (m.type !== "monster") continue;
+      if (!isCombatant(m)) continue;
       if (m.stone) {
         floatText(m.x,m.y,"STONE","#bbbbbb");
         continue;
       }
       damage(m,power,m.x,m.y,"#ff6b6b", true);
-      if (m.hp <= 0) killMonster(i, false);
+      if (m.hp <= 0) replaceDefeated(i, false);
     }
   }
 
@@ -371,6 +388,7 @@ function explode(x,y,power,kind) {
       board[i] = spawnThing();
     }
     clouds = [];
+    lavaPools = [];
     burst(x,y,"#ffffff",20,6);
   }
 
@@ -379,7 +397,7 @@ function explode(x,y,power,kind) {
     flash = "Clean bomb!";
     floatText(120,100,"CLEAN","#d8ecff");
     for (const m of board) {
-      if (m.type !== "monster") continue;
+      if (!isCombatant(m)) continue;
       cleanMonster(m);
       floatText(m.x,m.y,"CLEAN","#d8ecff");
     }
@@ -389,6 +407,7 @@ function explode(x,y,power,kind) {
       k.target = null;
     }
     clouds = [];
+    lavaPools = [];
     burst(x,y,"#d8ecff",18,5);
   }
 
@@ -398,7 +417,7 @@ function explode(x,y,power,kind) {
     flash = `Random bomb!`;
 
     for (const m of board) {
-      if (m.type !== "monster") continue;
+      if (!isCombatant(m)) continue;
       m.hp = rand(1, m.maxHp);
       floatText(m.x,m.y,"HP = " + m.hp,"#c86bff");
     }
@@ -411,7 +430,7 @@ function explode(x,y,power,kind) {
     flash = `Weaken bomb!`;
 
     for (const m of board) {
-      if (m.type !== "monster") continue;
+      if (!isCombatant(m)) continue;
       m.atk = Math.max(1, m.atk - amount);
       floatText(m.x,m.y,`ATK -${amount}`,"#bbbbbb");
     }
@@ -424,7 +443,7 @@ function explode(x,y,power,kind) {
     flash = `Strength bomb!`;
 
     for (const m of board) {
-      if (m.type !== "monster") continue;
+      if (!isCombatant(m)) continue;
       m.atk += amount;
       floatText(m.x,m.y,`ATK +${amount}`,"#ffb15e");
     }
@@ -439,7 +458,8 @@ function explode(x,y,power,kind) {
       clouds.push({
         x: rand(80, Math.max(90, W-80)),
         y: rand(150, Math.max(160, H-130)),
-        r: rand(190,285)
+        r: rand(260,420),
+        border: rand(5,14)
       });
     }
   }
@@ -452,14 +472,14 @@ function explode(x,y,power,kind) {
 
     for (let i = board.length - 1; i >= 0; i--) {
       const m = board[i];
-      if (m.type !== "monster") continue;
+      if (!isCombatant(m)) continue;
       if (m.stone) {
         floatText(m.x,m.y,"STONE","#bbbbbb");
         continue;
       }
       const dmg = power + 12;
       damage(m,dmg,m.x,m.y,"#ffe65c", true);
-      if (m.hp <= 0) killMonster(i, false);
+      if (m.hp <= 0) replaceDefeated(i, false);
     }
   }
 
@@ -471,7 +491,7 @@ function explode(x,y,power,kind) {
     flash = `Poison bomb!`;
 
     for (const m of board) {
-      if (m.type !== "monster") continue;
+      if (!isCombatant(m)) continue;
       if (m.stone) {
         floatText(m.x,m.y,"STONE","#bbbbbb");
         continue;
@@ -485,7 +505,7 @@ function explode(x,y,power,kind) {
   if (kind === "fire") {
     flash = `Fire bomb!`;
     for (const m of board) {
-      if (m.type !== "monster") continue;
+      if (!isCombatant(m)) continue;
       if (m.stone) {
         floatText(m.x,m.y,"STONE","#bbbbbb");
         continue;
@@ -496,12 +516,29 @@ function explode(x,y,power,kind) {
     }
   }
 
+  if (kind === "lava") {
+    flash = `Lava bomb!`;
+    lavaPools = [];
+    for (const m of board) {
+      if (!isCombatant(m)) continue;
+      lavaPools.push({
+        x: m.x,
+        y: m.y,
+        r: rand(75,130),
+        life: rand(430,620),
+        damage: Math.max(2, Math.floor(power * .35))
+      });
+      floatText(m.x,m.y,"LAVA","#ff7a2f");
+    }
+    burst(x,y,"#ff7a2f",20,7);
+  }
+
   if (kind === "heal") {
     heal(hero, power, 120, 100);
     flash = `Healing bomb!`;
 
     for (const m of board) {
-      if (m.type !== "monster") continue;
+      if (!isCombatant(m)) continue;
       const amount = Math.floor(power * .6);
       m.hp = Math.min(m.maxHp, m.hp + amount);
       floatText(m.x,m.y,"+"+amount,"#70ff8a");
@@ -512,7 +549,7 @@ function explode(x,y,power,kind) {
     const now = performance.now();
     flash = `Ice bomb!`;
     for (const m of board) {
-      if (m.type !== "monster") continue;
+      if (!isCombatant(m)) continue;
       if (m.stone) continue;
       m.frozenUntil = now + 4000;
       m.attacking = false;
@@ -524,7 +561,7 @@ function explode(x,y,power,kind) {
   if (kind === "zombie") {
     flash = `Zombie bomb!`;
     for (const m of board) {
-      if (m.type !== "monster") continue;
+      if (!isCombatant(m)) continue;
       if (m.stone) continue;
       zombifyMonster(m);
       floatText(m.x,m.y,"ZOMBIE","#7aff7a");
@@ -535,7 +572,7 @@ function explode(x,y,power,kind) {
   if (kind === "stone") {
     flash = `Stone bomb!`;
     for (const m of board) {
-      if (m.type !== "monster") continue;
+      if (!isCombatant(m)) continue;
       m.stone = true;
       m.attacking = false;
       m.vx = 0;
@@ -566,10 +603,12 @@ function explode(x,y,power,kind) {
       }
     }
     for (const m of board) {
-      if (m.type !== "monster") continue;
+      if (!isCombatant(m)) continue;
       m.rage = true;
-      m.parts.originalColor = m.parts.originalColor || m.parts.color;
-      m.parts.color = "#ff3b3b";
+      if (m.parts) {
+        m.parts.originalColor = m.parts.originalColor || m.parts.color;
+        m.parts.color = "#ff3b3b";
+      }
       floatText(m.x,m.y,"RAGE","#ff3b3b");
     }
   }
@@ -577,7 +616,7 @@ function explode(x,y,power,kind) {
   if (kind === "blind") {
     flash = `Blind bomb!`;
     for (const m of board) {
-      if (m.type !== "monster") continue;
+      if (!isCombatant(m)) continue;
       m.blind = true;
       m.attacking = false;
       floatText(m.x,m.y,"BLIND","#ffffff");

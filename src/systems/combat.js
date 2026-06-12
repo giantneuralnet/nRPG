@@ -10,7 +10,7 @@ function statusTick() {
 
   for (let i = board.length - 1; i >= 0; i--) {
     const m = board[i];
-    if (m.type !== "monster") continue;
+    if (m.type !== "monster" && m.type !== "knight") continue;
 
     if (m.stone && (m.poison > 0 || m.fire > 0)) {
       floatText(m.x, m.y, "STONE", "#bbbbbb");
@@ -29,7 +29,25 @@ function statusTick() {
       damage(m, dmg, m.x, m.y, "#ff7a2f", true);
     }
 
-    if (m.hp <= 0) killMonster(i, true);
+    if (m.hp <= 0) {
+      if (m.type === "monster") killMonster(i, true);
+      else removeDeadKnights();
+    }
+  }
+
+  for (let i = lavaPools.length - 1; i >= 0; i--) {
+    const pool = lavaPools[i];
+    for (let j = board.length - 1; j >= 0; j--) {
+      const t = board[j];
+      if (t.type !== "monster" && t.type !== "knight") continue;
+      if (t.stone) continue;
+      if (dist(t.x,t.y,pool.x,pool.y) > pool.r + t.r * .65) continue;
+      damage(t, pool.damage, t.x, t.y, "#ff7a2f", true);
+      if (t.hp <= 0) {
+        if (t.type === "monster") killMonster(j, true);
+        else removeDeadKnights();
+      }
+    }
   }
 }
 
@@ -285,6 +303,7 @@ function knightFights() {
   const now = performance.now();
   for (const k of board) {
     if (k.type !== "knight") continue;
+    if (k.stone || now < k.frozenUntil) continue;
     if (k.rage && (!k.target || k.target.hp <= 0 || !board.includes(k.target))) {
       let nearest = null;
       let best = Infinity;
@@ -317,7 +336,6 @@ function knightFights() {
     if (d < k.r + target.r + 42 && now >= k.attackCooldownUntil) {
       k.attackCooldownUntil = now + 720;
       const dealt = damage(target, k.atk, target.x, target.y, "#d8ecff");
-      floatText(k.x,k.y,"KNIGHT","#d8ecff");
       if (target.hp <= 0) {
         const index = board.indexOf(target);
         if (index >= 0) killMonster(index, true);

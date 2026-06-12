@@ -30,6 +30,7 @@ const itemInfo = [
   ["cloudBomb","Cloud bomb","Creates huge white clouds."],
   ["poisonBomb","Poison bomb","Poisons all monsters and hurts you."],
   ["fireBomb","Fire bomb","Sets monsters on fire for damage over time."],
+  ["lavaBomb","Lava bomb","Drops shrinking lava pools under current fighters."],
   ["healBomb","Heal bomb","Heals you and monsters."],
   ["lightningBomb","Lightning bomb","Damages all monsters and you."],
   ["iceBomb","Ice bomb","Freezes monsters temporarily."],

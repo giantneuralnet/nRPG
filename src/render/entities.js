@@ -170,11 +170,12 @@ function drawMonster(m) {
 }
 
 function drawKnightOn(renderCtx, k) {
+  const now = performance.now();
   renderCtx.save();
   renderCtx.translate(k.x, k.y);
   renderCtx.scale(k.r/55, k.r/55);
 
-  renderCtx.fillStyle = k.rage ? "#ff3b3b" : "#cfd6e6";
+  renderCtx.fillStyle = k.stone ? "#888888" : now < k.frozenUntil ? "#72dfff" : k.zombie ? "#7aff7a" : k.rage ? "#ff3b3b" : "#cfd6e6";
   renderCtx.strokeStyle = "white";
   renderCtx.lineWidth = 5;
   renderCtx.beginPath();
@@ -182,14 +183,23 @@ function drawKnightOn(renderCtx, k) {
   renderCtx.fill();
   renderCtx.stroke();
 
-  renderCtx.fillStyle = "#6aa8ff";
+  renderCtx.fillStyle = k.blind ? "#dddddd" : "#6aa8ff";
   renderCtx.beginPath();
   renderCtx.roundRect(-28,-62,56,34,10);
   renderCtx.fill();
   renderCtx.stroke();
 
-  renderCtx.fillStyle = "#111";
-  renderCtx.fillRect(-18,-48,36,8);
+  renderCtx.strokeStyle = "#111";
+  renderCtx.lineWidth = k.blind ? 6 : 0;
+  if (k.blind) {
+    renderCtx.beginPath();
+    renderCtx.moveTo(-18,-45);
+    renderCtx.lineTo(18,-45);
+    renderCtx.stroke();
+  } else {
+    renderCtx.fillStyle = "#111";
+    renderCtx.fillRect(-18,-48,36,8);
+  }
 
   renderCtx.strokeStyle = "#ffd84a";
   renderCtx.lineWidth = 8;
@@ -213,14 +223,50 @@ function drawKnightOn(renderCtx, k) {
 }
 
 function drawKnight(k) {
+  const now = performance.now();
   drawKnightOn(ctx, k);
 
   ctx.save();
+  const r = k.r;
+  const barW = r*2.1;
+  const barH = 9;
+  const bx = k.x-barW/2;
+  const by = k.y-r-32;
+
+  ctx.fillStyle = "#222";
+  ctx.fillRect(bx,by,barW,barH);
+  ctx.fillStyle = k.stone ? "#bbbbbb" : k.zombie ? "#7aff7a" : k.rage ? "#ff3b3b" : "#d8ecff";
+  ctx.fillRect(bx,by,barW*Math.max(0,k.hp/k.maxHp),barH);
+  ctx.strokeStyle = "white";
+  ctx.lineWidth = 1;
+  ctx.strokeRect(bx,by,barW,barH);
+
+  if (k.poison > 0) {
+    ctx.fillStyle = "#7cff4f";
+    ctx.fillRect(bx,by+barH+3,barW*Math.min(1,k.poison/30),5);
+  }
+  if (k.fire > 0) {
+    ctx.fillStyle = "#ff7a2f";
+    ctx.fillRect(bx,by+barH+10,barW*Math.min(1,k.fire/30),5);
+  }
+  if (now < k.frozenUntil) {
+    ctx.fillStyle = "#72dfff";
+    ctx.fillRect(bx,by+barH+17,barW*Math.max(0,(k.frozenUntil-now)/4000),5);
+  }
+
   ctx.textAlign = "center";
   ctx.textBaseline = "bottom";
   ctx.font = "bold 14px system-ui";
   ctx.fillStyle = "#d8ecff";
-  ctx.fillText(k.target ? "KNIGHT" : "ALLY", k.x, k.y - k.r - 14);
+  ctx.fillText(`${k.stone ? "STONE " : ""}${k.rage ? "RAGE " : ""}${k.blind ? "BLIND " : ""}${k.shielded && !k.shieldBroken ? "SHIELDED " : ""}${k.zombie ? "ZOMBIE " : ""}ALLY ATK ${k.atk}`, k.x, by-4);
+
+  if (k.shielded && !k.shieldBroken) {
+    const shieldSize = r * 1.35;
+    if (!icons.monsterShield && typeof makeIcon === "function") icons.monsterShield = makeIcon("monsterShield");
+    if (icons.monsterShield) {
+      ctx.drawImage(icons.monsterShield, k.x + r * .45 - shieldSize * .5, k.y - shieldSize * .2, shieldSize, shieldSize);
+    }
+  }
   ctx.restore();
 }
 
@@ -300,6 +346,7 @@ function drawItem(item) {
   if (item.kind === "lightningBomb") ctx.fillText(`LIGHTNING ${item.value}`, item.x, item.y+item.r+10);
   if (item.kind === "poisonBomb") ctx.fillText(`POISON BOMB`, item.x, item.y+item.r+10);
   if (item.kind === "fireBomb") ctx.fillText(`FIRE BOMB`, item.x, item.y+item.r+10);
+  if (item.kind === "lavaBomb") ctx.fillText(`LAVA BOMB`, item.x, item.y+item.r+10);
   if (item.kind === "healBomb") ctx.fillText(`HEAL BOMB`, item.x, item.y+item.r+10);
   if (item.kind === "iceBomb") ctx.fillText(`ICE BOMB`, item.x, item.y+item.r+10);
   if (item.kind === "zombieBomb") ctx.fillText(`ZOMBIE BOMB`, item.x, item.y+item.r+10);

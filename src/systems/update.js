@@ -40,6 +40,14 @@ function update() {
     if (boom.t <= 0) boom = null;
   }
 
+  if (lavaPools) {
+    for (let i = lavaPools.length - 1; i >= 0; i--) {
+      lavaPools[i].r *= .995;
+      lavaPools[i].life--;
+      if (lavaPools[i].life <= 0 || lavaPools[i].r < 18) lavaPools.splice(i,1);
+    }
+  }
+
   for (let i = floats.length - 1; i >= 0; i--) {
     const f = floats[i];
 
@@ -103,6 +111,16 @@ function update() {
     }
 
     if (t.type === "knight") {
+      if (t.stone) {
+        t.vx *= .75;
+        t.vy *= .75;
+        continue;
+      }
+      if (now < t.frozenUntil) {
+        t.vx *= .9;
+        t.vy *= .9;
+        continue;
+      }
       const speed = 1.8 + hero.level*.02;
       t.vx = Math.max(-speed, Math.min(speed, t.vx));
       t.vy = Math.max(-speed, Math.min(speed, t.vy));

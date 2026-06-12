@@ -7,6 +7,7 @@ function draw() {
   if (gameState !== "menu") {
     update();
     drawHeroUI();
+    drawLavaPools();
 
     for (const t of board) {
       if (t.type === "monster") drawMonster(t);

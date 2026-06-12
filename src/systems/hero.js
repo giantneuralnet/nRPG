@@ -26,14 +26,14 @@ function damage(target, amount, x, y, color="#ff6b6b", useParticles = false) {
     return 0;
   }
 
-  if (target.type === "monster" && target.stone) {
+  if ((target.type === "monster" || target.type === "knight") && target.stone) {
     floatText(x, y, "STONE", "#bbbbbb");
     if (useParticles) burst(x,y,"#bbbbbb",8,3);
     sound("hit");
     return 0;
   }
 
-  if (target.type === "monster" && absorbShield(target, x, y, useParticles)) {
+  if ((target.type === "monster" || target.type === "knight") && absorbShield(target, x, y, useParticles)) {
     return 0;
   }
 

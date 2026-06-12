@@ -66,11 +66,31 @@ function drawClouds() {
 
   ctx.save();
   for (const c of clouds) {
+    ctx.strokeStyle = "#777777";
+    ctx.lineWidth = c.border || 8;
     ctx.fillStyle = "#ffffff";
 
     ctx.beginPath();
     ctx.arc(c.x,c.y,c.r,0,Math.PI*2);
     ctx.fill();
+    ctx.stroke();
+  }
+  ctx.restore();
+}
+
+function drawLavaPools() {
+  if (!lavaPools || lavaPools.length <= 0) return;
+
+  ctx.save();
+  for (const l of lavaPools) {
+    const alpha = Math.max(.18, Math.min(.75, l.life / 620));
+    ctx.fillStyle = `rgba(255,92,20,${alpha})`;
+    ctx.strokeStyle = `rgba(255,185,55,${Math.min(.9, alpha + .2)})`;
+    ctx.lineWidth = 5;
+    ctx.beginPath();
+    ctx.arc(l.x,l.y,l.r,0,Math.PI*2);
+    ctx.fill();
+    ctx.stroke();
   }
   ctx.restore();
 }
