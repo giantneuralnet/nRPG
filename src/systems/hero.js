@@ -20,6 +20,12 @@ function spendPowerTurn() {
 function damage(target, amount, x, y, color="#ff6b6b", useParticles = false) {
   amount = Math.max(0, Math.floor(amount));
 
+  if (target.type === "monster" && target.ghost && rng() < .5) {
+    floatText(x, y, "DODGE", "#d8ecff");
+    sound("hit");
+    return 0;
+  }
+
   if (target.type === "monster" && target.stone) {
     floatText(x, y, "STONE", "#bbbbbb");
     if (useParticles) burst(x,y,"#bbbbbb",8,3);

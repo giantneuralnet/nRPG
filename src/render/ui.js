@@ -12,6 +12,8 @@ function drawHeroUI() {
   if (hero.powerDefTurns > 0) status.push(`DEF UP ${hero.powerDefTurns}`);
   if (hero.regenTicks > 0) status.push(`REGEN ${hero.regenTicks}`);
   if (hero.vampire > 0) status.push(`VAMP ${hero.vampire}%`);
+  if (hero.blessed > 0) status.push(`BLESSED ${hero.blessed}`);
+  if (hero.rage) status.push("RAGE");
   if (status.length) {
     ctx.font = "bold 14px system-ui";
     ctx.fillStyle = "#ffe65c";

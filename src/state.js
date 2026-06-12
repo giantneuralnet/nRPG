@@ -26,7 +26,9 @@ function resetGame() {
     powerDefBonus: 0,
     regenTicks: 0,
     regenPower: 0,
-    vampire: 0
+    vampire: 0,
+    blessed: 0,
+    rage: false
   };
 
   rooms = [null, null, null, null];

@@ -57,19 +57,26 @@ function useItem(item, index) {
 
   if (item.kind === "bomb") explode(item.x, item.y, item.value, "normal");
   if (item.kind === "clearBomb") explode(item.x, item.y, item.value, "clear");
+  if (item.kind === "cleanBomb") explode(item.x, item.y, item.value, "clean");
   if (item.kind === "randomBomb") explode(item.x, item.y, item.value, "random");
   if (item.kind === "weakenBomb") explode(item.x, item.y, item.value, "weaken");
   if (item.kind === "strengthBomb") explode(item.x, item.y, item.value, "strength");
   if (item.kind === "cloudBomb") explode(item.x, item.y, item.value, "cloud");
   if (item.kind === "lightningBomb") explode(item.x, item.y, item.value, "lightning");
   if (item.kind === "poisonBomb") explode(item.x, item.y, item.value, "poison");
+  if (item.kind === "fireBomb") explode(item.x, item.y, item.value, "fire");
   if (item.kind === "healBomb") explode(item.x, item.y, item.value, "heal");
   if (item.kind === "iceBomb") explode(item.x, item.y, item.value, "ice");
   if (item.kind === "zombieBomb") explode(item.x, item.y, item.value, "zombie");
   if (item.kind === "shieldBomb") shieldAllMonsters(item.x,item.y);
+  if (item.kind === "stoneBomb") explode(item.x, item.y, item.value, "stone");
+  if (item.kind === "nukeBomb") explode(item.x, item.y, item.value, "nuke");
+  if (item.kind === "enrageBomb") explode(item.x, item.y, item.value, "enrage");
+  if (item.kind === "blindBomb") explode(item.x, item.y, item.value, "blind");
 
   if (item.kind === "stoneScroll") stoneRandomMonster(item.x,item.y);
   if (item.kind === "hauntedScroll") hauntMonsters(item.x,item.y);
+  if (item.kind === "blessedScroll") blessHero(item.x,item.y);
   if (item.kind === "killRandomItem") killRandomTarget(item.x,item.y);
   if (item.kind === "healRandomItem") healRandomTarget(item.x,item.y);
   if (item.kind === "flashBang") flashBang(item.x,item.y);
@@ -79,6 +86,7 @@ function useItem(item, index) {
   if (item.kind === "chest") openChest(item.x, item.y);
 
   board[index] = spawnThing();
+  checkStoneLock();
 }
 
 function openChest(x,y) {
@@ -141,6 +149,65 @@ function stoneRandomMonster(x,y) {
   floatText(m.x,m.y,"STONE","#bbbbbb");
   burst(m.x,m.y,"#bbbbbb",16,4);
   sound("boom");
+}
+
+function blessHero(x,y) {
+  hero.blessed += 1;
+  flash = "Blessed curse!";
+  floatText(x,y,"BLESSED","#ffe65c");
+  sound("level");
+}
+
+function cleanMonster(m) {
+  m.poison = 0;
+  m.fire = 0;
+  m.stone = false;
+  m.frozenUntil = 0;
+  m.haunted = false;
+  m.blind = false;
+  m.rage = false;
+  m.shielded = false;
+  m.shieldBroken = false;
+  m.attacking = false;
+  m.target = null;
+  if (m.parts.originalColor && !m.zombie) {
+    m.parts.color = m.parts.originalColor;
+    m.parts.originalColor = null;
+  }
+  if (m.zombie) {
+    m.zombie = false;
+    if (m.parts.originalColor) {
+      m.parts.color = m.parts.originalColor;
+      m.parts.originalColor = null;
+    }
+  }
+}
+
+function cleanHero() {
+  hero.poison = 0;
+  hero.powerAtkTurns = 0;
+  hero.powerDefTurns = 0;
+  hero.powerAtkBonus = 0;
+  hero.powerDefBonus = 0;
+  hero.regenTicks = 0;
+  hero.regenPower = 0;
+  hero.vampire = 0;
+  hero.blessed = 0;
+  hero.rage = false;
+  blindUntil = 0;
+}
+
+function zombifyMonster(m) {
+  if (!m.zombie) {
+    m.hp = Math.max(1, Math.floor(m.hp * .5));
+    m.maxHp = Math.max(1, Math.floor(m.maxHp * .5));
+    m.atk = Math.max(1, Math.floor(m.atk * .5));
+  }
+  m.zombie = true;
+  m.target = null;
+  m.parts.originalColor = m.parts.originalColor || m.parts.color;
+  m.parts.color = "#6cff6c";
+  m.attacking = false;
 }
 
 function randomLivingTargets() {
@@ -276,6 +343,7 @@ function explode(x,y,power,kind) {
   shake = 20;
 
   if (kind === "lightning") sound("zap");
+  else if (kind === "clean") sound("item");
   else sound("boom");
 
   if (kind === "normal") {
@@ -304,6 +372,24 @@ function explode(x,y,power,kind) {
     }
     clouds = [];
     burst(x,y,"#ffffff",20,6);
+  }
+
+  if (kind === "clean") {
+    cleanHero();
+    flash = "Clean bomb!";
+    floatText(120,100,"CLEAN","#d8ecff");
+    for (const m of board) {
+      if (m.type !== "monster") continue;
+      cleanMonster(m);
+      floatText(m.x,m.y,"CLEAN","#d8ecff");
+    }
+    for (const k of board) {
+      if (k.type !== "knight") continue;
+      k.rage = false;
+      k.target = null;
+    }
+    clouds = [];
+    burst(x,y,"#d8ecff",18,5);
   }
 
   if (kind === "random") {
@@ -396,6 +482,20 @@ function explode(x,y,power,kind) {
     }
   }
 
+  if (kind === "fire") {
+    flash = `Fire bomb!`;
+    for (const m of board) {
+      if (m.type !== "monster") continue;
+      if (m.stone) {
+        floatText(m.x,m.y,"STONE","#bbbbbb");
+        continue;
+      }
+      m.fire += power;
+      floatText(m.x,m.y,`FIRE +${power}`,"#ff7a2f");
+      burst(m.x,m.y,"#ff7a2f",10,4);
+    }
+  }
+
   if (kind === "heal") {
     heal(hero, power, 120, 100);
     flash = `Healing bomb!`;
@@ -426,15 +526,65 @@ function explode(x,y,power,kind) {
     for (const m of board) {
       if (m.type !== "monster") continue;
       if (m.stone) continue;
-      m.zombie = true;
-      m.target = null;
-      m.parts.originalColor = m.parts.color;
-      m.parts.color = "#6cff6c";
-      m.attacking = false;
+      zombifyMonster(m);
       floatText(m.x,m.y,"ZOMBIE","#7aff7a");
       burst(m.x,m.y,"#7aff7a",12,4);
     }
   }
 
+  if (kind === "stone") {
+    flash = `Stone bomb!`;
+    for (const m of board) {
+      if (m.type !== "monster") continue;
+      m.stone = true;
+      m.attacking = false;
+      m.vx = 0;
+      m.vy = 0;
+      floatText(m.x,m.y,"STONE","#bbbbbb");
+    }
+  }
+
+  if (kind === "nuke") {
+    flash = `NUKE!`;
+    hero.hp = 1;
+    for (let i = board.length - 1; i >= 0; i--) {
+      const t = board[i];
+      floatText(t.x,t.y,t.type === "monster" ? "KO" : "NUKED","#ff4f4f");
+      board[i] = spawnThing();
+    }
+    burst(x,y,"#ff4f4f",30,9);
+  }
+
+  if (kind === "enrage") {
+    hero.rage = true;
+    flash = `Enrage bomb!`;
+    floatText(120,100,"RAGE","#ff3b3b");
+    for (const k of board) {
+      if (k.type === "knight") {
+        k.rage = true;
+        floatText(k.x,k.y,"RAGE","#ff3b3b");
+      }
+    }
+    for (const m of board) {
+      if (m.type !== "monster") continue;
+      m.rage = true;
+      m.parts.originalColor = m.parts.originalColor || m.parts.color;
+      m.parts.color = "#ff3b3b";
+      floatText(m.x,m.y,"RAGE","#ff3b3b");
+    }
+  }
+
+  if (kind === "blind") {
+    flash = `Blind bomb!`;
+    for (const m of board) {
+      if (m.type !== "monster") continue;
+      m.blind = true;
+      m.attacking = false;
+      floatText(m.x,m.y,"BLIND","#ffffff");
+    }
+    burst(x,y,"#ffffff",18,5);
+  }
+
   if (hero.hp <= 0) die();
+  checkStoneLock();
 }

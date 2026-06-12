@@ -8,7 +8,7 @@ function drawMonsterBodyOn(renderCtx, m, x, y, r, shakeAmount = 0) {
   renderCtx.translate(x + visualRand(-shakeAmount,shakeAmount), y + visualRand(-shakeAmount,shakeAmount));
   renderCtx.scale(r/75,r/75);
   if (m.ghost) renderCtx.globalAlpha = .68;
-  renderCtx.fillStyle = stone ? "#888888" : frozen ? "#72dfff" : p.color;
+  renderCtx.fillStyle = stone ? "#888888" : frozen ? "#72dfff" : m.rage ? "#ff3b3b" : p.color;
 
   if (p.head === "circle") {
     renderCtx.beginPath(); renderCtx.arc(0,0,70,0,Math.PI*2); renderCtx.fill();
@@ -41,13 +41,25 @@ function drawMonsterBodyOn(renderCtx, m, x, y, r, shakeAmount = 0) {
     renderCtx.strokeStyle = "white"; renderCtx.lineWidth = 4; renderCtx.stroke();
   }
 
-  renderCtx.fillStyle = "white";
-  for (let i=0;i<p.eyes;i++) {
-    const ex = (i-(p.eyes-1)/2)*25;
-    renderCtx.beginPath(); renderCtx.arc(ex,-20,11,0,Math.PI*2); renderCtx.fill();
-    renderCtx.fillStyle = m.zombie ? "#111" : "black";
-    renderCtx.beginPath(); renderCtx.arc(ex,-20,5,0,Math.PI*2); renderCtx.fill();
+  if (m.blind) {
+    renderCtx.strokeStyle = "white";
+    renderCtx.lineWidth = 8;
+    for (let i=0;i<p.eyes;i++) {
+      const ex = (i-(p.eyes-1)/2)*25;
+      renderCtx.beginPath();
+      renderCtx.moveTo(ex-12,-20);
+      renderCtx.lineTo(ex+12,-20);
+      renderCtx.stroke();
+    }
+  } else {
     renderCtx.fillStyle = "white";
+    for (let i=0;i<p.eyes;i++) {
+      const ex = (i-(p.eyes-1)/2)*25;
+      renderCtx.beginPath(); renderCtx.arc(ex,-20,11,0,Math.PI*2); renderCtx.fill();
+      renderCtx.fillStyle = m.zombie ? "#111" : "black";
+      renderCtx.beginPath(); renderCtx.arc(ex,-20,5,0,Math.PI*2); renderCtx.fill();
+      renderCtx.fillStyle = "white";
+    }
   }
 
   if (p.mouth === "smile") {
@@ -65,7 +77,7 @@ function drawMonsterBodyOn(renderCtx, m, x, y, r, shakeAmount = 0) {
     renderCtx.beginPath(); renderCtx.arc(0,25,25,0,Math.PI*2); renderCtx.fill();
   }
 
-  renderCtx.strokeStyle = stone ? "#666" : frozen ? "#72dfff" : p.color;
+  renderCtx.strokeStyle = stone ? "#666" : frozen ? "#72dfff" : m.rage ? "#ff3b3b" : p.color;
   renderCtx.lineWidth = 10;
 
   for (let i=0;i<p.arms;i++) {
@@ -107,7 +119,10 @@ function drawMonster(m) {
 
   if (m.shielded && !m.shieldBroken) {
     const shieldSize = r * 1.55;
-    ctx.drawImage(icons.monsterShield, m.x + r * .45 - shieldSize * .5, m.y - shieldSize * .25, shieldSize, shieldSize);
+    if (!icons.monsterShield && typeof makeIcon === "function") icons.monsterShield = makeIcon("monsterShield");
+    if (icons.monsterShield) {
+      ctx.drawImage(icons.monsterShield, m.x + r * .45 - shieldSize * .5, m.y - shieldSize * .25, shieldSize, shieldSize);
+    }
   }
 
   ctx.save();
@@ -130,27 +145,82 @@ function drawMonster(m) {
     ctx.fillRect(bx,by+barH+3,barW*Math.min(1,m.poison/30),5);
   }
 
-  if (frozen) {
-    ctx.fillStyle = "#72dfff";
-    ctx.fillRect(bx,by+barH+10,barW*Math.max(0,(m.frozenUntil-now)/4000),5);
+  if (m.fire > 0) {
+    ctx.fillStyle = "#ff7a2f";
+    ctx.fillRect(bx,by+barH+10,barW*Math.min(1,m.fire/30),5);
   }
 
-  if (stone) {
-    ctx.fillStyle = "#bbbbbb";
-    ctx.fillRect(bx,by+barH+17,barW,5);
+  if (frozen) {
+    ctx.fillStyle = "#72dfff";
+    ctx.fillRect(bx,by+barH+17,barW*Math.max(0,(m.frozenUntil-now)/4000),5);
   }
 
   ctx.textAlign = "center";
   ctx.textBaseline = "bottom";
   ctx.font = "bold 14px system-ui";
   ctx.fillStyle = "white";
-  ctx.fillText(`${stone ? "STONE " : ""}${m.shielded && !m.shieldBroken ? "SHIELDED " : ""}${m.ghost ? "GHOST " : ""}${m.haunted ? "HAUNTED " : ""}${m.zombie ? "ZOMBIE " : ""}${m.elite ? "ELITE " : ""}ATK ${m.atk}`,m.x,by-4);
+  ctx.fillText(`${stone ? "STONE " : ""}${m.rage ? "RAGE " : ""}${m.blind ? "BLIND " : ""}${m.shielded && !m.shieldBroken ? "SHIELDED " : ""}${m.ghost ? "GHOST " : ""}${m.haunted ? "HAUNTED " : ""}${m.zombie ? "ZOMBIE " : ""}${m.elite ? "ELITE " : ""}ATK ${m.atk}`,m.x,by-4);
 
   if (m.attacking) {
     ctx.fillStyle = "#ff6666";
     ctx.fillText("attacking...",m.x,m.y+m.r+28);
   }
 
+  ctx.restore();
+}
+
+function drawKnightOn(renderCtx, k) {
+  renderCtx.save();
+  renderCtx.translate(k.x, k.y);
+  renderCtx.scale(k.r/55, k.r/55);
+
+  renderCtx.fillStyle = k.rage ? "#ff3b3b" : "#cfd6e6";
+  renderCtx.strokeStyle = "white";
+  renderCtx.lineWidth = 5;
+  renderCtx.beginPath();
+  renderCtx.roundRect(-34,-40,68,80,12);
+  renderCtx.fill();
+  renderCtx.stroke();
+
+  renderCtx.fillStyle = "#6aa8ff";
+  renderCtx.beginPath();
+  renderCtx.roundRect(-28,-62,56,34,10);
+  renderCtx.fill();
+  renderCtx.stroke();
+
+  renderCtx.fillStyle = "#111";
+  renderCtx.fillRect(-18,-48,36,8);
+
+  renderCtx.strokeStyle = "#ffd84a";
+  renderCtx.lineWidth = 8;
+  renderCtx.beginPath();
+  renderCtx.moveTo(34,-6);
+  renderCtx.lineTo(70,-42);
+  renderCtx.stroke();
+
+  renderCtx.fillStyle = "#9b5a25";
+  renderCtx.beginPath();
+  renderCtx.moveTo(-36,-6);
+  renderCtx.lineTo(-62,10);
+  renderCtx.lineTo(-48,48);
+  renderCtx.lineTo(-24,26);
+  renderCtx.closePath();
+  renderCtx.fill();
+  renderCtx.strokeStyle = "#d69a55";
+  renderCtx.stroke();
+
+  renderCtx.restore();
+}
+
+function drawKnight(k) {
+  drawKnightOn(ctx, k);
+
+  ctx.save();
+  ctx.textAlign = "center";
+  ctx.textBaseline = "bottom";
+  ctx.font = "bold 14px system-ui";
+  ctx.fillStyle = "#d8ecff";
+  ctx.fillText(k.target ? "KNIGHT" : "ALLY", k.x, k.y - k.r - 14);
   ctx.restore();
 }
 
@@ -198,7 +268,15 @@ function drawItem(item) {
   ctx.save();
 
   const size = item.r*2.1;
-  ctx.drawImage(icons[item.kind], item.x-size/2, item.y-size/2, size, size);
+  if (!icons[item.kind] && typeof makeIcon === "function") icons[item.kind] = makeIcon(item.kind);
+  if (icons[item.kind]) {
+    ctx.drawImage(icons[item.kind], item.x-size/2, item.y-size/2, size, size);
+  } else {
+    ctx.fillStyle = "#d8ecff";
+    ctx.beginPath();
+    ctx.arc(item.x,item.y,item.r,0,Math.PI*2);
+    ctx.fill();
+  }
 
   ctx.textAlign = "center";
   ctx.textBaseline = "top";
@@ -214,18 +292,25 @@ function drawItem(item) {
   if (item.kind === "poison") ctx.fillText(`POISON +${item.value}`, item.x, item.y+item.r+10);
   if (item.kind === "bomb") ctx.fillText(`BOMB ${item.value}`, item.x, item.y+item.r+10);
   if (item.kind === "clearBomb") ctx.fillText(`CLEAR BOMB`, item.x, item.y+item.r+10);
+  if (item.kind === "cleanBomb") ctx.fillText(`CLEAN BOMB`, item.x, item.y+item.r+10);
   if (item.kind === "randomBomb") ctx.fillText(`RANDOM BOMB`, item.x, item.y+item.r+10);
   if (item.kind === "weakenBomb") ctx.fillText(`WEAKEN`, item.x, item.y+item.r+10);
   if (item.kind === "strengthBomb") ctx.fillText(`STRENGTH`, item.x, item.y+item.r+10);
   if (item.kind === "cloudBomb") ctx.fillText(`CLOUDY BOMB`, item.x, item.y+item.r+10);
   if (item.kind === "lightningBomb") ctx.fillText(`LIGHTNING ${item.value}`, item.x, item.y+item.r+10);
   if (item.kind === "poisonBomb") ctx.fillText(`POISON BOMB`, item.x, item.y+item.r+10);
+  if (item.kind === "fireBomb") ctx.fillText(`FIRE BOMB`, item.x, item.y+item.r+10);
   if (item.kind === "healBomb") ctx.fillText(`HEAL BOMB`, item.x, item.y+item.r+10);
   if (item.kind === "iceBomb") ctx.fillText(`ICE BOMB`, item.x, item.y+item.r+10);
   if (item.kind === "zombieBomb") ctx.fillText(`ZOMBIE BOMB`, item.x, item.y+item.r+10);
   if (item.kind === "shieldBomb") ctx.fillText(`SHIELD BOMB`, item.x, item.y+item.r+10);
+  if (item.kind === "stoneBomb") ctx.fillText(`STONE BOMB`, item.x, item.y+item.r+10);
+  if (item.kind === "nukeBomb") ctx.fillText(`NUKE`, item.x, item.y+item.r+10);
+  if (item.kind === "enrageBomb") ctx.fillText(`ENRAGE`, item.x, item.y+item.r+10);
+  if (item.kind === "blindBomb") ctx.fillText(`BLIND BOMB`, item.x, item.y+item.r+10);
   if (item.kind === "stoneScroll") ctx.fillText(`STONE SCROLL`, item.x, item.y+item.r+10);
   if (item.kind === "hauntedScroll") ctx.fillText(`CURSE SCROLL`, item.x, item.y+item.r+10);
+  if (item.kind === "blessedScroll") ctx.fillText(`BLESS CURSE`, item.x, item.y+item.r+10);
   if (item.kind === "killRandomItem") ctx.fillText(`KILL RANDOM`, item.x, item.y+item.r+10);
   if (item.kind === "healRandomItem") ctx.fillText(`HEAL RANDOM`, item.x, item.y+item.r+10);
   if (item.kind === "flashBang") ctx.fillText(`FLASH BANG`, item.x, item.y+item.r+10);

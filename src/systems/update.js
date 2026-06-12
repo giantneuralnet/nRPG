@@ -6,7 +6,7 @@ function resolveOverlaps() {
       if (
         A.type === "monster" &&
         B.type === "monster" &&
-        ((A.zombie && A.target === B) || (B.zombie && B.target === A))
+        (((A.zombie || A.rage) && A.target === B) || ((B.zombie || B.rage) && B.target === A))
       ) {
         continue;
       }
@@ -60,7 +60,7 @@ function update() {
 
   if (now - lastPoisonTick >= 2000) {
     lastPoisonTick = now;
-    poisonTick();
+    statusTick();
   }
 
   for (const t of board) {
@@ -91,7 +91,7 @@ function update() {
       t.vx += Math.sin(t.wander)*.04;
       t.vy += Math.cos(t.wander*1.4)*.04;
 
-      const speed = (t.zombie ? 2.2 : 1) + hero.level*.035 + kills*.005;
+      const speed = (t.zombie || t.rage ? 2.2 : 1) + hero.level*.035 + kills*.005;
       t.vx = Math.max(-speed, Math.min(speed, t.vx));
       t.vy = Math.max(-speed, Math.min(speed, t.vy));
 
@@ -101,8 +101,21 @@ function update() {
       if (t.x < t.r+20 || t.x > W-t.r-20) t.vx *= -1;
       if (t.y < 160 || t.y > H-t.r-85) t.vy *= -1;
     }
+
+    if (t.type === "knight") {
+      const speed = 1.8 + hero.level*.02;
+      t.vx = Math.max(-speed, Math.min(speed, t.vx));
+      t.vy = Math.max(-speed, Math.min(speed, t.vy));
+      t.x += t.vx;
+      t.y += t.vy;
+      if (t.x < t.r+20 || t.x > W-t.r-20) t.vx *= -1;
+      if (t.y < 160 || t.y > H-t.r-85) t.vy *= -1;
+    }
   }
 
+  knightFights();
   zombieFights();
+  removeDeadKnights();
   resolveOverlaps();
+  checkStoneLock();
 }

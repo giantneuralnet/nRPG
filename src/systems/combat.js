@@ -1,4 +1,4 @@
-function poisonTick() {
+function statusTick() {
   if (gameState !== "playing") return;
 
   if (hero.regenTicks > 0) {
@@ -10,16 +10,24 @@ function poisonTick() {
 
   for (let i = board.length - 1; i >= 0; i--) {
     const m = board[i];
-    if (m.type !== "monster" || m.poison <= 0) continue;
+    if (m.type !== "monster") continue;
 
-    if (m.stone) {
+    if (m.stone && (m.poison > 0 || m.fire > 0)) {
       floatText(m.x, m.y, "STONE", "#bbbbbb");
       continue;
     }
 
-    const dmg = m.poison;
-    m.poison = Math.max(0, m.poison - 1);
-    damage(m, dmg, m.x, m.y, "#7cff4f", true);
+    if (m.poison > 0) {
+      const dmg = m.poison;
+      m.poison = Math.max(0, m.poison - 1);
+      damage(m, dmg, m.x, m.y, "#7cff4f", true);
+    }
+
+    if (m.fire > 0 && m.hp > 0) {
+      const dmg = m.fire + 2;
+      m.fire = Math.max(0, m.fire - 1);
+      damage(m, dmg, m.x, m.y, "#ff7a2f", true);
+    }
 
     if (m.hp <= 0) killMonster(i, true);
   }
@@ -31,10 +39,11 @@ function attackMonster(m,index) {
   const now = performance.now();
   if (now < m.attackCooldownUntil) return;
 
-  m.attackCooldownUntil = now + 450;
+  m.attackCooldownUntil = now + 260;
 
   const dmg = getHeroAtk();
   const dealt = damage(m,dmg,m.x,m.y);
+  setKnightTargets(m);
   spendPowerTurn();
   flash = `Monster -${dealt}`;
 
@@ -79,12 +88,14 @@ function attackMonster(m,index) {
       return;
     }
 
-    const dmg = Math.max(1, m.atk - getHeroDef());
-    damage(hero,dmg,120,100);
-    flash = `Hero -${dmg}`;
+    const target = pickCounterTarget(m);
+    const dmg = Math.max(1, m.atk - (target === hero ? getHeroDef() : 0));
+    damage(target,dmg,target === hero ? 120 : target.x,target === hero ? 100 : target.y);
+    flash = target === hero ? `Hero -${dmg}` : `Wild counter!`;
     m.attacking = false;
 
     if (hero.hp <= 0) die();
+    removeDeadKnights();
   }, 500);
 }
 
@@ -105,6 +116,12 @@ function killMonster(index, giveXp = true) {
   sound("dead");
   floatText(dead.x, dead.y, "KO", "#ff4f4f");
   burst(dead.x,dead.y,"#ff4f4f",18,6);
+
+  if (hero.blessed > 0) {
+    const amount = Math.max(1, Math.floor(hero.maxHp * .12));
+    hero.hp = Math.min(hero.maxHp, hero.hp + amount);
+    floatText(120,100,"BLESS +" + amount,"#ffe65c");
+  }
 
   if (giveXp) {
     hero.xp += dead.elite ? 3 : 1;
@@ -138,6 +155,8 @@ function makeGhost(dead) {
     target: dead.zombie ? null : dead.target,
     ghost: true,
     haunted: false,
+    blind: dead.blind,
+    rage: dead.rage,
     attacking: false,
     vx: (rng() - .5) * 2,
     vy: (rng() - .5) * 2,
@@ -168,18 +187,39 @@ function die() {
   sound("dead");
 }
 
+function checkStoneLock() {
+  if (gameState !== "playing") return;
+  const monsters = board.filter(t => t.type === "monster");
+  const hasItems = board.some(t => t.type === "item");
+  if (monsters.length > 0 && !hasItems && monsters.every(m => m.stone)) {
+    hero.alive = false;
+    gameState = "dead";
+    flash = "STONE LOCK";
+    sound("dead");
+  }
+}
+
 function zombieFights() {
   const now = performance.now();
   if (now < blindUntil) return;
 
   for (const z of board) {
-    if (z.type !== "monster" || !z.zombie || now < z.fightCooldownUntil || z.stone) continue;
+    if (z.type !== "monster" || !(z.zombie || z.rage) || now < z.fightCooldownUntil || z.stone) continue;
 
     let target = null;
     let best = Infinity;
 
     for (const m of board) {
-      if (m.type !== "monster" || m.zombie || now < m.frozenUntil || m.stone) continue;
+      if (z.rage && m.type === "knight") {
+        const d = dist(z.x,z.y,m.x,m.y);
+        if (d < best) {
+          best = d;
+          target = m;
+        }
+        continue;
+      }
+
+      if (m.type !== "monster" || m === z || (!z.rage && m.zombie) || now < m.frozenUntil || m.stone) continue;
 
       const d = dist(z.x,z.y,m.x,m.y);
       if (d < best) {
@@ -204,10 +244,10 @@ function zombieFights() {
       target.fightCooldownUntil = now + 650;
 
       const zdmg = z.atk;
-      const mdmg = target.atk;
+      const mdmg = target.type === "monster" ? target.atk : 0;
 
       damage(target, zdmg, target.x, target.y, "#7aff7a");
-      damage(z, mdmg, z.x, z.y, "#ff6b6b");
+      if (mdmg > 0) damage(z, mdmg, z.x, z.y, "#ff6b6b");
     }
   }
 
@@ -215,6 +255,76 @@ function zombieFights() {
     const m = board[i];
     if (m.type === "monster" && m.hp <= 0) {
       killMonster(i, m.zombie ? false : true);
+    }
+  }
+}
+
+function setKnightTargets(target) {
+  for (const k of board) {
+    if (k.type === "knight") k.target = target;
+  }
+}
+
+function pickCounterTarget(attacker) {
+  if (!attacker.blind) return hero;
+  const targets = [hero, ...board.filter(t => t !== attacker && (t.type === "monster" || t.type === "knight"))];
+  return pick(targets);
+}
+
+function removeDeadKnights() {
+  for (let i = board.length - 1; i >= 0; i--) {
+    const t = board[i];
+    if (t.type === "knight" && t.hp <= 0) {
+      floatText(t.x,t.y,"DOWN","#d8ecff");
+      board[i] = spawnThing();
+    }
+  }
+}
+
+function knightFights() {
+  const now = performance.now();
+  for (const k of board) {
+    if (k.type !== "knight") continue;
+    if (k.rage && (!k.target || k.target.hp <= 0 || !board.includes(k.target))) {
+      let nearest = null;
+      let best = Infinity;
+      for (const m of board) {
+        if (m.type !== "monster" || m.stone) continue;
+        const d = dist(k.x,k.y,m.x,m.y);
+        if (d < best) {
+          best = d;
+          nearest = m;
+        }
+      }
+      k.target = nearest;
+    }
+    if (!k.target || k.target.hp <= 0 || !board.includes(k.target)) {
+      k.target = null;
+      continue;
+    }
+
+    const target = k.target;
+    const dx = target.x - k.x;
+    const dy = target.y - k.y;
+    const d = Math.max(1, Math.hypot(dx,dy));
+    k.vx += dx / d * .58;
+    k.vy += dy / d * .58;
+    k.vx = Math.max(-2.8, Math.min(2.8, k.vx));
+    k.vy = Math.max(-2.8, Math.min(2.8, k.vy));
+    k.x += k.vx;
+    k.y += k.vy;
+
+    if (d < k.r + target.r + 42 && now >= k.attackCooldownUntil) {
+      k.attackCooldownUntil = now + 720;
+      const dealt = damage(target, k.atk, target.x, target.y, "#d8ecff");
+      floatText(k.x,k.y,"KNIGHT","#d8ecff");
+      if (target.hp <= 0) {
+        const index = board.indexOf(target);
+        if (index >= 0) killMonster(index, true);
+        k.target = null;
+      } else if (dealt <= 0) {
+        k.target = null;
+      }
     }
   }
 }

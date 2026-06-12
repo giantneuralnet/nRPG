@@ -7,15 +7,21 @@ function drawBoom() {
 
   if (boom.kind === "normal") ctx.strokeStyle = "rgba(255,220,80,.85)";
   if (boom.kind === "clear") ctx.strokeStyle = "rgba(255,255,255,.85)";
+  if (boom.kind === "clean") ctx.strokeStyle = "rgba(216,236,255,.85)";
   if (boom.kind === "random") ctx.strokeStyle = "rgba(200,100,255,.85)";
   if (boom.kind === "weaken") ctx.strokeStyle = "rgba(180,180,180,.85)";
   if (boom.kind === "strength") ctx.strokeStyle = "rgba(255,160,60,.85)";
   if (boom.kind === "cloud") ctx.strokeStyle = "rgba(220,230,255,.85)";
   if (boom.kind === "lightning") ctx.strokeStyle = "rgba(255,245,100,.9)";
   if (boom.kind === "poison") ctx.strokeStyle = "rgba(120,255,90,.85)";
+  if (boom.kind === "fire") ctx.strokeStyle = "rgba(255,120,40,.9)";
   if (boom.kind === "heal") ctx.strokeStyle = "rgba(255,100,150,.85)";
   if (boom.kind === "ice") ctx.strokeStyle = "rgba(100,220,255,.9)";
   if (boom.kind === "zombie") ctx.strokeStyle = "rgba(120,255,120,.9)";
+  if (boom.kind === "stone") ctx.strokeStyle = "rgba(190,190,190,.9)";
+  if (boom.kind === "nuke") ctx.strokeStyle = "rgba(255,60,60,.95)";
+  if (boom.kind === "enrage") ctx.strokeStyle = "rgba(255,40,40,.9)";
+  if (boom.kind === "blind") ctx.strokeStyle = "rgba(255,255,255,.9)";
 
   ctx.lineWidth = 7;
   ctx.beginPath();

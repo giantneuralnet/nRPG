@@ -26,11 +26,14 @@ function findFreePosition(radius) {
 function spawnThing(allowExileReturn = true) {
   if (allowExileReturn && exileQueue.length > 0 && rng() < .28) return popExiledMonster();
 
-  const isMonster = rng() < .56;
-  const r = Math.min(W,H) * (isMonster ? .076 : .062);
+  const roll = rng();
+  const isMonster = roll < .52;
+  const isKnight = roll >= .52 && roll < .60;
+  const r = Math.min(W,H) * (isMonster ? .076 : isKnight ? .068 : .062);
   const p = findFreePosition(r);
 
   if (isMonster) return makeMonster(p.x, -120 - rng()*200, p.y, r);
+  if (isKnight) return makeKnight(p.x, -120 - rng()*200, p.y, r);
   return makeItem(p.x, -120 - rng()*200, p.y, r);
 }
 
@@ -103,6 +106,7 @@ function makeMonster(x,y,targetY,r) {
     hp,maxHp:hp,
     atk,
     poison:0,
+    fire:0,
     stone:false,
     frozenUntil:0,
     attackCooldownUntil:0,
@@ -114,6 +118,8 @@ function makeMonster(x,y,targetY,r) {
     zombie:false,
     ghost:false,
     haunted:false,
+    blind:false,
+    rage:false,
     attacking:false,
     parts:{
       color:pick(colors),
@@ -128,12 +134,28 @@ function makeMonster(x,y,targetY,r) {
   };
 }
 
+function makeKnight(x,y,targetY,r) {
+  return {
+    type:"knight",
+    x,y,targetY,r,
+    vx:(rng()-.5)*1.3,
+    vy:0,
+    hp:70,
+    maxHp:70,
+    atk:12,
+    attackCooldownUntil:0,
+    target:null,
+    rage:false
+  };
+}
+
 function makeItem(x,y,targetY,r) {
   const kind = pick([
     "sword","shield","potion","potion","poison",
-    "bomb","clearBomb","randomBomb","weakenBomb","strengthBomb","shieldBomb",
-    "cloudBomb","poisonBomb","healBomb","lightningBomb","iceBomb","zombieBomb",
-    "powerPotion","regenPotion","vampirePotion","stoneScroll","hauntedScroll",
+    "bomb","clearBomb","cleanBomb","randomBomb","weakenBomb","strengthBomb","shieldBomb",
+    "cloudBomb","poisonBomb","fireBomb","healBomb","lightningBomb","iceBomb","zombieBomb",
+    "stoneBomb","nukeBomb","enrageBomb","blindBomb",
+    "powerPotion","regenPotion","vampirePotion","stoneScroll","hauntedScroll","blessedScroll",
     "killRandomItem","healRandomItem","flashBang","exileItem","swapHealthItem","door","chest","chest"
   ]);
 
@@ -157,17 +179,24 @@ function makeItem(x,y,targetY,r) {
       kind === "bomb" ? rand(25,45) :
       kind === "lightningBomb" ? rand(35,60) :
       kind === "poisonBomb" ? rand(4,8) :
+      kind === "fireBomb" ? rand(5,9) :
       kind === "healBomb" ? rand(25,50) :
       kind === "randomBomb" ? 0 :
       kind === "clearBomb" ? 0 :
+      kind === "cleanBomb" ? 0 :
       kind === "weakenBomb" ? rand(2,5) :
       kind === "strengthBomb" ? rand(2,5) :
       kind === "cloudBomb" ? 0 :
       kind === "iceBomb" ? 4 :
       kind === "zombieBomb" ? 0 :
       kind === "shieldBomb" ? 0 :
+      kind === "stoneBomb" ? 0 :
+      kind === "nukeBomb" ? 0 :
+      kind === "enrageBomb" ? 0 :
+      kind === "blindBomb" ? 0 :
       kind === "stoneScroll" ? 0 :
       kind === "hauntedScroll" ? 0 :
+      kind === "blessedScroll" ? 0 :
       kind === "killRandomItem" ? 0 :
       kind === "healRandomItem" ? 0 :
       kind === "flashBang" ? 0 :

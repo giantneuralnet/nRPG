@@ -23,18 +23,25 @@ const itemInfo = [
   ["vampirePotion","Vampire potion","Gain life steal on attacks."],
   ["bomb","Bomb","Damages you and all monsters."],
   ["clearBomb","Clear bomb","Clears the room without kills and removes clouds."],
+  ["cleanBomb","Clean bomb","Removes status effects from you and monsters."],
   ["randomBomb","Random bomb","Randomizes hero and monster HP."],
   ["weakenBomb","Weaken bomb","Lowers everyone’s attack."],
   ["strengthBomb","Strength bomb","Raises everyone’s attack."],
   ["cloudBomb","Cloud bomb","Creates huge white clouds."],
   ["poisonBomb","Poison bomb","Poisons all monsters and hurts you."],
+  ["fireBomb","Fire bomb","Sets monsters on fire for damage over time."],
   ["healBomb","Heal bomb","Heals you and monsters."],
   ["lightningBomb","Lightning bomb","Damages all monsters and you."],
   ["iceBomb","Ice bomb","Freezes monsters temporarily."],
   ["zombieBomb","Zombie bomb","Turns monsters into zombies."],
   ["shieldBomb","Shield all bomb","Gives every current monster a fresh shield."],
+  ["stoneBomb","Stone bomb","Turns every current monster into stone."],
+  ["nukeBomb","Nuke bomb","Replaces the whole screen and leaves you at 1 HP."],
+  ["enrageBomb","Enrage bomb","Makes monsters attack nearby targets and turn red."],
+  ["blindBomb","Blind bomb","Blinds monsters so counters hit random targets."],
   ["stoneScroll","Stone scroll","Makes one monster permanently stone."],
   ["hauntedScroll","Curse scroll","Haunts monsters so they rise once as ghosts."],
+  ["blessedScroll","Blessed curse","Heals you when you kill a monster."],
   ["killRandomItem","Kill random","Kills a random monster or backfires on you."],
   ["healRandomItem","Heal random","Fully heals a random target."],
   ["flashBang","Flash bang","Blinds the screen and stops monster fights for 5 seconds."],
@@ -51,8 +58,12 @@ const monsterInfo = [
   ["ghostZombie","Ghost zombie","Transparent zombie resurrected by a haunt."],
   ["haunted","Haunted","Purple border; rises as a ghost when killed."],
   ["stone","Stone","Cannot move or take damage."],
+  ["burning","Burning","Takes periodic fire damage."],
+  ["blind","Blind","Closed eyes; counters random targets."],
+  ["rage","Rage","Turns red and attacks nearby monsters."],
   ["frozen","Frozen","Cannot counter while frozen."],
   ["poisoned","Poisoned","Takes periodic poison damage."],
+  ["knight","Knight","Ally that attacks the monster you target."],
   ["door","Door","Switches to one of the three remembered rooms."]
 ];
 
@@ -136,13 +147,15 @@ function infoMonster(kind) {
   const m = {
     type:"monster",
     x:50,y:50,targetY:50,r:26,
-    hp:10,maxHp:10,atk:1,poison:0,stone:false,frozenUntil:0,
+    hp:10,maxHp:10,atk:1,poison:0,fire:0,stone:false,frozenUntil:0,
     elite:kind === "elite",
     shielded:kind === "shielded",
     shieldBroken:false,
     zombie:kind === "zombie" || kind === "ghostZombie",
     ghost:kind === "ghostZombie",
     haunted:kind === "haunted",
+    blind:kind === "blind",
+    rage:kind === "rage",
     attacking:false,
     parts:{
       color:kind === "zombie" || kind === "ghostZombie" ? "#6cff6c" : "#ff7070",
@@ -157,6 +170,7 @@ function infoMonster(kind) {
   if (kind === "stone") m.stone = true;
   if (kind === "frozen") m.frozenUntil = performance.now() + 10000;
   if (kind === "poisoned") m.poison = 12;
+  if (kind === "burning") m.fire = 12;
   return m;
 }
 
@@ -166,6 +180,10 @@ function makeMonsterInfoIcon(kind) {
   const g = c.getContext("2d");
   if (kind === "door") {
     drawDoorOn(g, { x:50, y:48, r:24, room:2 });
+    return c;
+  }
+  if (kind === "knight") {
+    drawKnightOn(g, { x:50, y:54, r:28, target:null });
     return c;
   }
 
@@ -178,6 +196,7 @@ function makeMonsterInfoIcon(kind) {
     g.arc(50,50,m.r*1.35,0,Math.PI*2);
     g.stroke();
   }
+  if (!icons.monsterShield && typeof makeIcon === "function") icons.monsterShield = makeIcon("monsterShield");
   if (m.shielded && !m.shieldBroken && icons.monsterShield) {
     const shieldSize = m.r * 1.55;
     g.drawImage(icons.monsterShield, 50 + m.r * .45 - shieldSize * .5, 50 - shieldSize * .25, shieldSize, shieldSize);
