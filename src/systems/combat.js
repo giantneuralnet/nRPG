@@ -237,7 +237,7 @@ function zombieFights() {
     let best = Infinity;
 
     for (const m of board) {
-      if (m.type !== "monster" || m === z || m.team === z.team || (!z.rage && m.zombie) || now < m.frozenUntil || m.stone) continue;
+      if (m.type !== "monster" || m === z || m.team === "hero" || (!z.rage && m.zombie) || now < m.frozenUntil || m.stone) continue;
 
       const d = dist(z.x,z.y,m.x,m.y);
       if (d < best) {
@@ -257,7 +257,7 @@ function zombieFights() {
     z.vx += dx / d * .62;
     z.vy += dy / d * .62;
 
-    if (best < z.r + target.r + 70) {
+    if (best < z.r + target.r + 115) {
       z.fightCooldownUntil = now + 650;
       target.fightCooldownUntil = now + 650;
 
@@ -314,14 +314,14 @@ function allyFights() {
     const dx = target.x - k.x;
     const dy = target.y - k.y;
     const d = Math.max(1, Math.hypot(dx,dy));
-    k.vx += dx / d * .58;
-    k.vy += dy / d * .58;
-    k.vx = Math.max(-2.8, Math.min(2.8, k.vx));
-    k.vy = Math.max(-2.8, Math.min(2.8, k.vy));
+    k.vx += dx / d * .78;
+    k.vy += dy / d * .78;
+    k.vx = Math.max(-3.6, Math.min(3.6, k.vx));
+    k.vy = Math.max(-3.6, Math.min(3.6, k.vy));
     k.x += k.vx;
     k.y += k.vy;
 
-    if (d < k.r + target.r + 42 && now >= k.attackCooldownUntil) {
+    if (d < k.r + target.r + 115 && now >= k.attackCooldownUntil) {
       k.attackCooldownUntil = now + 720;
       target.fightCooldownUntil = now + 720;
       const dealt = damage(target, k.atk, target.x, target.y, "#d8ecff");
