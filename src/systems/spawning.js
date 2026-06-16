@@ -168,6 +168,7 @@ function makeMonster(x,y,targetY,r) {
     frozenUntil:0,
     attackCooldownUntil:0,
     fightCooldownUntil:0,
+    rageAttackCooldownUntil:0,
     target:null,
     team:"enemy",
     elite,

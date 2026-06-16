@@ -223,6 +223,7 @@ function makeGhost(dead) {
     stone: dead.stone,
     attackCooldownUntil: 0,
     fightCooldownUntil: 0,
+    rageAttackCooldownUntil: 0,
     target: dead.zombie ? null : dead.target,
     ghost: true,
     haunted: false,
@@ -277,6 +278,22 @@ function zombieFights() {
 
   for (const z of board) {
     if (z.type !== "monster" || !(z.zombie || z.rage) || now < z.fightCooldownUntil || z.stone) continue;
+
+    if (
+      z.rage &&
+      z.team !== "hero" &&
+      z.hp > 0 &&
+      now >= (z.rageAttackCooldownUntil || 0) &&
+      now >= z.frozenUntil
+    ) {
+      z.rageAttackCooldownUntil = now + 1000;
+      if (rng() < .35) {
+        const dmg = Math.max(1, z.atk - getHeroDef());
+        damage(hero,dmg,120,100,"#ff3b3b");
+        flash = `Rage hit! Hero -${dmg}`;
+        if (hero.hp <= 0) die();
+      }
+    }
 
     let target = null;
     let best = Infinity;
