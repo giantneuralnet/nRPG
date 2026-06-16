@@ -306,6 +306,41 @@ function exileMonsters(x,y) {
   sound(count ? "zap" : "item");
 }
 
+function randomizeCloudCoveredPositions() {
+  const movable = board.filter(t => t.type === "item" || t.type === "monster");
+  const fixed = board.filter(t => t.type !== "item" && t.type !== "monster");
+  const placed = fixed.map(t => ({ x:t.x, y:t.y, r:t.r }));
+  const top = 155;
+  const bottom = Math.max(top + 100, H - 95);
+
+  for (const t of movable) {
+    let position = null;
+    for (let tries = 0; tries < 100; tries++) {
+      const x = t.r + 35 + rng() * Math.max(50, (W - t.r * 2 - 70));
+      const y = top + rng() * Math.max(50, (bottom - top));
+      if (placed.every(other => dist(x,y,other.x,other.y) >= t.r + other.r + 58)) {
+        position = { x, y };
+        break;
+      }
+    }
+
+    if (!position) {
+      position = {
+        x: t.r + 35 + rng() * Math.max(50, (W - t.r * 2 - 70)),
+        y: top + rng() * Math.max(50, (bottom - top))
+      };
+    }
+
+    t.x = position.x;
+    t.y = position.y;
+    t.targetY = position.y;
+    t.vx = 0;
+    t.vy = 0;
+    if (t.type === "monster") t.attacking = false;
+    placed.push({ x:t.x, y:t.y, r:t.r });
+  }
+}
+
 function swapRandomHealth(x,y) {
   const targets = randomLivingTargets();
   if (targets.length < 2) {
@@ -447,6 +482,7 @@ function explode(x,y,power,kind) {
     flash = `Cloudy bomb!`;
     const hits = rand(3,9);
     clouds = [{ hits, maxHits: hits, lastTap: 0 }];
+    randomizeCloudCoveredPositions();
     burst(x,y,"#d8ecff",16,5);
   }
 

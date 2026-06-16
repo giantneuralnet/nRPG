@@ -76,9 +76,12 @@ function drawClouds() {
   ctx.lineWidth = 4;
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
+  ctx.font = `bold ${Math.min(28, Math.max(20, W * .055))}px system-ui`;
+  ctx.strokeText("Tap to clear clouds", W/2, H/2 - 46);
+  ctx.fillText("Tap to clear clouds", W/2, H/2 - 46);
   ctx.font = "bold 42px system-ui";
-  ctx.strokeText(`${cloud.hits}`, W/2, H/2);
-  ctx.fillText(`${cloud.hits}`, W/2, H/2);
+  ctx.strokeText(`${cloud.hits}`, W/2, H/2 + 8);
+  ctx.fillText(`${cloud.hits}`, W/2, H/2 + 8);
   ctx.restore();
 }
 
