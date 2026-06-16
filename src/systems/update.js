@@ -41,9 +41,10 @@ function update() {
   }
 
   if (shockwaves) {
+    const now = performance.now();
     for (let i = shockwaves.length - 1; i >= 0; i--) {
-      shockwaves[i].t--;
-      if (shockwaves[i].t <= 0) shockwaves.splice(i,1);
+      const wave = shockwaves[i];
+      if (now >= wave.startAt + wave.life) shockwaves.splice(i,1);
     }
   }
 

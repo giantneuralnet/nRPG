@@ -287,35 +287,36 @@ function makeGhost(dead) {
   };
 }
 
-function shockwavePulse(source) {
-  if (!source) return;
+function shockwavePulse(source, cascade = null) {
+  if (!source || source.type !== "monster" || source.hp <= 0) return;
 
-  const queue = [source];
-  let pulses = 0;
-  const maxPulses = 18;
+  const chain = cascade || { pulses: 0, maxPulses: 18 };
+  if (chain.pulses >= chain.maxPulses) return;
+  chain.pulses++;
 
-  while (queue.length && pulses < maxPulses) {
-    const emitter = queue.shift();
-    if (!emitter || emitter.type !== "monster" || emitter.hp <= 0) continue;
+  const radius = source.r * 3.1 + 120;
+  const life = 340;
+  const waveSpeed = radius / life;
+  const pulseDamage = Math.max(1, Math.floor(source.atk * .65));
+  const startAt = performance.now();
+  floatText(source.x,source.y,"SHOCK","#72dfff");
+  shockwaves.push({ x:source.x, y:source.y, r:radius, startAt, life });
+  burst(source.x,source.y,"#72dfff",12,5);
 
-    pulses++;
-    const radius = emitter.r * 3.1 + 120;
-    const pulseDamage = Math.max(1, Math.floor(emitter.atk * .65));
-    floatText(emitter.x,emitter.y,"SHOCK","#72dfff");
-    shockwaves.push({ x:emitter.x, y:emitter.y, r:radius, t:18, life:18 });
-    burst(emitter.x,emitter.y,"#72dfff",12,5);
+  for (const t of board) {
+    if (t === source || t.type !== "monster" || t.hp <= 0) continue;
+    const d = dist(source.x,source.y,t.x,t.y);
+    if (d > radius) continue;
 
-    for (const t of board) {
-      if (t === emitter || t.type !== "monster" || t.hp <= 0) continue;
-      if (dist(emitter.x,emitter.y,t.x,t.y) > radius) continue;
+    setTimeout(() => {
+      if (gameState !== "playing" || !board.includes(t) || t.hp <= 0) return;
       damage(t,pulseDamage,t.x,t.y,"#72dfff", true);
-      if (t.echoDamage && queue.length + pulses < maxPulses) queue.push(t);
-    }
-  }
-
-  for (let i = board.length - 1; i >= 0; i--) {
-    const t = board[i];
-    if (t.type === "monster" && t.hp <= 0) killMonster(i, t.team !== "hero");
+      if (t.echoDamage) shockwavePulse(t, chain);
+      for (let i = board.length - 1; i >= 0; i--) {
+        const current = board[i];
+        if (current.type === "monster" && current.hp <= 0) killMonster(i, current.team !== "hero");
+      }
+    }, Math.max(0, Math.floor(d / waveSpeed)));
   }
 }
 

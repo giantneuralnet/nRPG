@@ -73,6 +73,13 @@ const itemInfo = [
   ["chest","Chest","Opens a random reward."]
 ];
 
+const goodBookItems = new Set([
+  "sword","shield","potion","poison","powerPotion","regenPotion","vampirePotion","moltenPotion","dodgePotion","critPotion","surprisePotion",
+  "phoenixPotion","luckyCharm","gunpowder","multiplyStatus","triggerStatus","maxHealthUp","prayerBook","banishBook","clearBomb","cleanBomb",
+  "healBomb","iceBomb","shieldBomb","stoneBomb","stoneScroll","allyScroll","killRandomItem","healRandomItem","exileItem","chest"
+]);
+let nextBookBlessed = true;
+
 const monsterInfo = [
   ["normal","Monster","Random monster that attacks back."],
   ["elite","Elite","Stronger monster worth more XP."],
@@ -259,8 +266,10 @@ function buildInfoList() {
   }
 }
 
-function sampleBookItems(count = 3) {
-  const pool = itemInfo.slice();
+function sampleBookItems(mode, blessed, count = 3) {
+  const wantsGood = mode === "prayer" ? blessed : !blessed;
+  let pool = itemInfo.filter(([kind]) => goodBookItems.has(kind) === wantsGood);
+  if (pool.length < count) pool = itemInfo.slice();
   const sample = [];
   while (pool.length && sample.length < count) {
     const index = Math.floor(rng() * pool.length);
@@ -270,12 +279,15 @@ function sampleBookItems(count = 3) {
 }
 
 function openItemBook(mode) {
+  const blessed = nextBookBlessed;
+  nextBookBlessed = !nextBookBlessed;
+  const prefix = blessed ? "Blessed" : "Cursed";
   const overlay = document.createElement("div");
   overlay.className = `book-overlay is-visible book-${mode}`;
   const panel = document.createElement("div");
   panel.className = "book-panel";
   const title = document.createElement("h2");
-  title.textContent = mode === "prayer" ? "PRAYER BOOK" : "BANISH BOOK";
+  title.textContent = mode === "prayer" ? `${prefix} Prayer Book` : `${prefix} Banish Book`;
   panel.appendChild(title);
   const prompt = document.createElement("div");
   prompt.className = "book-prompt";
@@ -292,7 +304,7 @@ function openItemBook(mode) {
   confirm.textContent = mode === "prayer" ? "PRAY" : "BANISH";
   confirm.disabled = true;
 
-  for (const [kind,name] of sampleBookItems()) {
+  for (const [kind,name] of sampleBookItems(mode, blessed)) {
     if (!icons[kind] && typeof makeIcon === "function") icons[kind] = makeIcon(kind);
     const button = document.createElement("button");
     button.className = "book-choice";
@@ -333,15 +345,6 @@ function openItemBook(mode) {
     overlay.remove();
   });
   panel.appendChild(confirm);
-
-  if (mode !== "prayer") {
-    const close = document.createElement("button");
-    close.className = "book-close";
-    close.type = "button";
-    close.textContent = "CLOSE";
-    close.addEventListener("click", () => overlay.remove());
-    panel.appendChild(close);
-  }
   overlay.appendChild(panel);
   document.body.appendChild(overlay);
 }

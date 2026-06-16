@@ -49,10 +49,11 @@ function drawShockwaves() {
   if (!shockwaves || !shockwaves.length) return;
 
   ctx.save();
-  ctx.strokeStyle = "rgba(114,223,255,.95)";
+  ctx.strokeStyle = "rgba(114,223,255,.9)";
   ctx.lineWidth = 7;
+  const now = performance.now();
   for (const wave of shockwaves) {
-    const progress = 1 - wave.t / wave.life;
+    const progress = Math.max(0, Math.min(1, (now - wave.startAt) / wave.life));
     ctx.beginPath();
     ctx.arc(wave.x,wave.y,wave.r*progress,0,Math.PI*2);
     ctx.stroke();
