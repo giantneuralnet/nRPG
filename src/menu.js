@@ -73,10 +73,12 @@ const itemInfo = [
   ["chest","Chest","Opens a random reward."]
 ];
 
-const goodBookItems = new Set([
+const helpfulBookItems = new Set([
   "sword","shield","potion","poison","powerPotion","regenPotion","vampirePotion","moltenPotion","dodgePotion","critPotion","surprisePotion",
-  "phoenixPotion","luckyCharm","gunpowder","multiplyStatus","triggerStatus","maxHealthUp","prayerBook","banishBook","clearBomb","cleanBomb",
-  "healBomb","iceBomb","shieldBomb","stoneBomb","stoneScroll","allyScroll","killRandomItem","healRandomItem","exileItem","chest"
+  "phoenixPotion","luckyCharm","gunpowder","multiplyStatus","triggerStatus","maxHealthUp","prayerBook","banishBook",
+  "bomb","clearBomb","cleanBomb","randomBomb","weakenBomb","strengthBomb","cloudBomb","poisonBomb","fireBomb","lavaBomb","contagionBomb",
+  "echoBomb","soulBomb","healBomb","lightningBomb","iceBomb","shieldBomb","stoneBomb","blindBomb",
+  "blessedScroll","allyScroll","killRandomItem","healRandomItem","flashBang","exileItem","swapHealthItem","chest"
 ]);
 let nextBookBlessed = true;
 
@@ -268,7 +270,7 @@ function buildInfoList() {
 
 function sampleBookItems(mode, blessed, count = 3) {
   const wantsGood = mode === "prayer" ? blessed : !blessed;
-  let pool = itemInfo.filter(([kind]) => goodBookItems.has(kind) === wantsGood);
+  let pool = itemInfo.filter(([kind]) => helpfulBookItems.has(kind) === wantsGood);
   if (pool.length < count) pool = itemInfo.slice();
   const sample = [];
   while (pool.length && sample.length < count) {
@@ -289,62 +291,47 @@ function openItemBook(mode) {
   const title = document.createElement("h2");
   title.textContent = mode === "prayer" ? `${prefix} Prayer Book` : `${prefix} Banish Book`;
   panel.appendChild(title);
-  const prompt = document.createElement("div");
-  prompt.className = "book-prompt";
-  prompt.textContent = mode === "prayer" ? "Pray for this item:" : "Item to banish:";
-  panel.appendChild(prompt);
 
   const grid = document.createElement("div");
-  grid.className = "book-grid book-triangle";
-  let selected = null;
-  let selectedName = "";
-  const confirm = document.createElement("button");
-  confirm.className = "book-confirm";
-  confirm.type = "button";
-  confirm.textContent = mode === "prayer" ? "PRAY" : "BANISH";
-  confirm.disabled = true;
+  grid.className = "book-list";
 
-  for (const [kind,name] of sampleBookItems(mode, blessed)) {
+  for (const [kind,name,description] of sampleBookItems(mode, blessed)) {
     if (!icons[kind] && typeof makeIcon === "function") icons[kind] = makeIcon(kind);
     const button = document.createElement("button");
-    button.className = "book-choice";
+    button.className = "info-row book-choice";
     button.type = "button";
     if (icons[kind]) {
       const img = document.createElement("img");
+      img.className = "info-icon";
       img.alt = "";
       img.src = icons[kind].toDataURL();
       button.appendChild(img);
     }
-    const span = document.createElement("span");
-    span.textContent = name;
-    button.appendChild(span);
+    const copy = document.createElement("div");
+    copy.className = "info-copy";
+    const strong = document.createElement("strong");
+    strong.textContent = name;
+    copy.appendChild(strong);
+    const detail = document.createElement("span");
+    detail.textContent = description;
+    copy.appendChild(detail);
+    button.appendChild(copy);
     button.addEventListener("click", () => {
-      selected = kind;
-      selectedName = name;
-      for (const choice of grid.querySelectorAll(".book-choice")) {
-        choice.classList.toggle("is-selected", choice === button);
+      if (mode === "prayer") {
+        hero.prayerKind = kind;
+        hero.prayerRemaining = 13;
+        flash = `${name} prayed`;
+      } else {
+        if (!hero.banishedItems.includes(kind)) hero.banishedItems.push(kind);
+        if (hero.prayerKind === kind) hero.prayerKind = null;
+        if (hero.prayerKind === null) hero.prayerRemaining = 0;
+        flash = `${name} banished`;
       }
-      confirm.disabled = false;
+      overlay.remove();
     });
     grid.appendChild(button);
   }
   panel.appendChild(grid);
-
-  confirm.addEventListener("click", () => {
-    if (!selected) return;
-    if (mode === "prayer") {
-      hero.prayerKind = selected;
-      hero.prayerRemaining = 13;
-      flash = `${selectedName} prayed`;
-    } else {
-      if (!hero.banishedItems.includes(selected)) hero.banishedItems.push(selected);
-      if (hero.prayerKind === selected) hero.prayerKind = null;
-      if (hero.prayerKind === null) hero.prayerRemaining = 0;
-      flash = `${selectedName} banished`;
-    }
-    overlay.remove();
-  });
-  panel.appendChild(confirm);
   overlay.appendChild(panel);
   document.body.appendChild(overlay);
 }

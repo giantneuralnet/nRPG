@@ -261,13 +261,13 @@ button:focus-visible {
 .book-panel {
   width: min(420px, calc(100vmin - 48px));
   height: min(420px, calc(100vmin - 48px));
-  overflow: hidden;
+  overflow: auto;
   border: 2px solid rgba(255,255,255,.7);
   background: #101015;
   color: white;
   padding: 18px;
   display: grid;
-  grid-template-rows: auto auto 1fr auto;
+  grid-template-rows: auto 1fr;
 }
 
 .book-panel h2 {
@@ -276,94 +276,25 @@ button:focus-visible {
   text-align: center;
 }
 
-.book-prompt {
-  margin-bottom: 8px;
-  font: 800 13px system-ui, sans-serif;
-  text-align: center;
-}
-
-.book-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(112px, 1fr));
-  gap: 10px;
-}
-
-.book-triangle {
-  position: relative;
-  display: block;
-  min-height: 230px;
-  margin: 0 0 6px;
-}
-
 .book-choice {
-  display: grid;
-  grid-template-rows: 64px auto;
-  justify-items: center;
-  align-items: center;
-  gap: 4px;
-  min-height: 94px;
-  padding: 6px;
-  border: 1px solid rgba(255,255,255,.22);
-  border-radius: 0;
+  width: 100%;
+  border: 0;
+  border-top: 1px solid rgba(255,255,255,.22);
   background: #101015;
   color: white;
-  text-align: center;
-  font: 800 12px system-ui, sans-serif;
+  text-align: left;
+  font: inherit;
 }
 
-.book-triangle .book-choice {
-  position: absolute;
-  width: 96px;
+.book-list {
+  overflow: auto;
 }
 
-.book-triangle .book-choice:nth-child(1) {
-  left: 50%;
-  top: 4px;
-  transform: translateX(-50%);
-}
-
-.book-triangle .book-choice:nth-child(2) {
-  left: 10%;
-  bottom: 12px;
-}
-
-.book-triangle .book-choice:nth-child(3) {
-  right: 10%;
-  bottom: 12px;
-}
-
-.book-choice img {
-  width: 62px;
-  height: 62px;
-}
-
-.book-choice span {
-  overflow-wrap: anywhere;
+.book-choice:first-child {
+  border-top: 0;
 }
 
 .book-choice.is-selected {
   border-color: #ffe65c;
   box-shadow: inset 0 0 0 3px #ffe65c;
-}
-
-.book-confirm {
-  width: 100%;
-  margin-top: 8px;
-  min-height: 38px;
-}
-
-@media (max-width: 460px) {
-  .book-triangle {
-    min-height: 205px;
-  }
-
-  .book-triangle .book-choice {
-    width: 82px;
-    font-size: 11px;
-  }
-
-  .book-choice img {
-    width: 54px;
-    height: 54px;
-  }
 }

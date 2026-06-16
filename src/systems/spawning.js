@@ -68,8 +68,10 @@ function isHelpfulEntity(t) {
   if (t.type !== "item") return false;
   return [
     "sword","shield","potion","poison","powerPotion","regenPotion","vampirePotion","moltenPotion","dodgePotion","critPotion","surprisePotion",
-    "phoenixPotion","luckyCharm","gunpowder","multiplyStatus","triggerStatus","maxHealthUp","prayerBook","banishBook","clearBomb","cleanBomb","healBomb","iceBomb","shieldBomb","stoneBomb","stoneScroll","allyScroll","combustionScroll",
-    "killRandomItem","healRandomItem","exileItem","chest"
+    "phoenixPotion","luckyCharm","gunpowder","multiplyStatus","triggerStatus","maxHealthUp","prayerBook","banishBook",
+    "bomb","clearBomb","cleanBomb","randomBomb","weakenBomb","strengthBomb","cloudBomb","poisonBomb","fireBomb","lavaBomb","contagionBomb",
+    "echoBomb","soulBomb","healBomb","lightningBomb","iceBomb","shieldBomb","stoneBomb","blindBomb",
+    "blessedScroll","allyScroll","killRandomItem","healRandomItem","flashBang","exileItem","swapHealthItem","chest"
   ].includes(t.kind);
 }
 
