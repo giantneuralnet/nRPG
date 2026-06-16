@@ -27,7 +27,7 @@ const itemInfo = [
   ["randomBomb","Random bomb","Randomizes hero and monster HP."],
   ["weakenBomb","Weaken bomb","Lowers everyone’s attack."],
   ["strengthBomb","Strength bomb","Raises everyone’s attack."],
-  ["cloudBomb","Cloud bomb","Grays the screen until tapped 6 times."],
+  ["cloudBomb","Cloud bomb","Grays the screen until tapped 3-9 times."],
   ["poisonBomb","Poison bomb","Poisons all monsters and hurts you."],
   ["fireBomb","Fire bomb","Sets monsters on fire for damage over time."],
   ["lavaBomb","Lava bomb","Drops long-lasting lava pools that add fire."],
@@ -58,7 +58,7 @@ const monsterInfo = [
   ["shielded","Shielded","Wood shield absorbs the next damage from any source."],
   ["zombie","Zombie","Fights other monsters and counters you."],
   ["ghostZombie","Ghost zombie","Transparent zombie resurrected by a haunt."],
-  ["haunted","Haunted","Purple border; rises as a ghost when killed."],
+  ["haunted","Haunted","Purple eyes; rises as a ghost when killed."],
   ["stone","Stone","Cannot move or take damage."],
   ["burning","Burning","Takes periodic fire damage."],
   ["blind","Blind","Closed eyes; counters random targets."],
@@ -188,17 +188,6 @@ function makeMonsterInfoIcon(kind) {
 
   const m = infoMonster(kind);
   drawMonsterBodyOn(g, m, 50, 50, m.r, 0);
-  if (m.haunted) {
-    g.save();
-    g.translate(50 + m.r * .72, 50 - m.r * .72);
-    g.rotate(Math.PI / 4);
-    g.fillStyle = "#b987ff";
-    g.strokeStyle = "white";
-    g.lineWidth = 2;
-    g.fillRect(-m.r * .18, -m.r * .18, m.r * .36, m.r * .36);
-    g.strokeRect(-m.r * .18, -m.r * .18, m.r * .36, m.r * .36);
-    g.restore();
-  }
   if (!icons.monsterShield && typeof makeIcon === "function") icons.monsterShield = makeIcon("monsterShield");
   if (m.shielded && !m.shieldBroken && icons.monsterShield) {
     const shieldSize = m.r * 1.55;

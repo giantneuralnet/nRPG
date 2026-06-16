@@ -6,11 +6,12 @@ function clearCloudAt(x,y) {
   if (now - cloud.lastTap >= 220) {
     cloud.lastTap = now;
     cloud.hits--;
-    flash = `Cloud ${cloud.hits}/6`;
     sound("item");
     if (cloud.hits <= 0) {
       clouds = [];
       flash = "Cloud cleared";
+    } else {
+      flash = `Cloud ${cloud.hits}/${cloud.maxHits || cloud.hits}`;
     }
   }
 

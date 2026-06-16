@@ -66,10 +66,13 @@ function drawClouds() {
 
   ctx.save();
   const cloud = clouds[0];
-  ctx.fillStyle = "rgba(130,130,130,.62)";
+  const maxHits = Math.max(1, cloud.maxHits || cloud.hits || 1);
+  const progress = Math.max(0, Math.min(1, 1 - cloud.hits / maxHits));
+  const shade = Math.floor(45 + progress * 210);
+  ctx.fillStyle = `rgb(${shade},${shade},${shade})`;
   ctx.fillRect(0,0,W,H);
-  ctx.fillStyle = "rgba(255,255,255,.86)";
-  ctx.strokeStyle = "rgba(40,40,40,.8)";
+  ctx.fillStyle = shade > 150 ? "rgba(20,20,20,.9)" : "rgba(255,255,255,.9)";
+  ctx.strokeStyle = shade > 150 ? "rgba(255,255,255,.75)" : "rgba(20,20,20,.75)";
   ctx.lineWidth = 4;
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";

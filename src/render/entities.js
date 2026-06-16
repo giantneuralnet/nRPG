@@ -47,7 +47,7 @@ function drawMonsterBodyOn(renderCtx, m, x, y, r, shakeAmount = 0) {
   }
 
   if (m.blind) {
-    renderCtx.strokeStyle = "white";
+    renderCtx.strokeStyle = m.haunted ? "#b987ff" : "white";
     renderCtx.lineWidth = 8;
     for (let i=0;i<p.eyes;i++) {
       const ex = (i-(p.eyes-1)/2)*25;
@@ -57,13 +57,14 @@ function drawMonsterBodyOn(renderCtx, m, x, y, r, shakeAmount = 0) {
       renderCtx.stroke();
     }
   } else {
-    renderCtx.fillStyle = "white";
+    const eyeColor = m.haunted ? "#b987ff" : "white";
+    renderCtx.fillStyle = eyeColor;
     for (let i=0;i<p.eyes;i++) {
       const ex = (i-(p.eyes-1)/2)*25;
       renderCtx.beginPath(); renderCtx.arc(ex,-20,11,0,Math.PI*2); renderCtx.fill();
       renderCtx.fillStyle = m.zombie ? "#111" : "black";
       renderCtx.beginPath(); renderCtx.arc(ex,-20,5,0,Math.PI*2); renderCtx.fill();
-      renderCtx.fillStyle = "white";
+      renderCtx.fillStyle = eyeColor;
     }
   }
 
@@ -168,18 +169,6 @@ function drawMonster(m) {
   const stone = m.stone;
 
   drawMonsterBodyOn(ctx, m, m.x, m.y, r, shake);
-
-  if (m.haunted) {
-    ctx.save();
-    ctx.translate(m.x + r * .72, m.y - r * .72);
-    ctx.rotate(Math.PI / 4);
-    ctx.fillStyle = "#b987ff";
-    ctx.strokeStyle = "white";
-    ctx.lineWidth = 2;
-    ctx.fillRect(-r * .18, -r * .18, r * .36, r * .36);
-    ctx.strokeRect(-r * .18, -r * .18, r * .36, r * .36);
-    ctx.restore();
-  }
 
   if (m.shielded && !m.shieldBroken) {
     const shieldSize = r * 1.55;

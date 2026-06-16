@@ -445,7 +445,8 @@ function explode(x,y,power,kind) {
 
   if (kind === "cloud") {
     flash = `Cloudy bomb!`;
-    clouds = [{ hits: 6, lastTap: 0 }];
+    const hits = rand(3,9);
+    clouds = [{ hits, maxHits: hits, lastTap: 0 }];
     burst(x,y,"#d8ecff",16,5);
   }
 
@@ -532,7 +533,7 @@ function explode(x,y,power,kind) {
       const avg = Math.floor((a.hp + b.hp) / 2);
       a.hp = Math.max(1, Math.min(a.maxHp, avg));
       b.hp = Math.max(1, Math.min(b.maxHp, avg));
-      soulLinks.push({ a, b });
+      soulLinks.push({ a, b, lastTick: performance.now() });
       flash = "Soul connection!";
       floatText(a.x,a.y,"SOUL","#ff3333");
       floatText(b.x,b.y,"SOUL","#ff3333");
@@ -589,7 +590,9 @@ function explode(x,y,power,kind) {
   }
 
   if (kind === "nuke") {
-    flash = `NUKE!`;
+    const killed = board.filter(t => t.type === "monster" && t.team !== "hero").length;
+    kills += killed;
+    flash = killed > 0 ? `NUKE! +${killed} kills` : `NUKE!`;
     hero.hp = 1;
     for (let i = board.length - 1; i >= 0; i--) {
       const t = board[i];
@@ -597,6 +600,11 @@ function explode(x,y,power,kind) {
       board[i] = spawnThing(true, i);
     }
     burst(x,y,"#ff4f4f",30,9);
+    if (kills >= 20) {
+      gameState = "win";
+      flash = "YOU WIN!";
+      sound("level");
+    }
   }
 
   if (kind === "enrage") {
