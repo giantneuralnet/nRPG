@@ -152,6 +152,11 @@ function addInfoTitle(text) {
 }
 
 function addInfoRow(icon, name, description, isItem = true) {
+  const row = createInfoRow(icon, name, description, isItem);
+  infoList.appendChild(row);
+}
+
+function createInfoRow(icon, name, description, isItem = true) {
   const row = document.createElement("div");
   row.className = "info-row";
 
@@ -176,7 +181,12 @@ function addInfoRow(icon, name, description, isItem = true) {
   copy.className = "info-copy";
   copy.innerHTML = `<strong>${name}</strong><span>${description}</span>`;
   row.appendChild(copy);
-  infoList.appendChild(row);
+  return row;
+}
+
+function itemDisplayName(kind) {
+  const item = itemInfo.find(([itemKind]) => itemKind === kind);
+  return item ? item[1] : kind;
 }
 
 function infoMonster(kind) {
@@ -296,38 +306,27 @@ function openItemBook(mode) {
   grid.className = "book-list";
 
   for (const [kind,name,description] of sampleBookItems(mode, blessed)) {
-    if (!icons[kind] && typeof makeIcon === "function") icons[kind] = makeIcon(kind);
-    const button = document.createElement("button");
+    const button = createInfoRow(kind, name, description, true);
     button.className = "info-row book-choice";
+    button.tabIndex = 0;
+    button.setAttribute("role", "button");
     button.type = "button";
-    if (icons[kind]) {
-      const img = document.createElement("img");
-      img.className = "info-icon";
-      img.alt = "";
-      img.src = icons[kind].toDataURL();
-      button.appendChild(img);
-    }
-    const copy = document.createElement("div");
-    copy.className = "info-copy";
-    const strong = document.createElement("strong");
-    strong.textContent = name;
-    copy.appendChild(strong);
-    const detail = document.createElement("span");
-    detail.textContent = description;
-    copy.appendChild(detail);
-    button.appendChild(copy);
-    button.addEventListener("click", () => {
+    const choose = () => {
       if (mode === "prayer") {
-        hero.prayerKind = kind;
-        hero.prayerRemaining = 13;
+        hero.prayers.push({ kind, remaining: 13 });
         flash = `${name} prayed`;
       } else {
         if (!hero.banishedItems.includes(kind)) hero.banishedItems.push(kind);
-        if (hero.prayerKind === kind) hero.prayerKind = null;
-        if (hero.prayerKind === null) hero.prayerRemaining = 0;
         flash = `${name} banished`;
       }
       overlay.remove();
+    };
+    button.addEventListener("click", choose);
+    button.addEventListener("keydown", event => {
+      if (event.key === "Enter" || event.key === " ") {
+        event.preventDefault();
+        choose();
+      }
     });
     grid.appendChild(button);
   }

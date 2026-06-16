@@ -43,8 +43,7 @@ function resetGame() {
     gunpowder: 0,
     trigger: 0,
     multiply: 1,
-    prayerKind: null,
-    prayerRemaining: 0,
+    prayers: [],
     banishedItems: []
   };
 
@@ -68,6 +67,12 @@ function resetGame() {
   board = fillRoom();
   rooms[currentRoom] = board;
   gameState = "playing";
+}
+
+function currentPrayer() {
+  if (!hero || !hero.prayers) return null;
+  while (hero.prayers.length && hero.prayers[hero.prayers.length - 1].remaining <= 0) hero.prayers.pop();
+  return hero.prayers[hero.prayers.length - 1] || null;
 }
 
 function fillRoom() {

@@ -15,7 +15,7 @@ function useItem(item, index) {
 }
 
 function applyItemEffect(item) {
-  const value = Math.max(0, Math.floor((item.value || 0) * (hero.multiply || 1)));
+  const value = Math.max(0, Math.floor((item.value || 0) * (item.kind === "multiplyStatus" ? 1 : hero.multiply || 1)));
   if (item.kind === "sword") {
     hero.atk += value;
     flash = `Sword +${value} ATK`;
@@ -327,8 +327,7 @@ function cleanHero() {
   hero.trigger = 0;
   hero.multiply = 1;
   hero.lucky = 0;
-  hero.prayerKind = null;
-  hero.prayerRemaining = 0;
+  hero.prayers = [];
   hero.banishedItems = [];
   blindUntil = 0;
 }

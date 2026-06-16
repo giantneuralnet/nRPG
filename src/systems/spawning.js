@@ -45,7 +45,7 @@ function spawnThing(allowExileReturn = true, replaceIndex = null, checked = true
 }
 
 function sampleSpawnThing(allowExileReturn = true) {
-  if (hero && hero.prayerKind && hero.prayerRemaining > 0 && !hero.banishedItems.includes(hero.prayerKind)) {
+  if (hero && currentPrayer()) {
     const r = Math.min(W,H) * .062;
     const p = findFreePosition(r);
     return makeItem(p.x, -120 - rng()*200, p.y, r);
@@ -243,13 +243,14 @@ function makeItem(x,y,targetY,r) {
     "phoenixPotion","confusionCurse","glitchCurse","luckyCharm","unluckyCurse","gunpowder","multiplyStatus","triggerStatus","maxHealthUp","maxHealthDown","prayerBook","banishBook","stoneScroll","zombieScroll","hauntedScroll","blessedScroll","allyScroll","combustionScroll",
     "killRandomItem","healRandomItem","flashBang","exileItem","swapHealthItem","door","chest","chest"
   ];
+  const prayer = currentPrayer();
   const banned = hero ? hero.banishedItems : [];
-  const allowed = itemKinds.filter(k => !banned.includes(k));
+  const allowed = itemKinds.filter(k => prayer && prayer.kind === k || !banned.includes(k));
   let kind = pick(allowed.length ? allowed : itemKinds);
-  if (hero && hero.prayerKind && hero.prayerRemaining > 0 && !banned.includes(hero.prayerKind)) {
-    kind = hero.prayerKind;
-    hero.prayerRemaining--;
-    if (hero.prayerRemaining <= 0) hero.prayerKind = null;
+  if (prayer) {
+    kind = prayer.kind;
+    prayer.remaining--;
+    while (hero.prayers.length && hero.prayers[hero.prayers.length - 1].remaining <= 0) hero.prayers.pop();
   }
 
   if (kind === "door") {
