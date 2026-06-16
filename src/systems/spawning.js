@@ -29,6 +29,10 @@ function spawnThing(allowExileReturn = true, replaceIndex = null, checked = true
   for (let tries = 0; tries < 10; tries++) {
     const exileQueueBefore = exileQueue.slice();
     const candidate = sampleSpawnThing(allowExileReturn);
+    if (hero && hero.unlucky > 0 && isHelpfulEntity(candidate) && rng() < Math.min(.75, hero.unlucky * .12)) {
+      exileQueue = exileQueueBefore;
+      continue;
+    }
     if (hasSafeAction(candidate, replaceIndex)) return candidate;
     exileQueue = exileQueueBefore;
   }
@@ -40,15 +44,25 @@ function sampleSpawnThing(allowExileReturn = true) {
   if (allowExileReturn && exileQueue.length > 0 && rng() < .28) return popExiledMonster();
 
   const roll = rng();
-  const unluckyShift = hero ? Math.min(.25, hero.unlucky * .04) : 0;
-  const isMonster = roll < .52 + unluckyShift;
-  const isKnight = roll >= .52 + unluckyShift && roll < .60 + unluckyShift;
+  const isMonster = roll < .52;
+  const isKnight = roll >= .52 && roll < .60;
   const r = Math.min(W,H) * (isMonster ? .076 : isKnight ? .068 : .062);
   const p = findFreePosition(r);
 
   if (isMonster) return makeMonster(p.x, -120 - rng()*200, p.y, r);
   if (isKnight) return makeKnight(p.x, -120 - rng()*200, p.y, r);
   return makeItem(p.x, -120 - rng()*200, p.y, r);
+}
+
+function isHelpfulEntity(t) {
+  if (t.type === "door") return true;
+  if (t.type === "monster") return t.team === "hero" || t.stone;
+  if (t.type !== "item") return false;
+  return [
+    "sword","shield","potion","poison","powerPotion","regenPotion","vampirePotion","moltenPotion","dodgePotion","critPotion","surprisePotion",
+    "phoenixPotion","gunpowder","triggerStatus","maxHealthUp","clearBomb","cleanBomb","healBomb","iceBomb","shieldBomb","stoneBomb","stoneScroll",
+    "killRandomItem","healRandomItem","exileItem","chest"
+  ].includes(t.kind);
 }
 
 function boardWithCandidate(candidate, replaceIndex) {
@@ -222,7 +236,7 @@ function makeItem(x,y,targetY,r) {
     "cloudBomb","poisonBomb","fireBomb","lavaBomb","contagionBomb","echoBomb","soulBomb","healBomb","lightningBomb","iceBomb",
     "stoneBomb","nukeBomb","enrageBomb","blindBomb",
     "powerPotion","regenPotion","vampirePotion","moltenPotion","dodgePotion","critPotion","surprisePotion","decayCurse",
-    "phoenixPotion","confusionCurse","glitchCurse","unluckyCurse","gunpowder","stoneScroll","zombieScroll","hauntedScroll","blessedScroll",
+    "phoenixPotion","confusionCurse","glitchCurse","unluckyCurse","gunpowder","triggerStatus","maxHealthUp","maxHealthDown","stoneScroll","zombieScroll","hauntedScroll","blessedScroll",
     "killRandomItem","healRandomItem","flashBang","exileItem","swapHealthItem","door","chest","chest"
   ]);
 
@@ -245,12 +259,15 @@ function makeItem(x,y,targetY,r) {
       kind === "dodgePotion" ? rand(8,14) :
       kind === "critPotion" ? rand(8,14) :
       kind === "surprisePotion" ? rand(5,10) :
-      kind === "decayCurse" ? rand(1,3) :
+      kind === "decayCurse" ? 1 :
       kind === "phoenixPotion" ? 1 :
-      kind === "confusionCurse" ? rand(1,2) :
+      kind === "confusionCurse" ? rand(18,28) :
       kind === "glitchCurse" ? 1 :
       kind === "unluckyCurse" ? rand(1,2) :
       kind === "gunpowder" ? rand(1,3) :
+      kind === "triggerStatus" ? rand(1,2) :
+      kind === "maxHealthUp" ? rand(10,25) :
+      kind === "maxHealthDown" ? rand(10,25) :
       kind === "powerPotion" ? rand(6,10) :
       kind === "poison" ? rand(2,4) :
       kind === "bomb" ? rand(25,45) :

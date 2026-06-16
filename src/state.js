@@ -39,7 +39,8 @@ function resetGame() {
     glitched: 0,
     glitchNextAt: 0,
     unlucky: 0,
-    gunpowder: 0
+    gunpowder: 0,
+    trigger: 0
   };
 
   rooms = {};

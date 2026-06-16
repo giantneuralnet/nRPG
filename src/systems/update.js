@@ -84,8 +84,8 @@ function update() {
   }
 
   if (hero.glitched > 0 && now >= hero.glitchNextAt) {
-    randomizeEnemyPositions();
-    hero.glitchNextAt = now + rand(1000,3000);
+    swapAllEntityPositions();
+    hero.glitchNextAt = now + rand(500,1000);
     flash = "Glitched!";
   }
 

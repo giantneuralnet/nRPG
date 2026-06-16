@@ -56,7 +56,8 @@ function attackMonster(m,index) {
 
   m.attackCooldownUntil = now + 260;
 
-  if (hero.confused > 0) {
+  if (hero.confused > 0 && rng() < Math.min(.75, hero.confused / 100)) {
+    floatText(120,100,"CONFUSED","#c86bff");
     const targets = [hero, ...board.filter(t => t.type === "monster" && t.team !== "hero")];
     const confusedTarget = pick(targets);
     if (confusedTarget === hero) {
@@ -87,7 +88,7 @@ function attackMonster(m,index) {
   if (dealt > 0 && hero.molten > 0) {
     lavaPools.push({
       x:m.x,y:m.y,r:rand(60,105),life:rand(650,950),
-      fire:Math.max(1, Math.floor(hero.molten * .5))
+      fire:Math.max(3, Math.floor(hero.molten * .5))
     });
     floatText(m.x,m.y,"MOLTEN","#ff7a2f");
   }

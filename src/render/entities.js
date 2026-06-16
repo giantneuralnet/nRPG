@@ -318,6 +318,9 @@ function drawItem(item) {
   if (item.kind === "glitchCurse") ctx.fillText(`GLITCH`, item.x, item.y+item.r+10);
   if (item.kind === "unluckyCurse") ctx.fillText(`UNLUCKY`, item.x, item.y+item.r+10);
   if (item.kind === "gunpowder") ctx.fillText(`GUNPOWDER`, item.x, item.y+item.r+10);
+  if (item.kind === "triggerStatus") ctx.fillText(`TRIGGER`, item.x, item.y+item.r+10);
+  if (item.kind === "maxHealthUp") ctx.fillText(`MAX HP +${item.value}`, item.x, item.y+item.r+10);
+  if (item.kind === "maxHealthDown") ctx.fillText(`MAX HP -${item.value}`, item.x, item.y+item.r+10);
   if (item.kind === "powerPotion") ctx.fillText(`POWER UP`, item.x, item.y+item.r+10);
   if (item.kind === "poison") ctx.fillText(`POISON +${item.value}`, item.x, item.y+item.r+10);
   if (item.kind === "bomb") ctx.fillText(`BOMB ${item.value}`, item.x, item.y+item.r+10);

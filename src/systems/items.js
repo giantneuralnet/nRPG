@@ -3,6 +3,13 @@ function isCombatant(t) {
 }
 
 function useItem(item, index) {
+  const times = 1 + Math.max(0, hero.trigger || 0);
+  for (let i = 0; i < times; i++) applyItemEffect(item);
+  board[index] = spawnThing(true, index);
+  checkStoneLock();
+}
+
+function applyItemEffect(item) {
   if (item.kind === "sword") {
     hero.atk += item.value;
     flash = `Sword +${item.value} ATK`;
@@ -46,10 +53,26 @@ function useItem(item, index) {
   if (item.kind === "confusionCurse") addHeroStatus("confused", item.value, item.x, item.y, "CONFUSED", "#c86bff");
   if (item.kind === "glitchCurse") {
     addHeroStatus("glitched", item.value, item.x, item.y, "GLITCH", "#65d7ff");
-    hero.glitchNextAt = performance.now() + rand(1000,3000);
+    hero.glitchNextAt = performance.now() + rand(500,1000);
   }
   if (item.kind === "unluckyCurse") addHeroStatus("unlucky", item.value, item.x, item.y, "UNLUCKY", "#bbbbbb");
   if (item.kind === "gunpowder") addHeroStatus("gunpowder", item.value, item.x, item.y, "GUNPOWDER", "#ffcf4f");
+  if (item.kind === "triggerStatus") addHeroStatus("trigger", item.value, item.x, item.y, "TRIGGER", "#d8ecff");
+
+  if (item.kind === "maxHealthUp") {
+    hero.maxHp += item.value;
+    hero.hp = Math.min(hero.maxHp, hero.hp + item.value);
+    flash = `Max HP +${item.value}`;
+    floatText(item.x,item.y,`MAX +${item.value}`,"#70ff8a");
+    sound("item");
+  }
+  if (item.kind === "maxHealthDown") {
+    hero.maxHp = Math.max(1, hero.maxHp - item.value);
+    hero.hp = Math.min(hero.hp, hero.maxHp);
+    flash = `Max HP -${item.value}`;
+    floatText(item.x,item.y,`MAX -${item.value}`,"#ff6b6b");
+    sound("item");
+  }
 
   if (item.kind === "powerPotion") {
     if (rng() < .5) {
@@ -107,8 +130,6 @@ function useItem(item, index) {
 
   if (item.kind === "chest") openChest(item.x, item.y);
 
-  board[index] = spawnThing(true, index);
-  checkStoneLock();
 }
 
 function openChest(x,y) {
@@ -253,6 +274,7 @@ function cleanHero() {
   hero.glitchNextAt = 0;
   hero.unlucky = 0;
   hero.gunpowder = 0;
+  hero.trigger = 0;
   blindUntil = 0;
 }
 
@@ -394,36 +416,23 @@ function randomizeCloudCoveredPositions() {
   }
 }
 
-function randomizeEnemyPositions() {
-  const movable = board.filter(t => t.type === "monster" && t.team !== "hero");
-  const fixed = board.filter(t => !(t.type === "monster" && t.team !== "hero"));
-  const placed = fixed.map(t => ({ x:t.x, y:t.y, r:t.r }));
-  const top = 155;
-  const bottom = Math.max(top + 100, H - 95);
-
-  for (const t of movable) {
-    let position = null;
-    for (let tries = 0; tries < 100; tries++) {
-      const x = t.r + 35 + rng() * Math.max(50, (W - t.r * 2 - 70));
-      const y = top + rng() * Math.max(50, (bottom - top));
-      if (placed.every(other => dist(x,y,other.x,other.y) >= t.r + other.r + 58)) {
-        position = { x, y };
-        break;
-      }
-    }
-    if (!position) {
-      position = {
-        x: t.r + 35 + rng() * Math.max(50, (W - t.r * 2 - 70)),
-        y: top + rng() * Math.max(50, (bottom - top))
-      };
-    }
-    t.x = position.x;
-    t.y = position.y;
-    t.targetY = position.y;
+function swapAllEntityPositions() {
+  if (board.length < 2) return;
+  const positions = board.map(t => ({ x:t.x, y:t.y, targetY:t.targetY }));
+  for (let i = positions.length - 1; i > 0; i--) {
+    const j = rand(0, i);
+    const tmp = positions[i];
+    positions[i] = positions[j];
+    positions[j] = tmp;
+  }
+  for (let i = 0; i < board.length; i++) {
+    const t = board[i];
+    t.x = positions[i].x;
+    t.y = positions[i].y;
+    t.targetY = positions[i].targetY;
     t.vx = 0;
     t.vy = 0;
-    t.attacking = false;
-    placed.push({ x:t.x, y:t.y, r:t.r });
+    if (t.type === "monster") t.attacking = false;
   }
 }
 
@@ -638,7 +647,7 @@ function explode(x,y,power,kind) {
         y: m.y,
         r: rand(75,130),
         life: rand(900,1300),
-        fire: Math.max(1, Math.floor(power * .18))
+        fire: Math.max(3, Math.floor(power * .18))
       });
       floatText(m.x,m.y,"LAVA","#ff7a2f");
     }

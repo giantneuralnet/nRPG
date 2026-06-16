@@ -63,12 +63,15 @@ function makeIcon(type) {
     }
   }
 
-  if (type === "decayCurse" || type === "confusionCurse" || type === "glitchCurse" || type === "unluckyCurse" || type === "gunpowder") {
+  if (type === "decayCurse" || type === "confusionCurse" || type === "glitchCurse" || type === "unluckyCurse" || type === "gunpowder" || type === "triggerStatus" || type === "maxHealthUp" || type === "maxHealthDown") {
     g.fillStyle =
       type === "decayCurse" ? "#8f6bff" :
       type === "confusionCurse" ? "#c86bff" :
       type === "glitchCurse" ? "#65d7ff" :
       type === "unluckyCurse" ? "#555" :
+      type === "triggerStatus" ? "#d8ecff" :
+      type === "maxHealthUp" ? "#70ff8a" :
+      type === "maxHealthDown" ? "#ff6b6b" :
       "#ffcf4f";
     g.beginPath(); g.roundRect(18,18,64,64,10); g.fill(); g.stroke();
     g.fillStyle = type === "gunpowder" || type === "glitchCurse" ? "#111" : "white";
@@ -80,6 +83,9 @@ function makeIcon(type) {
       type === "confusionCurse" ? "?" :
       type === "glitchCurse" ? "G" :
       type === "unluckyCurse" ? "U" :
+      type === "triggerStatus" ? "T" :
+      type === "maxHealthUp" ? "+" :
+      type === "maxHealthDown" ? "-" :
       "B",
       50,52
     );
@@ -210,6 +216,6 @@ function makeIcon(type) {
   "sword","shield","potion","poison","bomb","clearBomb","randomBomb",
   "cleanBomb","weakenBomb","strengthBomb","cloudBomb","poisonBomb","fireBomb","lavaBomb","contagionBomb","echoBomb","soulBomb","healBomb","lightningBomb",
   "iceBomb","stoneBomb","nukeBomb","enrageBomb","blindBomb","chest","powerPotion","regenPotion","vampirePotion","moltenPotion",
-  "dodgePotion","critPotion","surprisePotion","decayCurse","phoenixPotion","confusionCurse","glitchCurse","unluckyCurse","gunpowder","stoneScroll","zombieScroll",
+  "dodgePotion","critPotion","surprisePotion","decayCurse","phoenixPotion","confusionCurse","glitchCurse","unluckyCurse","gunpowder","triggerStatus","maxHealthUp","maxHealthDown","stoneScroll","zombieScroll",
   "hauntedScroll","blessedScroll","killRandomItem","healRandomItem","flashBang","exileItem","swapHealthItem","shieldBomb","monsterShield"
 ].forEach(t => icons[t] = makeIcon(t));
