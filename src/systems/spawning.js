@@ -213,6 +213,7 @@ function makeMonster(x,y,targetY,r) {
 function makeKnight(x,y,targetY,r) {
   const k = makeMonster(x,y,targetY,r);
   k.team = "hero";
+  k.wasAlly = true;
   k.elite = false;
   k.hp = 70;
   k.maxHp = 70;

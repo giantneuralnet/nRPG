@@ -1,5 +1,5 @@
 function drawMonsterBodyOn(renderCtx, m, x, y, r, shakeAmount = 0) {
-  if (m.team === "hero") {
+  if (m.team === "hero" || m.wasAlly) {
     drawKnightBodyOn(renderCtx, m, x, y, r, shakeAmount);
     return;
   }
@@ -141,24 +141,6 @@ function drawKnightBodyOn(renderCtx, k, x, y, r, shakeAmount = 0) {
     renderCtx.fillRect(-18,-48,36,8);
   }
 
-  renderCtx.strokeStyle = stone ? "#666" : "#ffd84a";
-  renderCtx.lineWidth = 8;
-  renderCtx.beginPath();
-  renderCtx.moveTo(34,-6);
-  renderCtx.lineTo(70,-42);
-  renderCtx.stroke();
-
-  renderCtx.fillStyle = "#9b5a25";
-  renderCtx.beginPath();
-  renderCtx.moveTo(-36,-6);
-  renderCtx.lineTo(-62,10);
-  renderCtx.lineTo(-48,48);
-  renderCtx.lineTo(-24,26);
-  renderCtx.closePath();
-  renderCtx.fill();
-  renderCtx.strokeStyle = "#d69a55";
-  renderCtx.stroke();
-
   renderCtx.restore();
 }
 
@@ -233,7 +215,7 @@ function drawMonster(m) {
   ctx.textBaseline = "bottom";
   ctx.font = "bold 14px system-ui";
   ctx.fillStyle = "white";
-  ctx.fillText(`${m.team === "hero" ? "ALLY " : ""}${stone ? "STONE " : ""}${m.rage ? "RAGE " : ""}${m.blind ? "BLIND " : ""}${m.contagious ? "CONTAGIOUS " : ""}${m.echoDamage ? "ECHO " : ""}${m.shielded && !m.shieldBroken ? "SHIELDED " : ""}${m.ghost ? "GHOST " : ""}${m.haunted ? "HAUNTED " : ""}${m.zombie ? "ZOMBIE " : ""}${m.elite ? "ELITE " : ""}ATK ${m.atk}`,m.x,by-4);
+  ctx.fillText(`${m.team === "hero" ? "ALLY " : ""}${stone ? "STONE " : ""}${m.rage ? "RAGE " : ""}${m.blind ? "BLIND " : ""}${m.contagious ? "CONTAGIOUS " : ""}${m.echoDamage ? "SHOCK " : ""}${m.shielded && !m.shieldBroken ? "SHIELDED " : ""}${m.ghost ? "GHOST " : ""}${m.haunted ? "HAUNTED " : ""}${m.zombie ? "ZOMBIE " : ""}${m.elite ? "ELITE " : ""}ATK ${m.atk}`,m.x,by-4);
 
   if (m.attacking) {
     ctx.fillStyle = "#ff6666";
@@ -335,7 +317,7 @@ function drawItem(item) {
   if (item.kind === "fireBomb") ctx.fillText(`FIRE BOMB`, item.x, item.y+item.r+10);
   if (item.kind === "lavaBomb") ctx.fillText(`LAVA BOMB`, item.x, item.y+item.r+10);
   if (item.kind === "contagionBomb") ctx.fillText(`CONTAGION`, item.x, item.y+item.r+10);
-  if (item.kind === "echoBomb") ctx.fillText(`ECHO BOMB`, item.x, item.y+item.r+10);
+  if (item.kind === "echoBomb") ctx.fillText(`SHOCKWAVE`, item.x, item.y+item.r+10);
   if (item.kind === "soulBomb") ctx.fillText(`SOUL LINK`, item.x, item.y+item.r+10);
   if (item.kind === "healBomb") ctx.fillText(`HEAL BOMB`, item.x, item.y+item.r+10);
   if (item.kind === "iceBomb") ctx.fillText(`ICE BOMB`, item.x, item.y+item.r+10);

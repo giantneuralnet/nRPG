@@ -4,7 +4,12 @@ function isCombatant(t) {
 
 function useItem(item, index) {
   const times = 1 + Math.max(0, hero.trigger || 0);
-  for (let i = 0; i < times; i++) applyItemEffect(item);
+  applyItemEffect(item);
+  for (let i = 1; i < times; i++) {
+    setTimeout(() => {
+      if (gameState === "playing") applyItemEffect(item);
+    }, i * 400);
+  }
   board[index] = spawnThing(true, index);
   checkStoneLock();
 }
@@ -669,15 +674,15 @@ function explode(x,y,power,kind) {
 
   if (kind === "echo") {
     let count = 0;
-    flash = `Echo bomb!`;
+    flash = `Shockwave bomb!`;
     for (const m of board) {
       if (!isCombatant(m) || m.team === "hero") continue;
       m.echoDamage = true;
-      floatText(m.x,m.y,"ECHO","#72dfff");
+      floatText(m.x,m.y,"SHOCK","#72dfff");
       burst(m.x,m.y,"#72dfff",10,4);
       count++;
     }
-    if (!count) flash = "No enemies to echo!";
+    if (!count) flash = "No enemies to shock!";
   }
 
   if (kind === "soul") {
@@ -747,12 +752,16 @@ function explode(x,y,power,kind) {
   }
 
   if (kind === "nuke") {
-    const killed = board.filter(t => t.type === "monster" && t.team !== "hero").length;
+    const killed = board.filter(t => t.type === "monster" && t.team !== "hero" && !t.stone).length;
     kills += killed;
     flash = killed > 0 ? `NUKE! +${killed} kills` : `NUKE!`;
     hero.hp = 1;
     for (let i = board.length - 1; i >= 0; i--) {
       const t = board[i];
+      if (t.type === "monster" && t.stone) {
+        floatText(t.x,t.y,"STONE","#bbbbbb");
+        continue;
+      }
       floatText(t.x,t.y,t.type === "monster" ? "KO" : "NUKED","#ff4f4f");
       board[i] = spawnThing(true, i);
     }

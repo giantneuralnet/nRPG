@@ -140,7 +140,7 @@ function attackMonster(m,index) {
     const target = pickCounterTarget(m);
     const dmg = Math.max(1, m.atk - (target === hero ? getHeroDef() : 0));
     damage(target,dmg,target === hero ? 120 : target.x,target === hero ? 100 : target.y);
-    if (m.echoDamage) echoPulse(m);
+    if (m.echoDamage) shockwavePulse(m);
     flash = target === hero ? `Hero -${dmg}` : `Wild counter!`;
     m.attacking = false;
 
@@ -277,20 +277,17 @@ function makeGhost(dead) {
   };
 }
 
-function echoPulse(source, visited = new Set()) {
+function shockwavePulse(source, visited = new Set()) {
   if (!source || visited.has(source)) return;
   visited.add(source);
 
   const radius = source.r * 3.1 + 120;
-  const pulseDamage = Math.max(1, Math.floor(source.atk * .45));
-  floatText(source.x,source.y,"ECHO","#72dfff");
+  const pulseDamage = Math.max(1, Math.floor(source.atk * .65));
+  floatText(source.x,source.y,"SHOCK","#72dfff");
+  boom = { x:source.x, y:source.y, r:radius, t:20, kind:"echo" };
   burst(source.x,source.y,"#72dfff",18,6);
 
   const chained = [];
-  if (hero.alive && dist(source.x,source.y,120,100) <= radius) {
-    damage(hero,pulseDamage,120,100,"#72dfff");
-  }
-
   for (const t of board) {
     if (t === source || t.type !== "monster" || t.hp <= 0) continue;
     if (dist(source.x,source.y,t.x,t.y) > radius) continue;
@@ -299,13 +296,12 @@ function echoPulse(source, visited = new Set()) {
     if (canChain) chained.push(t);
   }
 
-  for (const t of chained) echoPulse(t, visited);
+  for (const t of chained) shockwavePulse(t, visited);
 
   for (let i = board.length - 1; i >= 0; i--) {
     const t = board[i];
     if (t.type === "monster" && t.hp <= 0) killMonster(i, t.team !== "hero");
   }
-  if (hero.hp <= 0) die();
 }
 
 function levelUp() {

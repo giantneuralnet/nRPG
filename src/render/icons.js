@@ -180,7 +180,7 @@ function makeIcon(type) {
       type === "fireBomb" ? "F" :
       type === "lavaBomb" ? "L" :
       type === "contagionBomb" ? "↯" :
-      type === "echoBomb" ? "E" :
+      type === "echoBomb" ? "S" :
       type === "soulBomb" ? "∿" :
       type === "healBomb" ? "+" :
       type === "lightningBomb" ? "⚡" :
