@@ -271,7 +271,7 @@ function sampleBookItems(count = 3) {
 
 function openItemBook(mode) {
   const overlay = document.createElement("div");
-  overlay.className = "book-overlay is-visible";
+  overlay.className = `book-overlay is-visible book-${mode}`;
   const panel = document.createElement("div");
   panel.className = "book-panel";
   const title = document.createElement("h2");
@@ -283,13 +283,13 @@ function openItemBook(mode) {
   panel.appendChild(prompt);
 
   const grid = document.createElement("div");
-  grid.className = "book-grid";
+  grid.className = "book-grid book-triangle";
   let selected = null;
   let selectedName = "";
   const confirm = document.createElement("button");
   confirm.className = "book-confirm";
   confirm.type = "button";
-  confirm.textContent = "CONFIRM";
+  confirm.textContent = mode === "prayer" ? "PRAY" : "BANISH";
   confirm.disabled = true;
 
   for (const [kind,name] of sampleBookItems()) {
@@ -322,22 +322,26 @@ function openItemBook(mode) {
     if (!selected) return;
     if (mode === "prayer") {
       hero.prayerKind = selected;
+      hero.prayerRemaining = 13;
       flash = `${selectedName} prayed`;
     } else {
       if (!hero.banishedItems.includes(selected)) hero.banishedItems.push(selected);
       if (hero.prayerKind === selected) hero.prayerKind = null;
+      if (hero.prayerKind === null) hero.prayerRemaining = 0;
       flash = `${selectedName} banished`;
     }
     overlay.remove();
   });
   panel.appendChild(confirm);
 
-  const close = document.createElement("button");
-  close.className = "book-close";
-  close.type = "button";
-  close.textContent = "CLOSE";
-  close.addEventListener("click", () => overlay.remove());
-  panel.appendChild(close);
+  if (mode !== "prayer") {
+    const close = document.createElement("button");
+    close.className = "book-close";
+    close.type = "button";
+    close.textContent = "CLOSE";
+    close.addEventListener("click", () => overlay.remove());
+    panel.appendChild(close);
+  }
   overlay.appendChild(panel);
   document.body.appendChild(overlay);
 }

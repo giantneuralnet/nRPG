@@ -259,7 +259,12 @@ function makeItem(x,y,targetY,r) {
   ];
   const banned = hero ? hero.banishedItems : [];
   const allowed = itemKinds.filter(k => !banned.includes(k));
-  const kind = hero && hero.prayerKind && !banned.includes(hero.prayerKind) ? hero.prayerKind : pick(allowed.length ? allowed : itemKinds);
+  let kind = pick(allowed.length ? allowed : itemKinds);
+  if (hero && hero.prayerKind && hero.prayerRemaining > 0 && !banned.includes(hero.prayerKind)) {
+    kind = hero.prayerKind;
+    hero.prayerRemaining--;
+    if (hero.prayerRemaining <= 0) hero.prayerKind = null;
+  }
 
   if (kind === "door") {
     const room = pick([1,2,3,666].filter(n => n !== currentRoom));

@@ -259,13 +259,15 @@ button:focus-visible {
 }
 
 .book-panel {
-  width: min(760px, 100%);
-  max-height: min(82vh, 720px);
+  width: min(560px, calc(100vmin - 36px));
+  height: min(560px, calc(100vmin - 36px));
   overflow: auto;
   border: 2px solid rgba(255,255,255,.7);
   background: #101015;
   color: white;
   padding: 16px;
+  display: grid;
+  grid-template-rows: auto auto 1fr auto auto;
 }
 
 .book-panel h2 {
@@ -284,6 +286,14 @@ button:focus-visible {
   gap: 10px;
 }
 
+.book-triangle {
+  position: relative;
+  display: block;
+  min-height: 285px;
+  margin: 4px 0 8px;
+  animation: book-spin 18s linear infinite;
+}
+
 .book-choice {
   display: grid;
   grid-template-columns: 46px minmax(0, 1fr);
@@ -296,6 +306,29 @@ button:focus-visible {
   color: white;
   text-align: left;
   font: 700 13px system-ui, sans-serif;
+}
+
+.book-triangle .book-choice {
+  position: absolute;
+  width: 148px;
+  min-height: 70px;
+  animation: book-counter-spin 18s linear infinite;
+}
+
+.book-triangle .book-choice:nth-child(1) {
+  left: 50%;
+  top: 4px;
+  transform: translateX(-50%);
+}
+
+.book-triangle .book-choice:nth-child(2) {
+  left: 12%;
+  bottom: 12px;
+}
+
+.book-triangle .book-choice:nth-child(3) {
+  right: 12%;
+  bottom: 12px;
 }
 
 .book-choice img {
@@ -322,4 +355,35 @@ button:focus-visible {
   width: 100%;
   margin-top: 8px;
   min-height: 44px;
+}
+
+@keyframes book-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(-360deg); }
+}
+
+@keyframes book-counter-spin {
+  from { rotate: 0deg; }
+  to { rotate: 360deg; }
+}
+
+@media (max-width: 460px) {
+  .book-panel {
+    height: min(520px, calc(100vh - 36px));
+  }
+
+  .book-triangle {
+    min-height: 250px;
+  }
+
+  .book-triangle .book-choice {
+    width: 124px;
+    grid-template-columns: 38px minmax(0, 1fr);
+    font-size: 12px;
+  }
+
+  .book-choice img {
+    width: 36px;
+    height: 36px;
+  }
 }

@@ -50,6 +50,7 @@ function drawHeroStatuses(x,y) {
   if (hero.gunpowder > 0) statuses.push(["GUNPOWDER " + hero.gunpowder, "#ffcf4f"]);
   if (hero.multiply > 1) statuses.push(["MULTIPLY " + hero.multiply, "#ffe65c"]);
   if (hero.trigger > 0) statuses.push(["TRIGGER " + hero.trigger, "#d8ecff"]);
+  if (hero.prayerKind && hero.prayerRemaining > 0) statuses.push(["Prayer: " + hero.prayerRemaining, "#d8ecff"]);
   if (hero.rage) statuses.push(["RAGE", "#ff3b3b"]);
   if (!statuses.length) return;
 

@@ -327,6 +327,7 @@ function cleanHero() {
   hero.multiply = 1;
   hero.lucky = 0;
   hero.prayerKind = null;
+  hero.prayerRemaining = 0;
   hero.banishedItems = [];
   blindUntil = 0;
 }

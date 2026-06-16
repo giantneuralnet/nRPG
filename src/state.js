@@ -44,6 +44,7 @@ function resetGame() {
     trigger: 0,
     multiply: 1,
     prayerKind: null,
+    prayerRemaining: 0,
     banishedItems: []
   };
 
