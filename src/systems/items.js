@@ -15,114 +15,119 @@ function useItem(item, index) {
 }
 
 function applyItemEffect(item) {
+  const value = Math.max(0, Math.floor((item.value || 0) * (hero.multiply || 1)));
   if (item.kind === "sword") {
-    hero.atk += item.value;
-    flash = `Sword +${item.value} ATK`;
-    floatText(item.x,item.y,`ATK +${item.value}`,"#ffffff");
+    hero.atk += value;
+    flash = `Sword +${value} ATK`;
+    floatText(item.x,item.y,`ATK +${value}`,"#ffffff");
     sound("item");
   }
 
   if (item.kind === "shield") {
-    hero.def += item.value;
-    flash = `Shield +${item.value} DEF`;
-    floatText(item.x,item.y,`DEF +${item.value}`,"#85bdff");
+    hero.def += value;
+    flash = `Shield +${value} DEF`;
+    floatText(item.x,item.y,`DEF +${value}`,"#85bdff");
     sound("item");
   }
 
   if (item.kind === "potion") {
-    heal(hero, item.value, 120, 100);
-    flash = `Potion +${item.value} HP`;
+    heal(hero, value, 120, 100);
+    flash = `Potion +${value} HP`;
   }
 
   if (item.kind === "regenPotion") {
     hero.regenTicks += 8;
-    hero.regenPower += item.value;
+    hero.regenPower += value;
     flash = `Regen potion!`;
-    floatText(item.x,item.y,`REGEN +${item.value}`,"#40ff96");
+    floatText(item.x,item.y,`REGEN +${value}`,"#40ff96");
     sound("item");
   }
 
   if (item.kind === "vampirePotion") {
-    hero.vampire += item.value;
-    flash = `Vampire +${item.value}% life steal`;
-    floatText(item.x,item.y,`LIFE STEAL +${item.value}%`,"#ff4f9a");
+    hero.vampire += value;
+    flash = `Vampire +${value}% life steal`;
+    floatText(item.x,item.y,`LIFE STEAL +${value}%`,"#ff4f9a");
     sound("item");
   }
 
-  if (item.kind === "moltenPotion") addHeroStatus("molten", item.value, item.x, item.y, "MOLTEN", "#ff7a2f");
-  if (item.kind === "dodgePotion") addHeroStatus("dodge", item.value, item.x, item.y, "DODGE", "#72dfff");
-  if (item.kind === "critPotion") addHeroStatus("crit", item.value, item.x, item.y, "CRIT", "#ffe65c");
-  if (item.kind === "surprisePotion") addHeroStatus("surprise", item.value, item.x, item.y, "SURPRISE", "#ffffff");
-  if (item.kind === "decayCurse") addHeroStatus("decay", item.value, item.x, item.y, "DECAY", "#8f6bff");
-  if (item.kind === "phoenixPotion") addHeroStatus("phoenix", item.value, item.x, item.y, "PHOENIX", "#ff9d3b");
-  if (item.kind === "confusionCurse") addHeroStatus("confused", item.value, item.x, item.y, "CONFUSED", "#c86bff");
+  if (item.kind === "moltenPotion") addHeroStatus("molten", value, item.x, item.y, "MOLTEN", "#ff7a2f");
+  if (item.kind === "dodgePotion") addHeroStatus("dodge", value, item.x, item.y, "DODGE", "#72dfff");
+  if (item.kind === "critPotion") addHeroStatus("crit", value, item.x, item.y, "CRIT", "#ffe65c");
+  if (item.kind === "surprisePotion") addHeroStatus("surprise", value, item.x, item.y, "SURPRISE", "#ffffff");
+  if (item.kind === "decayCurse") addHeroStatus("decay", value, item.x, item.y, "DECAY", "#8f6bff");
+  if (item.kind === "phoenixPotion") addHeroStatus("phoenix", value, item.x, item.y, "PHOENIX", "#ff9d3b");
+  if (item.kind === "confusionCurse") addHeroStatus("confused", value, item.x, item.y, "CONFUSED", "#c86bff");
   if (item.kind === "glitchCurse") {
-    addHeroStatus("glitched", item.value, item.x, item.y, "GLITCH", "#65d7ff");
+    addHeroStatus("glitched", value, item.x, item.y, "GLITCH", "#65d7ff");
     hero.glitchNextAt = performance.now() + rand(500,1000);
   }
-  if (item.kind === "unluckyCurse") addHeroStatus("unlucky", item.value, item.x, item.y, "UNLUCKY", "#bbbbbb");
-  if (item.kind === "gunpowder") addHeroStatus("gunpowder", item.value, item.x, item.y, "GUNPOWDER", "#ffcf4f");
-  if (item.kind === "triggerStatus") addHeroStatus("trigger", item.value, item.x, item.y, "TRIGGER", "#d8ecff");
+  if (item.kind === "luckyCharm") addHeroStatus("lucky", value, item.x, item.y, "LUCKY", "#70ff8a");
+  if (item.kind === "unluckyCurse") addHeroStatus("unlucky", value, item.x, item.y, "UNLUCKY", "#bbbbbb");
+  if (item.kind === "gunpowder") addHeroStatus("gunpowder", value, item.x, item.y, "GUNPOWDER", "#ffcf4f");
+  if (item.kind === "multiplyStatus") addHeroStatus("multiply", value, item.x, item.y, "MULTIPLY", "#ffe65c");
+  if (item.kind === "triggerStatus") addHeroStatus("trigger", value, item.x, item.y, "TRIGGER", "#d8ecff");
+  if (item.kind === "prayerBook") openItemBook("prayer");
+  if (item.kind === "banishBook") openItemBook("banish");
 
   if (item.kind === "maxHealthUp") {
-    hero.maxHp += item.value;
-    hero.hp = Math.min(hero.maxHp, hero.hp + item.value);
-    flash = `Max HP +${item.value}`;
-    floatText(item.x,item.y,`MAX +${item.value}`,"#70ff8a");
+    hero.maxHp += value;
+    hero.hp = Math.min(hero.maxHp, hero.hp + value);
+    flash = `Max HP +${value}`;
+    floatText(item.x,item.y,`MAX +${value}`,"#70ff8a");
     sound("item");
   }
   if (item.kind === "maxHealthDown") {
-    hero.maxHp = Math.max(1, hero.maxHp - item.value);
+    hero.maxHp = Math.max(1, hero.maxHp - value);
     hero.hp = Math.min(hero.hp, hero.maxHp);
-    flash = `Max HP -${item.value}`;
-    floatText(item.x,item.y,`MAX -${item.value}`,"#ff6b6b");
+    flash = `Max HP -${value}`;
+    floatText(item.x,item.y,`MAX -${value}`,"#ff6b6b");
     sound("item");
   }
 
   if (item.kind === "powerPotion") {
     if (rng() < .5) {
       hero.powerAtkTurns = 3;
-      hero.powerAtkBonus = item.value;
-      flash = `Power up! +${item.value} ATK for 3 fights`;
-      floatText(item.x,item.y,`ATK +${item.value}`,"#ffd84a");
+      hero.powerAtkBonus = value;
+      flash = `Power up! +${value} ATK for 3 fights`;
+      floatText(item.x,item.y,`ATK +${value}`,"#ffd84a");
     } else {
       hero.powerDefTurns = 3;
-      hero.powerDefBonus = item.value;
-      flash = `Power up! +${item.value} DEF for 3 fights`;
-      floatText(item.x,item.y,`DEF +${item.value}`,"#85bdff");
+      hero.powerDefBonus = value;
+      flash = `Power up! +${value} DEF for 3 fights`;
+      floatText(item.x,item.y,`DEF +${value}`,"#85bdff");
     }
     sound("level");
   }
 
   if (item.kind === "poison") {
-    hero.poison += item.value;
-    flash = `Poison Sword +${item.value}`;
-    floatText(item.x,item.y,`POISON +${item.value}`,"#7cff4f");
+    hero.poison += value;
+    flash = `Poison Sword +${value}`;
+    floatText(item.x,item.y,`POISON +${value}`,"#7cff4f");
     sound("item");
   }
 
-  if (item.kind === "bomb") explode(item.x, item.y, item.value, "normal");
-  if (item.kind === "clearBomb") explode(item.x, item.y, item.value, "clear");
-  if (item.kind === "cleanBomb") explode(item.x, item.y, item.value, "clean");
-  if (item.kind === "randomBomb") explode(item.x, item.y, item.value, "random");
-  if (item.kind === "weakenBomb") explode(item.x, item.y, item.value, "weaken");
-  if (item.kind === "strengthBomb") explode(item.x, item.y, item.value, "strength");
-  if (item.kind === "cloudBomb") explode(item.x, item.y, item.value, "cloud");
-  if (item.kind === "lightningBomb") explode(item.x, item.y, item.value, "lightning");
-  if (item.kind === "poisonBomb") explode(item.x, item.y, item.value, "poison");
-  if (item.kind === "fireBomb") explode(item.x, item.y, item.value, "fire");
-  if (item.kind === "lavaBomb") explode(item.x, item.y, item.value, "lava");
-  if (item.kind === "contagionBomb") explode(item.x, item.y, item.value, "contagion");
-  if (item.kind === "echoBomb") explode(item.x, item.y, item.value, "echo");
-  if (item.kind === "soulBomb") explode(item.x, item.y, item.value, "soul");
-  if (item.kind === "healBomb") explode(item.x, item.y, item.value, "heal");
-  if (item.kind === "iceBomb") explode(item.x, item.y, item.value, "ice");
+  if (item.kind === "bomb") explode(item.x, item.y, value, "normal");
+  if (item.kind === "clearBomb") explode(item.x, item.y, value, "clear");
+  if (item.kind === "cleanBomb") explode(item.x, item.y, value, "clean");
+  if (item.kind === "randomBomb") explode(item.x, item.y, value, "random");
+  if (item.kind === "weakenBomb") explode(item.x, item.y, value, "weaken");
+  if (item.kind === "strengthBomb") explode(item.x, item.y, value, "strength");
+  if (item.kind === "cloudBomb") explode(item.x, item.y, value, "cloud");
+  if (item.kind === "lightningBomb") explode(item.x, item.y, value, "lightning");
+  if (item.kind === "poisonBomb") explode(item.x, item.y, value, "poison");
+  if (item.kind === "fireBomb") explode(item.x, item.y, value, "fire");
+  if (item.kind === "lavaBomb") explode(item.x, item.y, value, "lava");
+  if (item.kind === "contagionBomb") explode(item.x, item.y, value, "contagion");
+  if (item.kind === "echoBomb") explode(item.x, item.y, value, "echo");
+  if (item.kind === "soulBomb") explode(item.x, item.y, value, "soul");
+  if (item.kind === "healBomb") explode(item.x, item.y, value, "heal");
+  if (item.kind === "iceBomb") explode(item.x, item.y, value, "ice");
   if (item.kind === "zombieScroll") zombieRandomMonster(item.x,item.y);
   if (item.kind === "shieldBomb") shieldAllMonsters(item.x,item.y);
-  if (item.kind === "stoneBomb") explode(item.x, item.y, item.value, "stone");
-  if (item.kind === "nukeBomb") explode(item.x, item.y, item.value, "nuke");
-  if (item.kind === "enrageBomb") explode(item.x, item.y, item.value, "enrage");
-  if (item.kind === "blindBomb") explode(item.x, item.y, item.value, "blind");
+  if (item.kind === "stoneBomb") explode(item.x, item.y, value, "stone");
+  if (item.kind === "nukeBomb") explode(item.x, item.y, value, "nuke");
+  if (item.kind === "enrageBomb") explode(item.x, item.y, value, "enrage");
+  if (item.kind === "blindBomb") explode(item.x, item.y, value, "blind");
 
   if (item.kind === "stoneScroll") stoneRandomMonster(item.x,item.y);
   if (item.kind === "hauntedScroll") hauntMonsters(item.x,item.y);
@@ -280,6 +285,10 @@ function cleanHero() {
   hero.unlucky = 0;
   hero.gunpowder = 0;
   hero.trigger = 0;
+  hero.multiply = 1;
+  hero.lucky = 0;
+  hero.prayerKind = null;
+  hero.banishedItems = [];
   blindUntil = 0;
 }
 

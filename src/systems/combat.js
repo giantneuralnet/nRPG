@@ -186,7 +186,7 @@ function killMonster(index, giveXp = true) {
   }
 
   if (giveXp) {
-    hero.xp += dead.elite ? 3 : 1;
+    hero.xp += dead.ultraElite ? 6 : dead.elite ? 3 : 1;
     while (hero.xp >= hero.nextXp) {
       hero.xp -= hero.nextXp;
       levelUp();

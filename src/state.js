@@ -38,9 +38,13 @@ function resetGame() {
     confused: 0,
     glitched: 0,
     glitchNextAt: 0,
+    lucky: 0,
     unlucky: 0,
     gunpowder: 0,
-    trigger: 0
+    trigger: 0,
+    multiply: 1,
+    prayerKind: null,
+    banishedItems: []
   };
 
   rooms = {};

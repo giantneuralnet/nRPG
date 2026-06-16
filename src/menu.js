@@ -29,11 +29,15 @@ const itemInfo = [
   ["phoenixPotion","Phoenix","Revive at 1 HP instead of dying."],
   ["confusionCurse","Confused","Attacks hit random enemies and can hit you."],
   ["glitchCurse","Glitched","Swaps all entity positions every .5-1 second."],
+  ["luckyCharm","Lucky","Makes helpful entities more likely to spawn."],
   ["unluckyCurse","Unlucky","Makes item drops less common."],
   ["gunpowder","Gunpowder","Increases bomb damage."],
+  ["multiplyStatus","Multiply","Increases the value of future item pickups."],
   ["triggerStatus","Trigger","Makes future items trigger extra times."],
   ["maxHealthUp","Max health up","Increases your maximum health."],
   ["maxHealthDown","Max health down","Decreases your maximum health."],
+  ["prayerBook","Prayer book","Choose one item to be the only item that spawns."],
+  ["banishBook","Banish book","Choose one item to stop from spawning."],
   ["bomb","Bomb","Damages you and all monsters."],
   ["clearBomb","Clear bomb","Clears the room without kills and removes clouds."],
   ["cleanBomb","Clean bomb","Removes status effects from you and monsters."],
@@ -53,7 +57,7 @@ const itemInfo = [
   ["zombieScroll","Zombie scroll","Turns one monster into a zombie."],
   ["shieldBomb","Shield all bomb","Gives every current monster a fresh shield."],
   ["stoneBomb","Stone bomb","Turns every current monster into stone."],
-  ["nukeBomb","Nuke bomb","Replaces the whole screen and leaves you at 1 HP."],
+  ["nukeBomb","Nuke bomb","Clears non-stone entities and leaves you at 1 HP."],
   ["enrageBomb","Enrage bomb","Makes monsters attack nearby targets and turn red."],
   ["blindBomb","Blind bomb","Blinds monsters so counters hit random targets."],
   ["stoneScroll","Stone scroll","Makes one monster permanently stone."],
@@ -70,6 +74,7 @@ const itemInfo = [
 const monsterInfo = [
   ["normal","Monster","Random monster that attacks back."],
   ["elite","Elite","Stronger monster worth more XP."],
+  ["ultraElite","Ultra elite","Much stronger monster worth more XP."],
   ["shielded","Shielded","Wood shield absorbs the next damage from any source."],
   ["zombie","Zombie","Fights other monsters and counters you."],
   ["ghostZombie","Ghost zombie","Transparent zombie resurrected by a haunt."],
@@ -168,7 +173,8 @@ function infoMonster(kind) {
     x:50,y:50,targetY:50,r:26,
     hp:10,maxHp:10,atk:1,poison:0,fire:0,stone:false,frozenUntil:0,
     team:kind === "knight" ? "hero" : "enemy",
-    elite:kind === "elite",
+    elite:kind === "elite" || kind === "ultraElite",
+    ultraElite:kind === "ultraElite",
     shielded:kind === "shielded",
     shieldBroken:false,
     zombie:kind === "zombie" || kind === "ghostZombie",
@@ -247,6 +253,56 @@ function buildInfoList() {
       addInfoRow(monster[0].slice(0, 4).toUpperCase(), monster[1], monster[2], false);
     }
   }
+}
+
+function openItemBook(mode) {
+  const overlay = document.createElement("div");
+  overlay.className = "book-overlay is-visible";
+  const panel = document.createElement("div");
+  panel.className = "book-panel";
+  const title = document.createElement("h2");
+  title.textContent = mode === "prayer" ? "PRAYER BOOK" : "BANISH BOOK";
+  panel.appendChild(title);
+
+  const grid = document.createElement("div");
+  grid.className = "book-grid";
+  for (const [kind,name] of itemInfo) {
+    if (!icons[kind] && typeof makeIcon === "function") icons[kind] = makeIcon(kind);
+    const button = document.createElement("button");
+    button.className = "book-choice";
+    button.type = "button";
+    if (icons[kind]) {
+      const img = document.createElement("img");
+      img.alt = "";
+      img.src = icons[kind].toDataURL();
+      button.appendChild(img);
+    }
+    const span = document.createElement("span");
+    span.textContent = name;
+    button.appendChild(span);
+    button.addEventListener("click", () => {
+      if (mode === "prayer") {
+        hero.prayerKind = kind;
+        flash = `${name} prayed`;
+      } else {
+        if (!hero.banishedItems.includes(kind)) hero.banishedItems.push(kind);
+        if (hero.prayerKind === kind) hero.prayerKind = null;
+        flash = `${name} banished`;
+      }
+      overlay.remove();
+    });
+    grid.appendChild(button);
+  }
+  panel.appendChild(grid);
+
+  const close = document.createElement("button");
+  close.className = "book-close";
+  close.type = "button";
+  close.textContent = "CLOSE";
+  close.addEventListener("click", () => overlay.remove());
+  panel.appendChild(close);
+  overlay.appendChild(panel);
+  document.body.appendChild(overlay);
 }
 
 choiceDown.addEventListener("click", () => {

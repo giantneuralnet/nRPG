@@ -38,12 +38,12 @@ function drawMonsterBodyOn(renderCtx, m, x, y, r, shakeAmount = 0) {
   }
 
   if (m.elite) {
-    renderCtx.fillStyle = stone ? "#aaa" : "#ffd84a";
+    renderCtx.fillStyle = stone ? "#aaa" : m.ultraElite ? "#ff4f4f" : "#ffd84a";
     renderCtx.beginPath();
     renderCtx.moveTo(-32,-82); renderCtx.lineTo(-16,-112); renderCtx.lineTo(0,-82);
     renderCtx.lineTo(16,-112); renderCtx.lineTo(32,-82); renderCtx.closePath();
     renderCtx.fill();
-    renderCtx.strokeStyle = "white"; renderCtx.lineWidth = 4; renderCtx.stroke();
+    renderCtx.strokeStyle = m.ultraElite ? "#ffe65c" : "white"; renderCtx.lineWidth = 4; renderCtx.stroke();
   }
 
   if (m.blind) {
@@ -62,7 +62,7 @@ function drawMonsterBodyOn(renderCtx, m, x, y, r, shakeAmount = 0) {
     for (let i=0;i<p.eyes;i++) {
       const ex = (i-(p.eyes-1)/2)*25;
       renderCtx.beginPath(); renderCtx.arc(ex,-20,11,0,Math.PI*2); renderCtx.fill();
-      renderCtx.fillStyle = m.zombie ? "#111" : "black";
+      renderCtx.fillStyle = m.haunted ? "white" : m.zombie ? "#111" : "black";
       renderCtx.beginPath(); renderCtx.arc(ex,-20,5,0,Math.PI*2); renderCtx.fill();
       renderCtx.fillStyle = eyeColor;
     }
@@ -215,7 +215,7 @@ function drawMonster(m) {
   ctx.textBaseline = "bottom";
   ctx.font = "bold 14px system-ui";
   ctx.fillStyle = "white";
-  ctx.fillText(`${m.team === "hero" ? "ALLY " : ""}${stone ? "STONE " : ""}${m.rage ? "RAGE " : ""}${m.blind ? "BLIND " : ""}${m.contagious ? "CONTAGIOUS " : ""}${m.echoDamage ? "SHOCK " : ""}${m.shielded && !m.shieldBroken ? "SHIELDED " : ""}${m.ghost ? "GHOST " : ""}${m.haunted ? "HAUNTED " : ""}${m.zombie ? "ZOMBIE " : ""}${m.elite ? "ELITE " : ""}ATK ${m.atk}`,m.x,by-4);
+  ctx.fillText(`${m.team === "hero" ? "ALLY " : ""}${stone ? "STONE " : ""}${m.rage ? "RAGE " : ""}${m.blind ? "BLIND " : ""}${m.contagious ? "CONTAGIOUS " : ""}${m.echoDamage ? "SHOCK " : ""}${m.shielded && !m.shieldBroken ? "SHIELDED " : ""}${m.ghost ? "GHOST " : ""}${m.haunted ? "HAUNTED " : ""}${m.zombie ? "ZOMBIE " : ""}${m.ultraElite ? "ULTRA " : m.elite ? "ELITE " : ""}ATK ${m.atk}`,m.x,by-4);
 
   if (m.attacking) {
     ctx.fillStyle = "#ff6666";
@@ -298,11 +298,15 @@ function drawItem(item) {
   if (item.kind === "phoenixPotion") ctx.fillText(`PHOENIX`, item.x, item.y+item.r+10);
   if (item.kind === "confusionCurse") ctx.fillText(`CONFUSED`, item.x, item.y+item.r+10);
   if (item.kind === "glitchCurse") ctx.fillText(`GLITCH`, item.x, item.y+item.r+10);
+  if (item.kind === "luckyCharm") ctx.fillText(`LUCKY`, item.x, item.y+item.r+10);
   if (item.kind === "unluckyCurse") ctx.fillText(`UNLUCKY`, item.x, item.y+item.r+10);
   if (item.kind === "gunpowder") ctx.fillText(`GUNPOWDER`, item.x, item.y+item.r+10);
+  if (item.kind === "multiplyStatus") ctx.fillText(`MULTIPLY`, item.x, item.y+item.r+10);
   if (item.kind === "triggerStatus") ctx.fillText(`TRIGGER`, item.x, item.y+item.r+10);
   if (item.kind === "maxHealthUp") ctx.fillText(`MAX HP +${item.value}`, item.x, item.y+item.r+10);
   if (item.kind === "maxHealthDown") ctx.fillText(`MAX HP -${item.value}`, item.x, item.y+item.r+10);
+  if (item.kind === "prayerBook") ctx.fillText(`PRAYER`, item.x, item.y+item.r+10);
+  if (item.kind === "banishBook") ctx.fillText(`BANISH`, item.x, item.y+item.r+10);
   if (item.kind === "powerPotion") ctx.fillText(`POWER UP`, item.x, item.y+item.r+10);
   if (item.kind === "poison") ctx.fillText(`POISON +${item.value}`, item.x, item.y+item.r+10);
   if (item.kind === "bomb") ctx.fillText(`BOMB ${item.value}`, item.x, item.y+item.r+10);
@@ -324,7 +328,7 @@ function drawItem(item) {
   if (item.kind === "zombieScroll") ctx.fillText(`ZOMBIE SCROLL`, item.x, item.y+item.r+10);
   if (item.kind === "shieldBomb") ctx.fillText(`SHIELD BOMB`, item.x, item.y+item.r+10);
   if (item.kind === "stoneBomb") ctx.fillText(`STONE BOMB`, item.x, item.y+item.r+10);
-  if (item.kind === "nukeBomb") ctx.fillText(`NUKE`, item.x, item.y+item.r+10);
+  if (item.kind === "nukeBomb") ctx.fillText(`NUKE NO STONE`, item.x, item.y+item.r+10);
   if (item.kind === "enrageBomb") ctx.fillText(`ENRAGE`, item.x, item.y+item.r+10);
   if (item.kind === "blindBomb") ctx.fillText(`BLIND BOMB`, item.x, item.y+item.r+10);
   if (item.kind === "stoneScroll") ctx.fillText(`STONE SCROLL`, item.x, item.y+item.r+10);

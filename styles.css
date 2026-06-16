@@ -243,3 +243,67 @@ button:focus-visible {
     height: 48px;
   }
 }
+
+.book-overlay {
+  position: fixed;
+  inset: 0;
+  display: none;
+  place-items: center;
+  padding: 18px;
+  background: rgba(0,0,0,.72);
+  z-index: 30;
+}
+
+.book-overlay.is-visible {
+  display: grid;
+}
+
+.book-panel {
+  width: min(760px, 100%);
+  max-height: min(82vh, 720px);
+  overflow: auto;
+  border: 2px solid rgba(255,255,255,.7);
+  background: #101015;
+  color: white;
+  padding: 16px;
+}
+
+.book-panel h2 {
+  margin: 0 0 12px;
+  font-size: 22px;
+}
+
+.book-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(112px, 1fr));
+  gap: 10px;
+}
+
+.book-choice {
+  display: grid;
+  grid-template-columns: 46px minmax(0, 1fr);
+  align-items: center;
+  gap: 8px;
+  min-height: 58px;
+  padding: 6px;
+  border: 1px solid rgba(255,255,255,.35);
+  background: #19191f;
+  color: white;
+  text-align: left;
+  font: 700 13px system-ui, sans-serif;
+}
+
+.book-choice img {
+  width: 44px;
+  height: 44px;
+}
+
+.book-choice span {
+  overflow-wrap: anywhere;
+}
+
+.book-close {
+  width: 100%;
+  margin-top: 12px;
+  min-height: 44px;
+}

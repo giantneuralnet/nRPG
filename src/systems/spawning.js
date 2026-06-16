@@ -33,6 +33,10 @@ function spawnThing(allowExileReturn = true, replaceIndex = null, checked = true
       exileQueue = exileQueueBefore;
       continue;
     }
+    if (hero && hero.lucky > 0 && !isHelpfulEntity(candidate) && rng() < Math.min(.75, hero.lucky * .12)) {
+      exileQueue = exileQueueBefore;
+      continue;
+    }
     if (hasSafeAction(candidate, replaceIndex)) return candidate;
     exileQueue = exileQueueBefore;
   }
@@ -60,7 +64,7 @@ function isHelpfulEntity(t) {
   if (t.type !== "item") return false;
   return [
     "sword","shield","potion","poison","powerPotion","regenPotion","vampirePotion","moltenPotion","dodgePotion","critPotion","surprisePotion",
-    "phoenixPotion","gunpowder","triggerStatus","maxHealthUp","clearBomb","cleanBomb","healBomb","iceBomb","shieldBomb","stoneBomb","stoneScroll",
+    "phoenixPotion","luckyCharm","gunpowder","multiplyStatus","triggerStatus","maxHealthUp","prayerBook","banishBook","clearBomb","cleanBomb","healBomb","iceBomb","shieldBomb","stoneBomb","stoneScroll",
     "killRandomItem","healRandomItem","exileItem","chest"
   ].includes(t.kind);
 }
@@ -127,7 +131,8 @@ function makeDoor(x,y,targetY,r,room) {
 }
 
 function makeMonster(x,y,targetY,r) {
-  const elite = rng() < .09 + Math.min(.08, kills * .002);
+  const ultraElite = rng() < .018 + Math.min(.035, kills * .001);
+  const elite = ultraElite || rng() < .09 + Math.min(.08, kills * .002);
 
   const hpType = rng();
   const atkType = rng();
@@ -167,6 +172,12 @@ function makeMonster(x,y,targetY,r) {
     r *= 1.12;
   }
 
+  if (ultraElite) {
+    hp = Math.floor(hp * 1.8);
+    atk = Math.floor(atk * 1.55);
+    r *= 1.1;
+  }
+
   const colors = ["#ff7070","#65d7ff","#ffcf4f","#b987ff","#ff8a4f","#ff6fd8","#8fa8ff"];
 
   return {
@@ -187,6 +198,7 @@ function makeMonster(x,y,targetY,r) {
     target:null,
     team:"enemy",
     elite,
+    ultraElite,
     shielded:rng()<.18,
     shieldBroken:false,
     zombie:false,
@@ -231,15 +243,18 @@ function makeKnight(x,y,targetY,r) {
 }
 
 function makeItem(x,y,targetY,r) {
-  const kind = pick([
+  const itemKinds = [
     "sword","shield","potion","potion","poison",
     "bomb","clearBomb","cleanBomb","randomBomb","weakenBomb","strengthBomb","shieldBomb",
     "cloudBomb","poisonBomb","fireBomb","lavaBomb","contagionBomb","echoBomb","soulBomb","healBomb","lightningBomb","iceBomb",
     "stoneBomb","nukeBomb","enrageBomb","blindBomb",
     "powerPotion","regenPotion","vampirePotion","moltenPotion","dodgePotion","critPotion","surprisePotion","decayCurse",
-    "phoenixPotion","confusionCurse","glitchCurse","unluckyCurse","gunpowder","triggerStatus","maxHealthUp","maxHealthDown","stoneScroll","zombieScroll","hauntedScroll","blessedScroll",
+    "phoenixPotion","confusionCurse","glitchCurse","luckyCharm","unluckyCurse","gunpowder","multiplyStatus","triggerStatus","maxHealthUp","maxHealthDown","prayerBook","banishBook","stoneScroll","zombieScroll","hauntedScroll","blessedScroll",
     "killRandomItem","healRandomItem","flashBang","exileItem","swapHealthItem","door","chest","chest"
-  ]);
+  ];
+  const banned = hero ? hero.banishedItems : [];
+  const allowed = itemKinds.filter(k => !banned.includes(k));
+  const kind = hero && hero.prayerKind && !banned.includes(hero.prayerKind) ? hero.prayerKind : pick(allowed.length ? allowed : itemKinds);
 
   if (kind === "door") {
     const room = pick([1,2,3,666].filter(n => n !== currentRoom));
@@ -264,11 +279,15 @@ function makeItem(x,y,targetY,r) {
       kind === "phoenixPotion" ? 1 :
       kind === "confusionCurse" ? rand(18,28) :
       kind === "glitchCurse" ? 1 :
+      kind === "luckyCharm" ? rand(1,2) :
       kind === "unluckyCurse" ? rand(1,2) :
       kind === "gunpowder" ? rand(1,3) :
-      kind === "triggerStatus" ? rand(1,2) :
+      kind === "multiplyStatus" ? rand(1,2) :
+      kind === "triggerStatus" ? 1 :
       kind === "maxHealthUp" ? rand(10,25) :
       kind === "maxHealthDown" ? rand(10,25) :
+      kind === "prayerBook" ? 0 :
+      kind === "banishBook" ? 0 :
       kind === "powerPotion" ? rand(6,10) :
       kind === "poison" ? rand(2,4) :
       kind === "bomb" ? rand(25,45) :

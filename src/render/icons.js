@@ -63,18 +63,22 @@ function makeIcon(type) {
     }
   }
 
-  if (type === "decayCurse" || type === "confusionCurse" || type === "glitchCurse" || type === "unluckyCurse" || type === "gunpowder" || type === "triggerStatus" || type === "maxHealthUp" || type === "maxHealthDown") {
+  if (type === "decayCurse" || type === "confusionCurse" || type === "glitchCurse" || type === "luckyCharm" || type === "unluckyCurse" || type === "gunpowder" || type === "multiplyStatus" || type === "triggerStatus" || type === "maxHealthUp" || type === "maxHealthDown" || type === "prayerBook" || type === "banishBook") {
     g.fillStyle =
       type === "decayCurse" ? "#8f6bff" :
       type === "confusionCurse" ? "#c86bff" :
       type === "glitchCurse" ? "#65d7ff" :
+      type === "luckyCharm" ? "#70ff8a" :
       type === "unluckyCurse" ? "#555" :
+      type === "multiplyStatus" ? "#ffe65c" :
       type === "triggerStatus" ? "#d8ecff" :
       type === "maxHealthUp" ? "#70ff8a" :
       type === "maxHealthDown" ? "#ff6b6b" :
+      type === "prayerBook" ? "#d8ecff" :
+      type === "banishBook" ? "#ff6b6b" :
       "#ffcf4f";
     g.beginPath(); g.roundRect(18,18,64,64,10); g.fill(); g.stroke();
-    g.fillStyle = type === "gunpowder" || type === "glitchCurse" ? "#111" : "white";
+    g.fillStyle = type === "gunpowder" || type === "glitchCurse" || type === "luckyCharm" || type === "multiplyStatus" || type === "prayerBook" || type === "banishBook" ? "#111" : "white";
     g.font = "bold 30px system-ui";
     g.textAlign = "center";
     g.textBaseline = "middle";
@@ -82,10 +86,14 @@ function makeIcon(type) {
       type === "decayCurse" ? "D" :
       type === "confusionCurse" ? "?" :
       type === "glitchCurse" ? "G" :
+      type === "luckyCharm" ? "L" :
       type === "unluckyCurse" ? "U" :
+      type === "multiplyStatus" ? "M" :
       type === "triggerStatus" ? "T" :
       type === "maxHealthUp" ? "+" :
       type === "maxHealthDown" ? "-" :
+      type === "prayerBook" ? "P" :
+      type === "banishBook" ? "B" :
       "B",
       50,52
     );
@@ -216,6 +224,6 @@ function makeIcon(type) {
   "sword","shield","potion","poison","bomb","clearBomb","randomBomb",
   "cleanBomb","weakenBomb","strengthBomb","cloudBomb","poisonBomb","fireBomb","lavaBomb","contagionBomb","echoBomb","soulBomb","healBomb","lightningBomb",
   "iceBomb","stoneBomb","nukeBomb","enrageBomb","blindBomb","chest","powerPotion","regenPotion","vampirePotion","moltenPotion",
-  "dodgePotion","critPotion","surprisePotion","decayCurse","phoenixPotion","confusionCurse","glitchCurse","unluckyCurse","gunpowder","triggerStatus","maxHealthUp","maxHealthDown","stoneScroll","zombieScroll",
+  "dodgePotion","critPotion","surprisePotion","decayCurse","phoenixPotion","confusionCurse","glitchCurse","luckyCharm","unluckyCurse","gunpowder","multiplyStatus","triggerStatus","maxHealthUp","maxHealthDown","prayerBook","banishBook","stoneScroll","zombieScroll",
   "hauntedScroll","blessedScroll","killRandomItem","healRandomItem","flashBang","exileItem","swapHealthItem","shieldBomb","monsterShield"
 ].forEach(t => icons[t] = makeIcon(t));

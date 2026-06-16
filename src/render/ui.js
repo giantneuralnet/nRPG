@@ -45,8 +45,10 @@ function drawHeroStatuses(x,y) {
   if (hero.phoenix > 0) statuses.push(["PHOENIX " + hero.phoenix, "#ff9d3b"]);
   if (hero.confused > 0) statuses.push(["CONFUSED " + hero.confused, "#c86bff"]);
   if (hero.glitched > 0) statuses.push(["GLITCHED " + hero.glitched, "#65d7ff"]);
+  if (hero.lucky > 0) statuses.push(["LUCKY " + hero.lucky, "#70ff8a"]);
   if (hero.unlucky > 0) statuses.push(["UNLUCKY " + hero.unlucky, "#bbbbbb"]);
   if (hero.gunpowder > 0) statuses.push(["GUNPOWDER " + hero.gunpowder, "#ffcf4f"]);
+  if (hero.multiply > 1) statuses.push(["MULTIPLY " + hero.multiply, "#ffe65c"]);
   if (hero.trigger > 0) statuses.push(["TRIGGER " + hero.trigger, "#d8ecff"]);
   if (hero.rage) statuses.push(["RAGE", "#ff3b3b"]);
   if (!statuses.length) return;
