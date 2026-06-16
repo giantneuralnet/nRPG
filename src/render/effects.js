@@ -17,6 +17,7 @@ function drawBoom() {
   if (boom.kind === "fire") ctx.strokeStyle = "rgba(255,120,40,.9)";
   if (boom.kind === "lava") ctx.strokeStyle = "rgba(255,90,20,.95)";
   if (boom.kind === "contagion") ctx.strokeStyle = "rgba(80,255,115,.9)";
+  if (boom.kind === "echo") ctx.strokeStyle = "rgba(114,223,255,.9)";
   if (boom.kind === "heal") ctx.strokeStyle = "rgba(255,100,150,.85)";
   if (boom.kind === "ice") ctx.strokeStyle = "rgba(100,220,255,.9)";
   if (boom.kind === "zombie") ctx.strokeStyle = "rgba(120,255,120,.9)";

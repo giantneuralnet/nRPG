@@ -32,6 +32,7 @@ const itemInfo = [
   ["fireBomb","Fire bomb","Sets monsters on fire for damage over time."],
   ["lavaBomb","Lava bomb","Drops long-lasting lava pools that add fire."],
   ["contagionBomb","Contagion bomb","Makes monsters copy their statuses to all other monsters when killed."],
+  ["echoBomb","Echo bomb","Makes enemies pulse damage during counterattacks."],
   ["soulBomb","Soul connection bomb","Links two monsters so they split incoming damage."],
   ["healBomb","Heal bomb","Heals you and monsters."],
   ["lightningBomb","Lightning bomb","Damages all monsters and you."],
@@ -61,6 +62,7 @@ const monsterInfo = [
   ["ghostZombie","Ghost zombie","Transparent zombie resurrected by a haunt."],
   ["haunted","Haunted","Purple eyes; rises as a ghost when killed."],
   ["contagious","Contagious","Copies statuses to all other monsters when killed."],
+  ["echo","Echo","Counterattacks pulse damage and can trigger more echo pulses."],
   ["stone","Stone","Cannot move or take damage."],
   ["burning","Burning","Takes periodic fire damage."],
   ["blind","Blind","Closed eyes; counters random targets."],
@@ -160,6 +162,7 @@ function infoMonster(kind) {
     ghost:kind === "ghostZombie",
     haunted:kind === "haunted",
     contagious:kind === "contagious",
+    echoDamage:kind === "echo",
     blind:kind === "blind",
     rage:kind === "rage",
     attacking:false,
@@ -198,6 +201,15 @@ function makeMonsterInfoIcon(kind) {
     g.setLineDash([8, 7]);
     g.beginPath();
     g.arc(50,50,m.r * 1.14,0,Math.PI*2);
+    g.stroke();
+    g.restore();
+  }
+  if (m.echoDamage) {
+    g.save();
+    g.strokeStyle = "#72dfff";
+    g.lineWidth = 4;
+    g.beginPath();
+    g.arc(50,50,m.r * 1.28,0,Math.PI*2);
     g.stroke();
     g.restore();
   }

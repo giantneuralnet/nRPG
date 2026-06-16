@@ -71,6 +71,7 @@ function useItem(item, index) {
   if (item.kind === "fireBomb") explode(item.x, item.y, item.value, "fire");
   if (item.kind === "lavaBomb") explode(item.x, item.y, item.value, "lava");
   if (item.kind === "contagionBomb") explode(item.x, item.y, item.value, "contagion");
+  if (item.kind === "echoBomb") explode(item.x, item.y, item.value, "echo");
   if (item.kind === "soulBomb") explode(item.x, item.y, item.value, "soul");
   if (item.kind === "healBomb") explode(item.x, item.y, item.value, "heal");
   if (item.kind === "iceBomb") explode(item.x, item.y, item.value, "ice");
@@ -174,6 +175,7 @@ function cleanMonster(m) {
   m.blind = false;
   m.rage = false;
   m.contagious = false;
+  m.echoDamage = false;
   m.shielded = false;
   m.shieldBroken = false;
   m.attacking = false;
@@ -569,6 +571,19 @@ function explode(x,y,power,kind) {
       count++;
     }
     if (!count) flash = "No monsters to infect!";
+  }
+
+  if (kind === "echo") {
+    let count = 0;
+    flash = `Echo bomb!`;
+    for (const m of board) {
+      if (!isCombatant(m) || m.team === "hero") continue;
+      m.echoDamage = true;
+      floatText(m.x,m.y,"ECHO","#72dfff");
+      burst(m.x,m.y,"#72dfff",10,4);
+      count++;
+    }
+    if (!count) flash = "No enemies to echo!";
   }
 
   if (kind === "soul") {

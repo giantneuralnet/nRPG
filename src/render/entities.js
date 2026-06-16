@@ -181,6 +181,16 @@ function drawMonster(m) {
     ctx.restore();
   }
 
+  if (m.echoDamage) {
+    ctx.save();
+    ctx.strokeStyle = "#72dfff";
+    ctx.lineWidth = 4;
+    ctx.beginPath();
+    ctx.arc(m.x,m.y,r * 1.28,0,Math.PI*2);
+    ctx.stroke();
+    ctx.restore();
+  }
+
   if (m.shielded && !m.shieldBroken) {
     const shieldSize = r * 1.55;
     if (!icons.monsterShield && typeof makeIcon === "function") icons.monsterShield = makeIcon("monsterShield");
@@ -223,7 +233,7 @@ function drawMonster(m) {
   ctx.textBaseline = "bottom";
   ctx.font = "bold 14px system-ui";
   ctx.fillStyle = "white";
-  ctx.fillText(`${m.team === "hero" ? "ALLY " : ""}${stone ? "STONE " : ""}${m.rage ? "RAGE " : ""}${m.blind ? "BLIND " : ""}${m.contagious ? "CONTAGIOUS " : ""}${m.shielded && !m.shieldBroken ? "SHIELDED " : ""}${m.ghost ? "GHOST " : ""}${m.haunted ? "HAUNTED " : ""}${m.zombie ? "ZOMBIE " : ""}${m.elite ? "ELITE " : ""}ATK ${m.atk}`,m.x,by-4);
+  ctx.fillText(`${m.team === "hero" ? "ALLY " : ""}${stone ? "STONE " : ""}${m.rage ? "RAGE " : ""}${m.blind ? "BLIND " : ""}${m.contagious ? "CONTAGIOUS " : ""}${m.echoDamage ? "ECHO " : ""}${m.shielded && !m.shieldBroken ? "SHIELDED " : ""}${m.ghost ? "GHOST " : ""}${m.haunted ? "HAUNTED " : ""}${m.zombie ? "ZOMBIE " : ""}${m.elite ? "ELITE " : ""}ATK ${m.atk}`,m.x,by-4);
 
   if (m.attacking) {
     ctx.fillStyle = "#ff6666";
@@ -312,6 +322,7 @@ function drawItem(item) {
   if (item.kind === "fireBomb") ctx.fillText(`FIRE BOMB`, item.x, item.y+item.r+10);
   if (item.kind === "lavaBomb") ctx.fillText(`LAVA BOMB`, item.x, item.y+item.r+10);
   if (item.kind === "contagionBomb") ctx.fillText(`CONTAGION`, item.x, item.y+item.r+10);
+  if (item.kind === "echoBomb") ctx.fillText(`ECHO BOMB`, item.x, item.y+item.r+10);
   if (item.kind === "soulBomb") ctx.fillText(`SOUL LINK`, item.x, item.y+item.r+10);
   if (item.kind === "healBomb") ctx.fillText(`HEAL BOMB`, item.x, item.y+item.r+10);
   if (item.kind === "iceBomb") ctx.fillText(`ICE BOMB`, item.x, item.y+item.r+10);

@@ -180,6 +180,7 @@ function makeMonster(x,y,targetY,r) {
     blind:false,
     rage:false,
     contagious:false,
+    echoDamage:false,
     attacking:false,
     parts:{
       color:pick(colors),
@@ -217,7 +218,7 @@ function makeItem(x,y,targetY,r) {
   const kind = pick([
     "sword","shield","potion","potion","poison",
     "bomb","clearBomb","cleanBomb","randomBomb","weakenBomb","strengthBomb","shieldBomb",
-    "cloudBomb","poisonBomb","fireBomb","lavaBomb","contagionBomb","soulBomb","healBomb","lightningBomb","iceBomb","zombieBomb",
+    "cloudBomb","poisonBomb","fireBomb","lavaBomb","contagionBomb","echoBomb","soulBomb","healBomb","lightningBomb","iceBomb","zombieBomb",
     "stoneBomb","nukeBomb","enrageBomb","blindBomb",
     "powerPotion","regenPotion","vampirePotion","stoneScroll","hauntedScroll","blessedScroll",
     "killRandomItem","healRandomItem","flashBang","exileItem","swapHealthItem","door","chest","chest"
@@ -246,6 +247,7 @@ function makeItem(x,y,targetY,r) {
       kind === "fireBomb" ? rand(5,9) :
       kind === "lavaBomb" ? rand(10,16) :
       kind === "contagionBomb" ? 0 :
+      kind === "echoBomb" ? 0 :
       kind === "soulBomb" ? 0 :
       kind === "healBomb" ? rand(25,50) :
       kind === "randomBomb" ? 0 :

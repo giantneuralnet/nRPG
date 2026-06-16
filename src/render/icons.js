@@ -93,7 +93,7 @@ function makeIcon(type) {
 
   if ([
     "bomb","clearBomb","randomBomb","weakenBomb","strengthBomb",
-    "cloudBomb","poisonBomb","fireBomb","lavaBomb","contagionBomb","soulBomb","healBomb","lightningBomb","iceBomb","zombieBomb","shieldBomb",
+    "cloudBomb","poisonBomb","fireBomb","lavaBomb","contagionBomb","echoBomb","soulBomb","healBomb","lightningBomb","iceBomb","zombieBomb","shieldBomb",
     "cleanBomb","stoneBomb","nukeBomb","enrageBomb","blindBomb"
   ].includes(type)) {
     const colors = {
@@ -107,6 +107,7 @@ function makeIcon(type) {
       fireBomb:"#ff7a2f",
       lavaBomb:"#d94112",
       contagionBomb:"#57ff75",
+      echoBomb:"#72dfff",
       soulBomb:"#ff3333",
       healBomb:"#ff5f8f",
       lightningBomb:"#ffe65c",
@@ -137,6 +138,7 @@ function makeIcon(type) {
       type === "fireBomb" ? "F" :
       type === "lavaBomb" ? "L" :
       type === "contagionBomb" ? "↯" :
+      type === "echoBomb" ? "E" :
       type === "soulBomb" ? "∿" :
       type === "healBomb" ? "+" :
       type === "lightningBomb" ? "⚡" :
@@ -171,7 +173,7 @@ function makeIcon(type) {
 
 [
   "sword","shield","potion","poison","bomb","clearBomb","randomBomb",
-  "cleanBomb","weakenBomb","strengthBomb","cloudBomb","poisonBomb","fireBomb","lavaBomb","contagionBomb","soulBomb","healBomb","lightningBomb",
+  "cleanBomb","weakenBomb","strengthBomb","cloudBomb","poisonBomb","fireBomb","lavaBomb","contagionBomb","echoBomb","soulBomb","healBomb","lightningBomb",
   "iceBomb","zombieBomb","stoneBomb","nukeBomb","enrageBomb","blindBomb","chest","powerPotion","regenPotion","vampirePotion","stoneScroll",
   "hauntedScroll","blessedScroll","killRandomItem","healRandomItem","flashBang","exileItem","swapHealthItem","shieldBomb","monsterShield"
 ].forEach(t => icons[t] = makeIcon(t));
