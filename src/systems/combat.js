@@ -125,7 +125,7 @@ function killMonster(index, giveXp = true) {
     sound("dead");
     floatText(dead.x, dead.y, "DOWN", "#d8ecff");
     burst(dead.x,dead.y,"#d8ecff",14,5);
-    board[index] = spawnThing();
+    board[index] = spawnThing(true, index);
     return;
   }
 
@@ -164,7 +164,7 @@ function killMonster(index, giveXp = true) {
     return;
   }
 
-  board[index] = spawnThing();
+  board[index] = spawnThing(true, index);
 }
 
 function makeGhost(dead) {

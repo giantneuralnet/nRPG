@@ -91,7 +91,7 @@ function useItem(item, index) {
 
   if (item.kind === "chest") openChest(item.x, item.y);
 
-  board[index] = spawnThing();
+  board[index] = spawnThing(true, index);
   checkStoneLock();
 }
 
@@ -296,7 +296,7 @@ function exileMonsters(x,y) {
     const t = board[i];
     if (t.type !== "monster") continue;
     exileQueue.push(t);
-    board[i] = spawnThing(false);
+    board[i] = spawnThing(false, i);
     count++;
   }
 
@@ -382,7 +382,7 @@ function explode(x,y,power,kind) {
     flash = `Clear bomb! No kills.`;
     for (let i = 0; i < board.length; i++) {
       floatText(board[i].x, board[i].y, "CLEARED", "#ffffff");
-      board[i] = spawnThing();
+      board[i] = spawnThing(true, i);
     }
     clouds = [];
     lavaPools = [];
@@ -594,7 +594,7 @@ function explode(x,y,power,kind) {
     for (let i = board.length - 1; i >= 0; i--) {
       const t = board[i];
       floatText(t.x,t.y,t.type === "monster" ? "KO" : "NUKED","#ff4f4f");
-      board[i] = spawnThing();
+      board[i] = spawnThing(true, i);
     }
     burst(x,y,"#ff4f4f",30,9);
   }
