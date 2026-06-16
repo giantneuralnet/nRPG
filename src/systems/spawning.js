@@ -64,7 +64,7 @@ function isHelpfulEntity(t) {
   if (t.type !== "item") return false;
   return [
     "sword","shield","potion","poison","powerPotion","regenPotion","vampirePotion","moltenPotion","dodgePotion","critPotion","surprisePotion",
-    "phoenixPotion","luckyCharm","gunpowder","multiplyStatus","triggerStatus","maxHealthUp","prayerBook","banishBook","clearBomb","cleanBomb","healBomb","iceBomb","shieldBomb","stoneBomb","stoneScroll",
+    "phoenixPotion","luckyCharm","gunpowder","multiplyStatus","triggerStatus","maxHealthUp","prayerBook","banishBook","clearBomb","cleanBomb","healBomb","iceBomb","shieldBomb","stoneBomb","stoneScroll","allyScroll","combustionScroll",
     "killRandomItem","healRandomItem","exileItem","chest"
   ].includes(t.kind);
 }
@@ -105,6 +105,7 @@ function playerDirectDamage(item) {
   if (item.kind === "bomb") return Math.floor(item.value * .6);
   if (item.kind === "lightningBomb") return Math.floor(item.value * .35);
   if (item.kind === "poisonBomb") return Math.floor(item.value * 1.2);
+  if (item.kind === "nukeBomb") return hero ? hero.hp : 9999;
   return 0;
 }
 
@@ -208,6 +209,7 @@ function makeMonster(x,y,targetY,r) {
     rage:false,
     contagious:false,
     echoDamage:false,
+    combustAt:0,
     attacking:false,
     parts:{
       color:pick(colors),
@@ -249,7 +251,7 @@ function makeItem(x,y,targetY,r) {
     "cloudBomb","poisonBomb","fireBomb","lavaBomb","contagionBomb","echoBomb","soulBomb","healBomb","lightningBomb","iceBomb",
     "stoneBomb","nukeBomb","enrageBomb","blindBomb",
     "powerPotion","regenPotion","vampirePotion","moltenPotion","dodgePotion","critPotion","surprisePotion","decayCurse",
-    "phoenixPotion","confusionCurse","glitchCurse","luckyCharm","unluckyCurse","gunpowder","multiplyStatus","triggerStatus","maxHealthUp","maxHealthDown","prayerBook","banishBook","stoneScroll","zombieScroll","hauntedScroll","blessedScroll",
+    "phoenixPotion","confusionCurse","glitchCurse","luckyCharm","unluckyCurse","gunpowder","multiplyStatus","triggerStatus","maxHealthUp","maxHealthDown","prayerBook","banishBook","stoneScroll","zombieScroll","hauntedScroll","blessedScroll","allyScroll","combustionScroll",
     "killRandomItem","healRandomItem","flashBang","exileItem","swapHealthItem","door","chest","chest"
   ];
   const banned = hero ? hero.banishedItems : [];
@@ -315,6 +317,8 @@ function makeItem(x,y,targetY,r) {
       kind === "stoneScroll" ? 0 :
       kind === "hauntedScroll" ? 0 :
       kind === "blessedScroll" ? 0 :
+      kind === "allyScroll" ? 0 :
+      kind === "combustionScroll" ? 0 :
       kind === "killRandomItem" ? 0 :
       kind === "healRandomItem" ? 0 :
       kind === "flashBang" ? 0 :

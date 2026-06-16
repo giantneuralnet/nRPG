@@ -17,6 +17,7 @@ function draw() {
     }
 
     drawBoom();
+    drawShockwaves();
     drawClouds();
 
     drawParticles();

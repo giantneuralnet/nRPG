@@ -273,6 +273,11 @@ button:focus-visible {
   font-size: 22px;
 }
 
+.book-prompt {
+  margin-bottom: 12px;
+  font: 800 15px system-ui, sans-serif;
+}
+
 .book-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(112px, 1fr));
@@ -302,8 +307,19 @@ button:focus-visible {
   overflow-wrap: anywhere;
 }
 
-.book-close {
+.book-choice.is-selected {
+  border-color: #ffe65c;
+  box-shadow: inset 0 0 0 3px #ffe65c;
+}
+
+.book-confirm {
   width: 100%;
   margin-top: 12px;
+  min-height: 44px;
+}
+
+.book-close {
+  width: 100%;
+  margin-top: 8px;
   min-height: 44px;
 }

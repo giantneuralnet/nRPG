@@ -57,12 +57,14 @@ const itemInfo = [
   ["zombieScroll","Zombie scroll","Turns one monster into a zombie."],
   ["shieldBomb","Shield all bomb","Gives every current monster a fresh shield."],
   ["stoneBomb","Stone bomb","Turns every current monster into stone."],
-  ["nukeBomb","Nuke bomb","Clears non-stone entities and leaves you at 1 HP."],
+  ["nukeBomb","Nuke","Nukes everything."],
   ["enrageBomb","Enrage bomb","Makes monsters attack nearby targets and turn red."],
   ["blindBomb","Blind bomb","Blinds monsters so counters hit random targets."],
   ["stoneScroll","Stone scroll","Makes one monster permanently stone."],
   ["hauntedScroll","Curse scroll","Haunts monsters so they rise once as ghosts."],
   ["blessedScroll","Blessed curse","Heals you when you kill a monster."],
+  ["allyScroll","Ally scroll","Makes a random monster your ally."],
+  ["combustionScroll","Combustion scroll","Starts a 10 second countdown on a monster, then it explodes for its attack."],
   ["killRandomItem","Kill random","Kills a random monster or backfires on you."],
   ["healRandomItem","Heal random","Fully heals a random target."],
   ["flashBang","Flash bang","Blinds the screen and stops monster fights for 5 seconds."],
@@ -81,6 +83,7 @@ const monsterInfo = [
   ["haunted","Haunted","Purple eyes; rises as a ghost when killed."],
   ["contagious","Contagious","Copies statuses, including ally, to all other monsters when killed."],
   ["echo","Shockwave","Counterattacks emit a radius that can trigger more shockwaves."],
+  ["combustion","Combustion","Orange eyes and a countdown; explodes for attack value at zero."],
   ["stone","Stone","Cannot move or take damage."],
   ["burning","Burning","Takes periodic fire damage."],
   ["blind","Blind","Closed eyes; counters random targets."],
@@ -182,6 +185,7 @@ function infoMonster(kind) {
     haunted:kind === "haunted",
     contagious:kind === "contagious",
     echoDamage:kind === "echo",
+    combustAt:kind === "combustion" ? performance.now() + 10000 : 0,
     blind:kind === "blind",
     rage:kind === "rage",
     attacking:false,
@@ -255,6 +259,16 @@ function buildInfoList() {
   }
 }
 
+function sampleBookItems(count = 3) {
+  const pool = itemInfo.slice();
+  const sample = [];
+  while (pool.length && sample.length < count) {
+    const index = Math.floor(rng() * pool.length);
+    sample.push(pool.splice(index,1)[0]);
+  }
+  return sample;
+}
+
 function openItemBook(mode) {
   const overlay = document.createElement("div");
   overlay.className = "book-overlay is-visible";
@@ -263,10 +277,22 @@ function openItemBook(mode) {
   const title = document.createElement("h2");
   title.textContent = mode === "prayer" ? "PRAYER BOOK" : "BANISH BOOK";
   panel.appendChild(title);
+  const prompt = document.createElement("div");
+  prompt.className = "book-prompt";
+  prompt.textContent = mode === "prayer" ? "Pray for this item:" : "Item to banish:";
+  panel.appendChild(prompt);
 
   const grid = document.createElement("div");
   grid.className = "book-grid";
-  for (const [kind,name] of itemInfo) {
+  let selected = null;
+  let selectedName = "";
+  const confirm = document.createElement("button");
+  confirm.className = "book-confirm";
+  confirm.type = "button";
+  confirm.textContent = "CONFIRM";
+  confirm.disabled = true;
+
+  for (const [kind,name] of sampleBookItems()) {
     if (!icons[kind] && typeof makeIcon === "function") icons[kind] = makeIcon(kind);
     const button = document.createElement("button");
     button.className = "book-choice";
@@ -281,19 +307,30 @@ function openItemBook(mode) {
     span.textContent = name;
     button.appendChild(span);
     button.addEventListener("click", () => {
-      if (mode === "prayer") {
-        hero.prayerKind = kind;
-        flash = `${name} prayed`;
-      } else {
-        if (!hero.banishedItems.includes(kind)) hero.banishedItems.push(kind);
-        if (hero.prayerKind === kind) hero.prayerKind = null;
-        flash = `${name} banished`;
+      selected = kind;
+      selectedName = name;
+      for (const choice of grid.querySelectorAll(".book-choice")) {
+        choice.classList.toggle("is-selected", choice === button);
       }
-      overlay.remove();
+      confirm.disabled = false;
     });
     grid.appendChild(button);
   }
   panel.appendChild(grid);
+
+  confirm.addEventListener("click", () => {
+    if (!selected) return;
+    if (mode === "prayer") {
+      hero.prayerKind = selected;
+      flash = `${selectedName} prayed`;
+    } else {
+      if (!hero.banishedItems.includes(selected)) hero.banishedItems.push(selected);
+      if (hero.prayerKind === selected) hero.prayerKind = null;
+      flash = `${selectedName} banished`;
+    }
+    overlay.remove();
+  });
+  panel.appendChild(confirm);
 
   const close = document.createElement("button");
   close.className = "book-close";

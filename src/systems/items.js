@@ -132,6 +132,8 @@ function applyItemEffect(item) {
   if (item.kind === "stoneScroll") stoneRandomMonster(item.x,item.y);
   if (item.kind === "hauntedScroll") hauntMonsters(item.x,item.y);
   if (item.kind === "blessedScroll") blessHero(item.x,item.y);
+  if (item.kind === "allyScroll") allyRandomMonster(item.x,item.y);
+  if (item.kind === "combustionScroll") combustRandomMonster(item.x,item.y);
   if (item.kind === "killRandomItem") killRandomTarget(item.x,item.y);
   if (item.kind === "healRandomItem") healRandomTarget(item.x,item.y);
   if (item.kind === "flashBang") flashBang(item.x,item.y);
@@ -235,6 +237,42 @@ function blessHero(x,y) {
   sound("level");
 }
 
+function allyRandomMonster(x,y) {
+  const monsters = board.filter(t => t.type === "monster" && t.team !== "hero");
+  if (monsters.length <= 0) {
+    flash = "No monster to ally!";
+    floatText(x,y,"NO TARGET","#d8ecff");
+    sound("item");
+    return;
+  }
+
+  const m = pick(monsters);
+  m.team = "hero";
+  m.target = null;
+  m.attacking = false;
+  flash = "Ally scroll!";
+  floatText(m.x,m.y,"ALLY","#d8ecff");
+  burst(m.x,m.y,"#d8ecff",16,4);
+  sound("level");
+}
+
+function combustRandomMonster(x,y) {
+  const monsters = board.filter(t => t.type === "monster" && !t.stone && !t.combustAt);
+  if (monsters.length <= 0) {
+    flash = "No monster to combust!";
+    floatText(x,y,"NO TARGET","#ff9d3b");
+    sound("item");
+    return;
+  }
+
+  const m = pick(monsters);
+  m.combustAt = performance.now() + 10000;
+  flash = "Spontaneous combustion!";
+  floatText(m.x,m.y,"10","#ff9d3b");
+  burst(m.x,m.y,"#ff9d3b",16,4);
+  sound("zap");
+}
+
 function cleanMonster(m) {
   m.poison = 0;
   m.fire = 0;
@@ -245,6 +283,7 @@ function cleanMonster(m) {
   m.rage = false;
   m.contagious = false;
   m.echoDamage = false;
+  m.combustAt = 0;
   m.shielded = false;
   m.shieldBroken = false;
   m.attacking = false;
@@ -305,6 +344,14 @@ function zombifyMonster(m) {
     m.parts.color = "#6cff6c";
   }
   m.attacking = false;
+}
+
+function spontaneousCombust(m) {
+  if (!m || m.type !== "monster") return;
+  m.combustAt = 0;
+  flash = "Spontaneous combustion!";
+  floatText(m.x,m.y,"BOOM","#ff9d3b");
+  explode(m.x,m.y,Math.max(1, m.atk),"normal");
 }
 
 function replaceDefeated(index, giveXp = false) {
@@ -534,6 +581,7 @@ function explode(x,y,power,kind) {
     clouds = [];
     lavaPools = [];
     soulLinks = [];
+    shockwaves = [];
     burst(x,y,"#ffffff",20,6);
   }
 
@@ -549,6 +597,7 @@ function explode(x,y,power,kind) {
     clouds = [];
     lavaPools = [];
     soulLinks = [];
+    shockwaves = [];
     burst(x,y,"#d8ecff",18,5);
   }
 
@@ -761,25 +810,20 @@ function explode(x,y,power,kind) {
   }
 
   if (kind === "nuke") {
-    const killed = board.filter(t => t.type === "monster" && t.team !== "hero" && !t.stone).length;
+    const killed = board.filter(t => t.type === "monster" && t.team !== "hero").length;
     kills += killed;
     flash = killed > 0 ? `NUKE! +${killed} kills` : `NUKE!`;
-    hero.hp = 1;
     for (let i = board.length - 1; i >= 0; i--) {
       const t = board[i];
-      if (t.type === "monster" && t.stone) {
-        floatText(t.x,t.y,"STONE","#bbbbbb");
-        continue;
-      }
       floatText(t.x,t.y,t.type === "monster" ? "KO" : "NUKED","#ff4f4f");
       board[i] = spawnThing(true, i);
     }
     burst(x,y,"#ff4f4f",30,9);
-    if (kills >= 20) {
-      gameState = "win";
-      flash = "YOU WIN!";
-      sound("level");
-    }
+    hero.hp = 0;
+    hero.alive = false;
+    gameState = "dead";
+    flash = "NUKED";
+    sound("dead");
   }
 
   if (kind === "enrage") {

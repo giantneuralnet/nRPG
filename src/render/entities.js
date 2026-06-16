@@ -47,7 +47,7 @@ function drawMonsterBodyOn(renderCtx, m, x, y, r, shakeAmount = 0) {
   }
 
   if (m.blind) {
-    renderCtx.strokeStyle = m.haunted ? "#b987ff" : "white";
+    renderCtx.strokeStyle = m.combustAt ? "#ff9d3b" : m.haunted ? "#b987ff" : "white";
     renderCtx.lineWidth = 8;
     for (let i=0;i<p.eyes;i++) {
       const ex = (i-(p.eyes-1)/2)*25;
@@ -57,12 +57,12 @@ function drawMonsterBodyOn(renderCtx, m, x, y, r, shakeAmount = 0) {
       renderCtx.stroke();
     }
   } else {
-    const eyeColor = m.haunted ? "#b987ff" : "white";
+    const eyeColor = m.combustAt ? "#ff9d3b" : m.haunted ? "#b987ff" : "white";
     renderCtx.fillStyle = eyeColor;
     for (let i=0;i<p.eyes;i++) {
       const ex = (i-(p.eyes-1)/2)*25;
       renderCtx.beginPath(); renderCtx.arc(ex,-20,11,0,Math.PI*2); renderCtx.fill();
-      renderCtx.fillStyle = m.haunted ? "white" : m.zombie ? "#111" : "black";
+      renderCtx.fillStyle = m.combustAt || m.haunted ? "white" : m.zombie ? "#111" : "black";
       renderCtx.beginPath(); renderCtx.arc(ex,-20,5,0,Math.PI*2); renderCtx.fill();
       renderCtx.fillStyle = eyeColor;
     }
@@ -123,7 +123,7 @@ function drawKnightBodyOn(renderCtx, k, x, y, r, shakeAmount = 0) {
   renderCtx.fill();
   renderCtx.stroke();
 
-  renderCtx.fillStyle = k.blind ? "#dddddd" : "#6aa8ff";
+  renderCtx.fillStyle = k.combustAt ? "#ff9d3b" : k.blind ? "#dddddd" : "#6aa8ff";
   renderCtx.beginPath();
   renderCtx.roundRect(-28,-62,56,34,10);
   renderCtx.fill();
@@ -137,7 +137,7 @@ function drawKnightBodyOn(renderCtx, k, x, y, r, shakeAmount = 0) {
     renderCtx.lineTo(18,-45);
     renderCtx.stroke();
   } else {
-    renderCtx.fillStyle = "#111";
+    renderCtx.fillStyle = k.combustAt ? "white" : "#111";
     renderCtx.fillRect(-18,-48,36,8);
   }
 
@@ -215,7 +215,8 @@ function drawMonster(m) {
   ctx.textBaseline = "bottom";
   ctx.font = "bold 14px system-ui";
   ctx.fillStyle = "white";
-  ctx.fillText(`${m.team === "hero" ? "ALLY " : ""}${stone ? "STONE " : ""}${m.rage ? "RAGE " : ""}${m.blind ? "BLIND " : ""}${m.contagious ? "CONTAGIOUS " : ""}${m.echoDamage ? "SHOCK " : ""}${m.shielded && !m.shieldBroken ? "SHIELDED " : ""}${m.ghost ? "GHOST " : ""}${m.haunted ? "HAUNTED " : ""}${m.zombie ? "ZOMBIE " : ""}${m.ultraElite ? "ULTRA " : m.elite ? "ELITE " : ""}ATK ${m.atk}`,m.x,by-4);
+  const combustText = m.combustAt ? `BURN ${Math.max(0, Math.ceil((m.combustAt - performance.now()) / 1000))} ` : "";
+  ctx.fillText(`${m.team === "hero" ? "ALLY " : ""}${stone ? "STONE " : ""}${combustText}${m.rage ? "RAGE " : ""}${m.blind ? "BLIND " : ""}${m.contagious ? "CONTAGIOUS " : ""}${m.echoDamage ? "SHOCK " : ""}${m.shielded && !m.shieldBroken ? "SHIELDED " : ""}${m.ghost ? "GHOST " : ""}${m.haunted ? "HAUNTED " : ""}${m.zombie ? "ZOMBIE " : ""}${m.ultraElite ? "ULTRA " : m.elite ? "ELITE " : ""}ATK ${m.atk}`,m.x,by-4);
 
   if (m.attacking) {
     ctx.fillStyle = "#ff6666";
@@ -328,12 +329,14 @@ function drawItem(item) {
   if (item.kind === "zombieScroll") ctx.fillText(`ZOMBIE SCROLL`, item.x, item.y+item.r+10);
   if (item.kind === "shieldBomb") ctx.fillText(`SHIELD BOMB`, item.x, item.y+item.r+10);
   if (item.kind === "stoneBomb") ctx.fillText(`STONE BOMB`, item.x, item.y+item.r+10);
-  if (item.kind === "nukeBomb") ctx.fillText(`NUKE NO STONE`, item.x, item.y+item.r+10);
+  if (item.kind === "nukeBomb") ctx.fillText(`NUKE`, item.x, item.y+item.r+10);
   if (item.kind === "enrageBomb") ctx.fillText(`ENRAGE`, item.x, item.y+item.r+10);
   if (item.kind === "blindBomb") ctx.fillText(`BLIND BOMB`, item.x, item.y+item.r+10);
   if (item.kind === "stoneScroll") ctx.fillText(`STONE SCROLL`, item.x, item.y+item.r+10);
   if (item.kind === "hauntedScroll") ctx.fillText(`CURSE SCROLL`, item.x, item.y+item.r+10);
   if (item.kind === "blessedScroll") ctx.fillText(`BLESS CURSE`, item.x, item.y+item.r+10);
+  if (item.kind === "allyScroll") ctx.fillText(`ALLY SCROLL`, item.x, item.y+item.r+10);
+  if (item.kind === "combustionScroll") ctx.fillText(`COMBUST`, item.x, item.y+item.r+10);
   if (item.kind === "killRandomItem") ctx.fillText(`KILL RANDOM`, item.x, item.y+item.r+10);
   if (item.kind === "healRandomItem") ctx.fillText(`HEAL RANDOM`, item.x, item.y+item.r+10);
   if (item.kind === "flashBang") ctx.fillText(`FLASH BANG`, item.x, item.y+item.r+10);

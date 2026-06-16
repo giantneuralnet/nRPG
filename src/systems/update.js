@@ -40,6 +40,13 @@ function update() {
     if (boom.t <= 0) boom = null;
   }
 
+  if (shockwaves) {
+    for (let i = shockwaves.length - 1; i >= 0; i--) {
+      shockwaves[i].t--;
+      if (shockwaves[i].t <= 0) shockwaves.splice(i,1);
+    }
+  }
+
   if (lavaPools) {
     for (let i = lavaPools.length - 1; i >= 0; i--) {
       lavaPools[i].r *= .998;
@@ -89,7 +96,7 @@ function update() {
     flash = "Glitched!";
   }
 
-  if (now - lastPoisonTick >= 2000) {
+  if (now - lastPoisonTick >= 1000) {
     lastPoisonTick = now;
     statusTick();
   }

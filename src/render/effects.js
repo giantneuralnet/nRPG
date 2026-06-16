@@ -45,6 +45,22 @@ function drawBoom() {
   ctx.restore();
 }
 
+function drawShockwaves() {
+  if (!shockwaves || !shockwaves.length) return;
+
+  ctx.save();
+  ctx.strokeStyle = "rgba(114,223,255,.9)";
+  ctx.lineWidth = 6;
+  for (const wave of shockwaves) {
+    const progress = 1 - wave.t / wave.life;
+    ctx.globalAlpha = Math.max(.08, wave.t / wave.life);
+    ctx.beginPath();
+    ctx.arc(wave.x,wave.y,wave.r*progress,0,Math.PI*2);
+    ctx.stroke();
+  }
+  ctx.restore();
+}
+
 function drawBlind() {
   const remaining = blindUntil - performance.now();
   if (remaining <= 0) return;

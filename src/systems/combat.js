@@ -1,5 +1,6 @@
 function statusTick() {
   if (gameState !== "playing") return;
+  const now = performance.now();
 
   if (hero.regenTicks > 0) {
     const amount = Math.max(1, Math.floor(hero.regenPower * 1.25));
@@ -11,6 +12,11 @@ function statusTick() {
   for (let i = board.length - 1; i >= 0; i--) {
     const m = board[i];
     if (m.type !== "monster") continue;
+
+    if (m.combustAt && now >= m.combustAt) {
+      spontaneousCombust(m);
+      return;
+    }
 
     if (m.stone && (m.poison > 0 || m.fire > 0)) {
       floatText(m.x, m.y, "STONE", "#bbbbbb");
@@ -230,6 +236,7 @@ function copyContagiousStatuses(source, target) {
   target.blind = target.blind || source.blind;
   target.rage = target.rage || source.rage;
   target.echoDamage = target.echoDamage || source.echoDamage;
+  target.combustAt = target.combustAt || source.combustAt;
   target.ghost = target.ghost || source.ghost;
 
   if (source.zombie && !target.zombie) zombifyMonster(target);
@@ -270,6 +277,7 @@ function makeGhost(dead) {
     rage: dead.rage,
     contagious: false,
     echoDamage: dead.echoDamage,
+    combustAt: dead.combustAt,
     attacking: false,
     vx: (rng() - .5) * 2,
     vy: (rng() - .5) * 2,
@@ -277,26 +285,31 @@ function makeGhost(dead) {
   };
 }
 
-function shockwavePulse(source, visited = new Set()) {
-  if (!source || visited.has(source)) return;
-  visited.add(source);
+function shockwavePulse(source) {
+  if (!source) return;
 
-  const radius = source.r * 3.1 + 120;
-  const pulseDamage = Math.max(1, Math.floor(source.atk * .65));
-  floatText(source.x,source.y,"SHOCK","#72dfff");
-  boom = { x:source.x, y:source.y, r:radius, t:20, kind:"echo" };
-  burst(source.x,source.y,"#72dfff",18,6);
+  const queue = [source];
+  let pulses = 0;
+  const maxPulses = 18;
 
-  const chained = [];
-  for (const t of board) {
-    if (t === source || t.type !== "monster" || t.hp <= 0) continue;
-    if (dist(source.x,source.y,t.x,t.y) > radius) continue;
-    const canChain = t.echoDamage && !visited.has(t);
-    damage(t,pulseDamage,t.x,t.y,"#72dfff", true);
-    if (canChain) chained.push(t);
+  while (queue.length && pulses < maxPulses) {
+    const emitter = queue.shift();
+    if (!emitter || emitter.type !== "monster" || emitter.hp <= 0) continue;
+
+    pulses++;
+    const radius = emitter.r * 3.1 + 120;
+    const pulseDamage = Math.max(1, Math.floor(emitter.atk * .65));
+    floatText(emitter.x,emitter.y,"SHOCK","#72dfff");
+    shockwaves.push({ x:emitter.x, y:emitter.y, r:radius, t:18, life:18 });
+    burst(emitter.x,emitter.y,"#72dfff",12,5);
+
+    for (const t of board) {
+      if (t === emitter || t.type !== "monster" || t.hp <= 0) continue;
+      if (dist(emitter.x,emitter.y,t.x,t.y) > radius) continue;
+      damage(t,pulseDamage,t.x,t.y,"#72dfff", true);
+      if (t.echoDamage && queue.length + pulses < maxPulses) queue.push(t);
+    }
   }
-
-  for (const t of chained) shockwavePulse(t, visited);
 
   for (let i = board.length - 1; i >= 0; i--) {
     const t = board[i];
