@@ -142,6 +142,7 @@ function killMonster(index, giveXp = true) {
   sound("dead");
   floatText(dead.x, dead.y, "KO", "#ff4f4f");
   burst(dead.x,dead.y,"#ff4f4f",18,6);
+  if (dead.contagious) spreadContagion(dead);
 
   if (hero.blessed > 0) {
     const amount = Math.max(1, Math.floor(hero.maxHp * .12));
@@ -167,6 +168,50 @@ function killMonster(index, giveXp = true) {
   board[index] = spawnThing(true, index);
 }
 
+function spreadContagion(source) {
+  let count = 0;
+  for (const target of board) {
+    if (target === source || target.type !== "monster" || target.hp <= 0) continue;
+    copyContagiousStatuses(source, target);
+    floatText(target.x,target.y,"SPREAD","#57ff75");
+    burst(target.x,target.y,"#57ff75",8,3);
+    count++;
+  }
+  if (count) {
+    flash = `Contagion spread to ${count}`;
+    sound("zap");
+  }
+}
+
+function copyContagiousStatuses(source, target) {
+  target.poison = Math.max(target.poison || 0, source.poison || 0);
+  target.fire = Math.max(target.fire || 0, source.fire || 0);
+  target.stone = target.stone || source.stone;
+  target.haunted = target.haunted || source.haunted;
+  target.blind = target.blind || source.blind;
+  target.rage = target.rage || source.rage;
+  target.contagious = target.contagious || source.contagious;
+  target.ghost = target.ghost || source.ghost;
+
+  if (source.zombie && !target.zombie) zombifyMonster(target);
+  if (source.shielded && !source.shieldBroken) {
+    target.shielded = true;
+    target.shieldBroken = false;
+  }
+  if (source.frozenUntil && source.frozenUntil > performance.now()) {
+    target.frozenUntil = Math.max(target.frozenUntil || 0, source.frozenUntil);
+  }
+  if (target.rage && target.parts) {
+    target.parts.originalColor = target.parts.originalColor || target.parts.color;
+    target.parts.color = "#ff3b3b";
+  }
+  if (target.stone) {
+    target.attacking = false;
+    target.vx = 0;
+    target.vy = 0;
+  }
+}
+
 function makeGhost(dead) {
   return {
     ...dead,
@@ -183,6 +228,7 @@ function makeGhost(dead) {
     haunted: false,
     blind: dead.blind,
     rage: dead.rage,
+    contagious: dead.contagious,
     attacking: false,
     vx: (rng() - .5) * 2,
     vy: (rng() - .5) * 2,
