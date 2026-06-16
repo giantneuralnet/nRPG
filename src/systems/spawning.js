@@ -94,7 +94,10 @@ function isSafeMonsterAction(m) {
   if (performance.now() < m.frozenUntil) return true;
   if (performance.now() < blindUntil) return true;
   if (m.blind) return true;
-  return Math.max(1, m.atk - getHeroDef()) < hero.hp;
+
+  const hitsToKill = Math.max(1, Math.ceil(m.hp / Math.max(1, getHeroAtk())));
+  const counterDamage = Math.max(1, m.atk - getHeroDef());
+  return hitsToKill * counterDamage < hero.hp;
 }
 
 function isSafeItemAction(item) {
