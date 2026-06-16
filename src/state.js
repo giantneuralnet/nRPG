@@ -31,7 +31,7 @@ function resetGame() {
     rage: false
   };
 
-  rooms = [null, null, null, null];
+  rooms = {};
   currentRoom = 1;
   exileQueue = [];
   floats = [];

@@ -171,12 +171,13 @@ function drawMonster(m) {
 
   if (m.haunted) {
     ctx.save();
-    ctx.globalCompositeOperation = "destination-over";
-    ctx.shadowColor = "#b987ff";
-    ctx.shadowBlur = 18;
-    for (const [ox,oy] of [[0,-5],[5,0],[0,5],[-5,0],[4,4],[-4,4],[4,-4],[-4,-4]]) {
-      drawMonsterBodyOn(ctx, m, m.x + ox, m.y + oy, r, 0);
-    }
+    ctx.translate(m.x + r * .72, m.y - r * .72);
+    ctx.rotate(Math.PI / 4);
+    ctx.fillStyle = "#b987ff";
+    ctx.strokeStyle = "white";
+    ctx.lineWidth = 2;
+    ctx.fillRect(-r * .18, -r * .18, r * .36, r * .36);
+    ctx.strokeRect(-r * .18, -r * .18, r * .36, r * .36);
     ctx.restore();
   }
 
@@ -255,8 +256,9 @@ function drawDoorOn(renderCtx, door) {
   renderCtx.fillStyle = "white";
   renderCtx.textAlign = "center";
   renderCtx.textBaseline = "middle";
-  renderCtx.font = `bold ${Math.floor(door.r * .9)}px system-ui`;
-  renderCtx.fillText(door.room, door.x, door.y - door.r * .2);
+  const label = `${door.room}`;
+  renderCtx.font = `bold ${Math.floor(door.r * (label.length > 2 ? .55 : .9))}px system-ui`;
+  renderCtx.fillText(label, door.x, door.y - door.r * .2);
   renderCtx.restore();
 }
 

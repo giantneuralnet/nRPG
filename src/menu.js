@@ -66,7 +66,7 @@ const monsterInfo = [
   ["frozen","Frozen","Cannot counter while frozen."],
   ["poisoned","Poisoned","Takes periodic poison damage."],
   ["knight","Knight","Ally that attacks the monster you target."],
-  ["door","Door","Switches to one of the three remembered rooms."]
+  ["door","Door","Switches to one of the four remembered rooms."]
 ];
 
 function resumeAudio() {
@@ -189,11 +189,15 @@ function makeMonsterInfoIcon(kind) {
   const m = infoMonster(kind);
   drawMonsterBodyOn(g, m, 50, 50, m.r, 0);
   if (m.haunted) {
-    g.strokeStyle = "#b987ff";
-    g.lineWidth = 5;
-    g.beginPath();
-    g.arc(50,50,m.r*1.35,0,Math.PI*2);
-    g.stroke();
+    g.save();
+    g.translate(50 + m.r * .72, 50 - m.r * .72);
+    g.rotate(Math.PI / 4);
+    g.fillStyle = "#b987ff";
+    g.strokeStyle = "white";
+    g.lineWidth = 2;
+    g.fillRect(-m.r * .18, -m.r * .18, m.r * .36, m.r * .36);
+    g.strokeRect(-m.r * .18, -m.r * .18, m.r * .36, m.r * .36);
+    g.restore();
   }
   if (!icons.monsterShield && typeof makeIcon === "function") icons.monsterShield = makeIcon("monsterShield");
   if (m.shielded && !m.shieldBroken && icons.monsterShield) {

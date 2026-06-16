@@ -89,6 +89,11 @@ function makeMonster(x,y,targetY,r) {
     atk = Math.floor(atk * 1.15);
   }
 
+  if (currentRoom === 666) {
+    hp *= 2;
+    atk *= 2;
+  }
+
   if (elite) {
     hp = Math.floor(hp * 2.8);
     atk = Math.floor(atk * 2.1);
@@ -165,7 +170,7 @@ function makeItem(x,y,targetY,r) {
   ]);
 
   if (kind === "door") {
-    const room = pick([1,2,3].filter(n => n !== currentRoom));
+    const room = pick([1,2,3,666].filter(n => n !== currentRoom));
     return makeDoor(x,y,targetY,r * 1.12,room);
   }
 
