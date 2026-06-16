@@ -1,5 +1,5 @@
 let gameState = "menu";
-let hero, board, rooms, currentRoom, exileQueue, kills, flash, shake, boom, floats, particles, clouds, lavaPools, soulLinks, lastPoisonTick, blindUntil;
+let hero, board, rooms, currentRoom, exileQueue, kills, flash, shake, boom, floats, particles, clouds, lavaPools, soulLinks, lastPoisonTick, lastDecayTick, blindUntil;
 
 function difficultyScale() {
   if (settings.difficulty === "easy") return 0;
@@ -28,7 +28,18 @@ function resetGame() {
     regenPower: 0,
     vampire: 0,
     blessed: 0,
-    rage: false
+    rage: false,
+    molten: 0,
+    dodge: 0,
+    crit: 0,
+    surprise: 0,
+    decay: 0,
+    phoenix: 0,
+    confused: 0,
+    glitched: 0,
+    glitchNextAt: 0,
+    unlucky: 0,
+    gunpowder: 0
   };
 
   rooms = {};
@@ -45,6 +56,7 @@ function resetGame() {
   boom = null;
   blindUntil = 0;
   lastPoisonTick = performance.now();
+  lastDecayTick = performance.now();
 
   board = fillRoom();
   rooms[currentRoom] = board;

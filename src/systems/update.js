@@ -75,6 +75,20 @@ function update() {
 
   if (gameState !== "playing") return;
 
+  if (hero.decay > 0 && now - lastDecayTick >= 1000) {
+    lastDecayTick = now;
+    hero.hp -= hero.decay;
+    hero.poison += hero.decay;
+    floatText(120,100,`DECAY -${hero.decay}`,"#8f6bff");
+    if (hero.hp <= 0) die();
+  }
+
+  if (hero.glitched > 0 && now >= hero.glitchNextAt) {
+    randomizeEnemyPositions();
+    hero.glitchNextAt = now + rand(1000,3000);
+    flash = "Glitched!";
+  }
+
   if (now - lastPoisonTick >= 2000) {
     lastPoisonTick = now;
     statusTick();

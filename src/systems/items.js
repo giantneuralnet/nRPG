@@ -37,6 +37,20 @@ function useItem(item, index) {
     sound("item");
   }
 
+  if (item.kind === "moltenPotion") addHeroStatus("molten", item.value, item.x, item.y, "MOLTEN", "#ff7a2f");
+  if (item.kind === "dodgePotion") addHeroStatus("dodge", item.value, item.x, item.y, "DODGE", "#72dfff");
+  if (item.kind === "critPotion") addHeroStatus("crit", item.value, item.x, item.y, "CRIT", "#ffe65c");
+  if (item.kind === "surprisePotion") addHeroStatus("surprise", item.value, item.x, item.y, "SURPRISE", "#ffffff");
+  if (item.kind === "decayCurse") addHeroStatus("decay", item.value, item.x, item.y, "DECAY", "#8f6bff");
+  if (item.kind === "phoenixPotion") addHeroStatus("phoenix", item.value, item.x, item.y, "PHOENIX", "#ff9d3b");
+  if (item.kind === "confusionCurse") addHeroStatus("confused", item.value, item.x, item.y, "CONFUSED", "#c86bff");
+  if (item.kind === "glitchCurse") {
+    addHeroStatus("glitched", item.value, item.x, item.y, "GLITCH", "#65d7ff");
+    hero.glitchNextAt = performance.now() + rand(1000,3000);
+  }
+  if (item.kind === "unluckyCurse") addHeroStatus("unlucky", item.value, item.x, item.y, "UNLUCKY", "#bbbbbb");
+  if (item.kind === "gunpowder") addHeroStatus("gunpowder", item.value, item.x, item.y, "GUNPOWDER", "#ffcf4f");
+
   if (item.kind === "powerPotion") {
     if (rng() < .5) {
       hero.powerAtkTurns = 3;
@@ -139,6 +153,13 @@ function openChest(x,y) {
   sound("item");
 }
 
+function addHeroStatus(field, amount, x, y, label, color) {
+  hero[field] += amount;
+  flash = `${label} +${amount}`;
+  floatText(x,y,`${label} +${amount}`,color);
+  sound("item");
+}
+
 function stoneRandomMonster(x,y) {
   const monsters = board.filter(t => t.type === "monster");
   if (monsters.length <= 0) {
@@ -221,6 +242,17 @@ function cleanHero() {
   hero.vampire = 0;
   hero.blessed = 0;
   hero.rage = false;
+  hero.molten = 0;
+  hero.dodge = 0;
+  hero.crit = 0;
+  hero.surprise = 0;
+  hero.decay = 0;
+  hero.phoenix = 0;
+  hero.confused = 0;
+  hero.glitched = 0;
+  hero.glitchNextAt = 0;
+  hero.unlucky = 0;
+  hero.gunpowder = 0;
   blindUntil = 0;
 }
 
@@ -362,6 +394,39 @@ function randomizeCloudCoveredPositions() {
   }
 }
 
+function randomizeEnemyPositions() {
+  const movable = board.filter(t => t.type === "monster" && t.team !== "hero");
+  const fixed = board.filter(t => !(t.type === "monster" && t.team !== "hero"));
+  const placed = fixed.map(t => ({ x:t.x, y:t.y, r:t.r }));
+  const top = 155;
+  const bottom = Math.max(top + 100, H - 95);
+
+  for (const t of movable) {
+    let position = null;
+    for (let tries = 0; tries < 100; tries++) {
+      const x = t.r + 35 + rng() * Math.max(50, (W - t.r * 2 - 70));
+      const y = top + rng() * Math.max(50, (bottom - top));
+      if (placed.every(other => dist(x,y,other.x,other.y) >= t.r + other.r + 58)) {
+        position = { x, y };
+        break;
+      }
+    }
+    if (!position) {
+      position = {
+        x: t.r + 35 + rng() * Math.max(50, (W - t.r * 2 - 70)),
+        y: top + rng() * Math.max(50, (bottom - top))
+      };
+    }
+    t.x = position.x;
+    t.y = position.y;
+    t.targetY = position.y;
+    t.vx = 0;
+    t.vy = 0;
+    t.attacking = false;
+    placed.push({ x:t.x, y:t.y, r:t.r });
+  }
+}
+
 function swapRandomHealth(x,y) {
   const targets = randomLivingTargets();
   if (targets.length < 2) {
@@ -409,6 +474,9 @@ function hauntMonsters(x,y) {
 }
 
 function explode(x,y,power,kind) {
+  if (["normal","lightning","poison","fire","lava"].includes(kind) && hero.gunpowder > 0) {
+    power = Math.floor(power * (1 + hero.gunpowder * .5));
+  }
   boom = { x,y, r: Math.max(W,H), t:20, kind };
   shake = 20;
 

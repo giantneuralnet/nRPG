@@ -40,8 +40,9 @@ function sampleSpawnThing(allowExileReturn = true) {
   if (allowExileReturn && exileQueue.length > 0 && rng() < .28) return popExiledMonster();
 
   const roll = rng();
-  const isMonster = roll < .52;
-  const isKnight = roll >= .52 && roll < .60;
+  const unluckyShift = hero ? Math.min(.25, hero.unlucky * .04) : 0;
+  const isMonster = roll < .52 + unluckyShift;
+  const isKnight = roll >= .52 + unluckyShift && roll < .60 + unluckyShift;
   const r = Math.min(W,H) * (isMonster ? .076 : isKnight ? .068 : .062);
   const p = findFreePosition(r);
 
@@ -220,7 +221,8 @@ function makeItem(x,y,targetY,r) {
     "bomb","clearBomb","cleanBomb","randomBomb","weakenBomb","strengthBomb","shieldBomb",
     "cloudBomb","poisonBomb","fireBomb","lavaBomb","contagionBomb","echoBomb","soulBomb","healBomb","lightningBomb","iceBomb",
     "stoneBomb","nukeBomb","enrageBomb","blindBomb",
-    "powerPotion","regenPotion","vampirePotion","stoneScroll","zombieScroll","hauntedScroll","blessedScroll",
+    "powerPotion","regenPotion","vampirePotion","moltenPotion","dodgePotion","critPotion","surprisePotion","decayCurse",
+    "phoenixPotion","confusionCurse","glitchCurse","unluckyCurse","gunpowder","stoneScroll","zombieScroll","hauntedScroll","blessedScroll",
     "killRandomItem","healRandomItem","flashBang","exileItem","swapHealthItem","door","chest","chest"
   ]);
 
@@ -239,6 +241,16 @@ function makeItem(x,y,targetY,r) {
       kind === "potion" ? rand(22,45) :
       kind === "regenPotion" ? rand(10,16) :
       kind === "vampirePotion" ? rand(6,10) :
+      kind === "moltenPotion" ? rand(2,4) :
+      kind === "dodgePotion" ? rand(8,14) :
+      kind === "critPotion" ? rand(8,14) :
+      kind === "surprisePotion" ? rand(5,10) :
+      kind === "decayCurse" ? rand(1,3) :
+      kind === "phoenixPotion" ? 1 :
+      kind === "confusionCurse" ? rand(1,2) :
+      kind === "glitchCurse" ? 1 :
+      kind === "unluckyCurse" ? rand(1,2) :
+      kind === "gunpowder" ? rand(1,3) :
       kind === "powerPotion" ? rand(6,10) :
       kind === "poison" ? rand(2,4) :
       kind === "bomb" ? rand(25,45) :

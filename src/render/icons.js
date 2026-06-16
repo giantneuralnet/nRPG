@@ -33,19 +33,56 @@ function makeIcon(type) {
     g.beginPath(); g.moveTo(50,18); g.lineTo(50,78); g.stroke();
   }
 
-  if (type === "potion" || type === "regenPotion") {
-    g.fillStyle = type === "regenPotion" ? "#40ff96" : "#ff4f6d";
+  if (type === "potion" || type === "regenPotion" || type === "moltenPotion" || type === "dodgePotion" || type === "critPotion" || type === "surprisePotion" || type === "phoenixPotion") {
+    g.fillStyle =
+      type === "regenPotion" ? "#40ff96" :
+      type === "moltenPotion" ? "#ff7a2f" :
+      type === "dodgePotion" ? "#72dfff" :
+      type === "critPotion" ? "#ffe65c" :
+      type === "surprisePotion" ? "#ffffff" :
+      type === "phoenixPotion" ? "#ff9d3b" :
+      "#ff4f6d";
     g.fillRect(39,8,22,22); g.strokeRect(39,8,22,22);
     g.beginPath(); g.arc(50,60,30,0,Math.PI*2); g.fill(); g.stroke();
     g.fillStyle = "rgba(255,255,255,.45)";
     g.beginPath(); g.arc(39,49,8,0,Math.PI*2); g.fill();
-    if (type === "regenPotion") {
-      g.fillStyle = "#063";
-      g.font = "bold 22px system-ui";
+    if (type !== "potion") {
+      g.fillStyle = type === "surprisePotion" || type === "critPotion" || type === "dodgePotion" ? "#111" : "#063";
+      g.font = "bold 20px system-ui";
       g.textAlign = "center";
       g.textBaseline = "middle";
-      g.fillText("RE",50,62);
+      g.fillText(
+        type === "regenPotion" ? "RE" :
+        type === "moltenPotion" ? "M" :
+        type === "dodgePotion" ? "D" :
+        type === "critPotion" ? "C" :
+        type === "surprisePotion" ? "S" :
+        "P",
+        50,62
+      );
     }
+  }
+
+  if (type === "decayCurse" || type === "confusionCurse" || type === "glitchCurse" || type === "unluckyCurse" || type === "gunpowder") {
+    g.fillStyle =
+      type === "decayCurse" ? "#8f6bff" :
+      type === "confusionCurse" ? "#c86bff" :
+      type === "glitchCurse" ? "#65d7ff" :
+      type === "unluckyCurse" ? "#555" :
+      "#ffcf4f";
+    g.beginPath(); g.roundRect(18,18,64,64,10); g.fill(); g.stroke();
+    g.fillStyle = type === "gunpowder" || type === "glitchCurse" ? "#111" : "white";
+    g.font = "bold 30px system-ui";
+    g.textAlign = "center";
+    g.textBaseline = "middle";
+    g.fillText(
+      type === "decayCurse" ? "D" :
+      type === "confusionCurse" ? "?" :
+      type === "glitchCurse" ? "G" :
+      type === "unluckyCurse" ? "U" :
+      "B",
+      50,52
+    );
   }
 
   if (type === "powerPotion") {
@@ -172,6 +209,7 @@ function makeIcon(type) {
 [
   "sword","shield","potion","poison","bomb","clearBomb","randomBomb",
   "cleanBomb","weakenBomb","strengthBomb","cloudBomb","poisonBomb","fireBomb","lavaBomb","contagionBomb","echoBomb","soulBomb","healBomb","lightningBomb",
-  "iceBomb","stoneBomb","nukeBomb","enrageBomb","blindBomb","chest","powerPotion","regenPotion","vampirePotion","stoneScroll","zombieScroll",
+  "iceBomb","stoneBomb","nukeBomb","enrageBomb","blindBomb","chest","powerPotion","regenPotion","vampirePotion","moltenPotion",
+  "dodgePotion","critPotion","surprisePotion","decayCurse","phoenixPotion","confusionCurse","glitchCurse","unluckyCurse","gunpowder","stoneScroll","zombieScroll",
   "hauntedScroll","blessedScroll","killRandomItem","healRandomItem","flashBang","exileItem","swapHealthItem","shieldBomb","monsterShield"
 ].forEach(t => icons[t] = makeIcon(t));

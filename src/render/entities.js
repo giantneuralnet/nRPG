@@ -308,6 +308,16 @@ function drawItem(item) {
   if (item.kind === "potion") ctx.fillText(`HP +${item.value}`, item.x, item.y+item.r+10);
   if (item.kind === "regenPotion") ctx.fillText(`REGEN`, item.x, item.y+item.r+10);
   if (item.kind === "vampirePotion") ctx.fillText(`VAMPIRE`, item.x, item.y+item.r+10);
+  if (item.kind === "moltenPotion") ctx.fillText(`MOLTEN`, item.x, item.y+item.r+10);
+  if (item.kind === "dodgePotion") ctx.fillText(`DODGE`, item.x, item.y+item.r+10);
+  if (item.kind === "critPotion") ctx.fillText(`CRIT`, item.x, item.y+item.r+10);
+  if (item.kind === "surprisePotion") ctx.fillText(`SURPRISE`, item.x, item.y+item.r+10);
+  if (item.kind === "decayCurse") ctx.fillText(`DECAY`, item.x, item.y+item.r+10);
+  if (item.kind === "phoenixPotion") ctx.fillText(`PHOENIX`, item.x, item.y+item.r+10);
+  if (item.kind === "confusionCurse") ctx.fillText(`CONFUSED`, item.x, item.y+item.r+10);
+  if (item.kind === "glitchCurse") ctx.fillText(`GLITCH`, item.x, item.y+item.r+10);
+  if (item.kind === "unluckyCurse") ctx.fillText(`UNLUCKY`, item.x, item.y+item.r+10);
+  if (item.kind === "gunpowder") ctx.fillText(`GUNPOWDER`, item.x, item.y+item.r+10);
   if (item.kind === "powerPotion") ctx.fillText(`POWER UP`, item.x, item.y+item.r+10);
   if (item.kind === "poison") ctx.fillText(`POISON +${item.value}`, item.x, item.y+item.r+10);
   if (item.kind === "bomb") ctx.fillText(`BOMB ${item.value}`, item.x, item.y+item.r+10);

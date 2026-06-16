@@ -29,6 +29,12 @@ function findSoulLinkedTarget(target) {
 function damage(target, amount, x, y, color="#ff6b6b", useParticles = false, splitSoul = true) {
   amount = Math.max(0, Math.floor(amount));
 
+  if (target === hero && hero.dodge > 0 && rng() < Math.min(.75, hero.dodge / 100)) {
+    floatText(x, y, "DODGE", "#72dfff");
+    sound("hit");
+    return 0;
+  }
+
   if (splitSoul && amount > 0) {
     const linked = findSoulLinkedTarget(target);
     if (linked) {

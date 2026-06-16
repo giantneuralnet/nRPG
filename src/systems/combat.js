@@ -56,8 +56,41 @@ function attackMonster(m,index) {
 
   m.attackCooldownUntil = now + 260;
 
-  const dmg = getHeroAtk();
+  if (hero.confused > 0) {
+    const targets = [hero, ...board.filter(t => t.type === "monster" && t.team !== "hero")];
+    const confusedTarget = pick(targets);
+    if (confusedTarget === hero) {
+      const selfDmg = getHeroAtk();
+      damage(hero,selfDmg,120,100,"#c86bff");
+      spendPowerTurn();
+      flash = `Confused! Hero -${selfDmg}`;
+      if (hero.hp <= 0) die();
+      return;
+    }
+    m = confusedTarget;
+    index = board.indexOf(m);
+  }
+
+  if (m.team === "hero") {
+    m.team = "enemy";
+    m.target = null;
+    flash = "Ally turned!";
+  }
+
+  let dmg = getHeroAtk();
+  if (hero.surprise > 0 && m.hp >= m.maxHp) dmg += hero.surprise;
+  if (hero.crit > 0 && rng() < Math.min(.75, hero.crit / 100)) {
+    dmg *= 2;
+    floatText(m.x,m.y,"CRIT","#ffe65c");
+  }
   const dealt = damage(m,dmg,m.x,m.y);
+  if (dealt > 0 && hero.molten > 0) {
+    lavaPools.push({
+      x:m.x,y:m.y,r:rand(60,105),life:rand(650,950),
+      fire:Math.max(1, Math.floor(hero.molten * .5))
+    });
+    floatText(m.x,m.y,"MOLTEN","#ff7a2f");
+  }
   if (m.team !== "hero") setAllyTargets(m);
   spendPowerTurn();
   flash = `Monster -${dealt}`;
@@ -118,17 +151,17 @@ function killMonster(index, giveXp = true) {
   if (!board[index]) return;
 
   const dead = board[index];
+  if (dead.contagious) {
+    spreadContagion(dead);
+    dead.contagious = false;
+  }
+
   if (dead.team === "hero") {
     sound("dead");
     floatText(dead.x, dead.y, "DOWN", "#d8ecff");
     burst(dead.x,dead.y,"#d8ecff",14,5);
     board[index] = spawnThing(true, index);
     return;
-  }
-
-  if (dead.contagious) {
-    spreadContagion(dead);
-    dead.contagious = false;
   }
 
   if (dead.haunted && !dead.ghost) {
@@ -185,6 +218,10 @@ function spreadContagion(source) {
 }
 
 function copyContagiousStatuses(source, target) {
+  if (source.team === "hero") {
+    target.team = "hero";
+    target.target = null;
+  }
   target.poison = Math.max(target.poison || 0, source.poison || 0);
   target.fire = Math.max(target.fire || 0, source.fire || 0);
   target.stone = target.stone || source.stone;
@@ -287,6 +324,16 @@ function levelUp() {
 }
 
 function die() {
+  if (hero.phoenix > 0) {
+    hero.phoenix--;
+    hero.hp = 1;
+    hero.alive = true;
+    flash = "PHOENIX!";
+    floatText(120,100,"PHOENIX","#ff9d3b");
+    burst(120,100,"#ff9d3b",26,8);
+    sound("level");
+    return;
+  }
   hero.alive = false;
   gameState = "dead";
   flash = "YOU DIED";
