@@ -50,10 +50,6 @@ function statusTick() {
 
 function attackMonster(m,index) {
   if (!hero.alive || m.attacking) return;
-  if (m.team === "hero") {
-    flash = "Ally is on your side!";
-    return;
-  }
 
   const now = performance.now();
   if (now < m.attackCooldownUntil) return;
@@ -62,7 +58,7 @@ function attackMonster(m,index) {
 
   const dmg = getHeroAtk();
   const dealt = damage(m,dmg,m.x,m.y);
-  setAllyTargets(m);
+  if (m.team !== "hero") setAllyTargets(m);
   spendPowerTurn();
   flash = `Monster -${dealt}`;
 
@@ -318,7 +314,6 @@ function zombieFights() {
 
     if (
       z.rage &&
-      z.team !== "hero" &&
       z.hp > 0 &&
       now >= (z.rageAttackCooldownUntil || 0) &&
       now >= z.frozenUntil

@@ -218,9 +218,9 @@ function makeItem(x,y,targetY,r) {
   const kind = pick([
     "sword","shield","potion","potion","poison",
     "bomb","clearBomb","cleanBomb","randomBomb","weakenBomb","strengthBomb","shieldBomb",
-    "cloudBomb","poisonBomb","fireBomb","lavaBomb","contagionBomb","echoBomb","soulBomb","healBomb","lightningBomb","iceBomb","zombieBomb",
+    "cloudBomb","poisonBomb","fireBomb","lavaBomb","contagionBomb","echoBomb","soulBomb","healBomb","lightningBomb","iceBomb",
     "stoneBomb","nukeBomb","enrageBomb","blindBomb",
-    "powerPotion","regenPotion","vampirePotion","stoneScroll","hauntedScroll","blessedScroll",
+    "powerPotion","regenPotion","vampirePotion","stoneScroll","zombieScroll","hauntedScroll","blessedScroll",
     "killRandomItem","healRandomItem","flashBang","exileItem","swapHealthItem","door","chest","chest"
   ]);
 
@@ -257,7 +257,7 @@ function makeItem(x,y,targetY,r) {
       kind === "strengthBomb" ? rand(2,5) :
       kind === "cloudBomb" ? 0 :
       kind === "iceBomb" ? 4 :
-      kind === "zombieBomb" ? 0 :
+      kind === "zombieScroll" ? 0 :
       kind === "shieldBomb" ? 0 :
       kind === "stoneBomb" ? 0 :
       kind === "nukeBomb" ? 0 :

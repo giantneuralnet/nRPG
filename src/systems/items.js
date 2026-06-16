@@ -75,7 +75,7 @@ function useItem(item, index) {
   if (item.kind === "soulBomb") explode(item.x, item.y, item.value, "soul");
   if (item.kind === "healBomb") explode(item.x, item.y, item.value, "heal");
   if (item.kind === "iceBomb") explode(item.x, item.y, item.value, "ice");
-  if (item.kind === "zombieBomb") explode(item.x, item.y, item.value, "zombie");
+  if (item.kind === "zombieScroll") zombieRandomMonster(item.x,item.y);
   if (item.kind === "shieldBomb") shieldAllMonsters(item.x,item.y);
   if (item.kind === "stoneBomb") explode(item.x, item.y, item.value, "stone");
   if (item.kind === "nukeBomb") explode(item.x, item.y, item.value, "nuke");
@@ -156,6 +156,23 @@ function stoneRandomMonster(x,y) {
   flash = "Stone scroll!";
   floatText(m.x,m.y,"STONE","#bbbbbb");
   burst(m.x,m.y,"#bbbbbb",16,4);
+  sound("boom");
+}
+
+function zombieRandomMonster(x,y) {
+  const monsters = board.filter(t => t.type === "monster" && t.team !== "hero" && !t.stone);
+  if (monsters.length <= 0) {
+    flash = "No monster to zombify!";
+    floatText(x,y,"NO TARGET","#7aff7a");
+    sound("item");
+    return;
+  }
+
+  const m = pick(monsters);
+  zombifyMonster(m);
+  flash = "Zombie scroll!";
+  floatText(m.x,m.y,"ZOMBIE","#7aff7a");
+  burst(m.x,m.y,"#7aff7a",16,4);
   sound("boom");
 }
 

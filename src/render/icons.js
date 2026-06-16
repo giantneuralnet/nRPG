@@ -81,19 +81,19 @@ function makeIcon(type) {
     );
   }
 
-  if (type === "stoneScroll" || type === "hauntedScroll" || type === "blessedScroll") {
+  if (type === "stoneScroll" || type === "zombieScroll" || type === "hauntedScroll" || type === "blessedScroll") {
     g.fillStyle = "#d8d1b0";
     g.beginPath(); g.roundRect(20,20,60,60,8); g.fill(); g.stroke();
-    g.fillStyle = type === "hauntedScroll" ? "#6c38d8" : type === "blessedScroll" ? "#d6a400" : "#777";
+    g.fillStyle = type === "zombieScroll" ? "#249f42" : type === "hauntedScroll" ? "#6c38d8" : type === "blessedScroll" ? "#d6a400" : "#777";
     g.font = "bold 35px system-ui";
     g.textAlign = "center";
     g.textBaseline = "middle";
-    g.fillText(type === "hauntedScroll" ? "☾" : type === "blessedScroll" ? "+" : "▣",50,52);
+    g.fillText(type === "zombieScroll" ? "Z" : type === "hauntedScroll" ? "☾" : type === "blessedScroll" ? "+" : "▣",50,52);
   }
 
   if ([
     "bomb","clearBomb","randomBomb","weakenBomb","strengthBomb",
-    "cloudBomb","poisonBomb","fireBomb","lavaBomb","contagionBomb","echoBomb","soulBomb","healBomb","lightningBomb","iceBomb","zombieBomb","shieldBomb",
+    "cloudBomb","poisonBomb","fireBomb","lavaBomb","contagionBomb","echoBomb","soulBomb","healBomb","lightningBomb","iceBomb","shieldBomb",
     "cleanBomb","stoneBomb","nukeBomb","enrageBomb","blindBomb"
   ].includes(type)) {
     const colors = {
@@ -112,7 +112,6 @@ function makeIcon(type) {
       healBomb:"#ff5f8f",
       lightningBomb:"#ffe65c",
       iceBomb:"#72dfff",
-      zombieBomb:"#7aff7a",
       shieldBomb:"#9b5a25",
       cleanBomb:"#d8ecff",
       stoneBomb:"#888888",
@@ -143,7 +142,6 @@ function makeIcon(type) {
       type === "healBomb" ? "+" :
       type === "lightningBomb" ? "⚡" :
       type === "iceBomb" ? "❄" :
-      type === "zombieBomb" ? "Z" :
       type === "shieldBomb" ? "S" :
       type === "cleanBomb" ? "C" :
       type === "stoneBomb" ? "▣" :
@@ -174,6 +172,6 @@ function makeIcon(type) {
 [
   "sword","shield","potion","poison","bomb","clearBomb","randomBomb",
   "cleanBomb","weakenBomb","strengthBomb","cloudBomb","poisonBomb","fireBomb","lavaBomb","contagionBomb","echoBomb","soulBomb","healBomb","lightningBomb",
-  "iceBomb","zombieBomb","stoneBomb","nukeBomb","enrageBomb","blindBomb","chest","powerPotion","regenPotion","vampirePotion","stoneScroll",
+  "iceBomb","stoneBomb","nukeBomb","enrageBomb","blindBomb","chest","powerPotion","regenPotion","vampirePotion","stoneScroll","zombieScroll",
   "hauntedScroll","blessedScroll","killRandomItem","healRandomItem","flashBang","exileItem","swapHealthItem","shieldBomb","monsterShield"
 ].forEach(t => icons[t] = makeIcon(t));

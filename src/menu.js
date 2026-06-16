@@ -37,7 +37,7 @@ const itemInfo = [
   ["healBomb","Heal bomb","Heals you and monsters."],
   ["lightningBomb","Lightning bomb","Damages all monsters and you."],
   ["iceBomb","Ice bomb","Freezes monsters temporarily."],
-  ["zombieBomb","Zombie bomb","Turns monsters into zombies."],
+  ["zombieScroll","Zombie scroll","Turns one monster into a zombie."],
   ["shieldBomb","Shield all bomb","Gives every current monster a fresh shield."],
   ["stoneBomb","Stone bomb","Turns every current monster into stone."],
   ["nukeBomb","Nuke bomb","Replaces the whole screen and leaves you at 1 HP."],
