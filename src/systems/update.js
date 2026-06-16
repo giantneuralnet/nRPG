@@ -53,13 +53,6 @@ function update() {
       const link = soulLinks[i];
       if (!board.includes(link.a) || !board.includes(link.b) || link.a.hp <= 0 || link.b.hp <= 0) {
         soulLinks.splice(i,1);
-        continue;
-      }
-      if (now - (link.lastTick || 0) >= 1000) {
-        const avg = Math.floor((link.a.hp + link.b.hp) / 2);
-        link.a.hp = Math.max(1, Math.min(link.a.maxHp, avg));
-        link.b.hp = Math.max(1, Math.min(link.b.maxHp, avg));
-        link.lastTick = now;
       }
     }
   }

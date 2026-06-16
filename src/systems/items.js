@@ -530,10 +530,7 @@ function explode(x,y,power,kind) {
       const a = pick(monsters);
       let b = pick(monsters);
       while (b === a) b = pick(monsters);
-      const avg = Math.floor((a.hp + b.hp) / 2);
-      a.hp = Math.max(1, Math.min(a.maxHp, avg));
-      b.hp = Math.max(1, Math.min(b.maxHp, avg));
-      soulLinks.push({ a, b, lastTick: performance.now() });
+      soulLinks.push({ a, b });
       flash = "Soul connection!";
       floatText(a.x,a.y,"SOUL","#ff3333");
       floatText(b.x,b.y,"SOUL","#ff3333");

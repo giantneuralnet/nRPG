@@ -17,8 +17,28 @@ function spendPowerTurn() {
   }
 }
 
-function damage(target, amount, x, y, color="#ff6b6b", useParticles = false) {
+function findSoulLinkedTarget(target) {
+  if (!soulLinks || target.type !== "monster") return null;
+  for (const link of soulLinks) {
+    if (link.a === target && board.includes(link.b) && link.b.hp > 0) return link.b;
+    if (link.b === target && board.includes(link.a) && link.a.hp > 0) return link.a;
+  }
+  return null;
+}
+
+function damage(target, amount, x, y, color="#ff6b6b", useParticles = false, splitSoul = true) {
   amount = Math.max(0, Math.floor(amount));
+
+  if (splitSoul && amount > 0) {
+    const linked = findSoulLinkedTarget(target);
+    if (linked) {
+      const targetAmount = Math.ceil(amount / 2);
+      const linkedAmount = Math.floor(amount / 2);
+      const dealtTarget = damage(target, targetAmount, x, y, color, useParticles, false);
+      const dealtLinked = linkedAmount > 0 ? damage(linked, linkedAmount, linked.x, linked.y, "#ff3333", useParticles, false) : 0;
+      return dealtTarget + dealtLinked;
+    }
+  }
 
   if (target.type === "monster" && target.ghost && rng() < .5) {
     floatText(x, y, "DODGE", "#d8ecff");
