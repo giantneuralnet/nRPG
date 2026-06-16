@@ -250,6 +250,7 @@ function allyRandomMonster(x,y) {
   m.team = "hero";
   m.target = null;
   m.attacking = false;
+  if (m.parts) m.parts.mouth = "smile";
   flash = "Ally scroll!";
   floatText(m.x,m.y,"ALLY","#d8ecff");
   burst(m.x,m.y,"#d8ecff",16,4);

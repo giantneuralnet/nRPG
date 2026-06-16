@@ -1,9 +1,4 @@
 function drawMonsterBodyOn(renderCtx, m, x, y, r, shakeAmount = 0) {
-  if (m.team === "hero" || m.wasAlly) {
-    drawKnightBodyOn(renderCtx, m, x, y, r, shakeAmount);
-    return;
-  }
-
   const p = m.parts;
   const now = performance.now();
   const frozen = now < m.frozenUntil;
@@ -100,45 +95,6 @@ function drawMonsterBodyOn(renderCtx, m, x, y, r, shakeAmount = 0) {
     renderCtx.moveTo(lx,58);
     renderCtx.lineTo(lx+visualRand(-10,10),112);
     renderCtx.stroke();
-  }
-
-  renderCtx.restore();
-}
-
-function drawKnightBodyOn(renderCtx, k, x, y, r, shakeAmount = 0) {
-  const now = performance.now();
-  const frozen = now < k.frozenUntil;
-  const stone = k.stone;
-
-  renderCtx.save();
-  renderCtx.translate(x + visualRand(-shakeAmount,shakeAmount), y + visualRand(-shakeAmount,shakeAmount));
-  renderCtx.scale(r/55,r/55);
-  if (k.ghost) renderCtx.globalAlpha = .68;
-
-  renderCtx.fillStyle = stone ? "#888888" : frozen ? "#72dfff" : k.zombie ? "#7aff7a" : k.rage ? "#ff3b3b" : "#cfd6e6";
-  renderCtx.strokeStyle = "white";
-  renderCtx.lineWidth = 5;
-  renderCtx.beginPath();
-  renderCtx.roundRect(-34,-40,68,80,12);
-  renderCtx.fill();
-  renderCtx.stroke();
-
-  renderCtx.fillStyle = k.combustAt ? "#ff9d3b" : k.blind ? "#dddddd" : "#6aa8ff";
-  renderCtx.beginPath();
-  renderCtx.roundRect(-28,-62,56,34,10);
-  renderCtx.fill();
-  renderCtx.stroke();
-
-  if (k.blind) {
-    renderCtx.strokeStyle = "#111";
-    renderCtx.lineWidth = 6;
-    renderCtx.beginPath();
-    renderCtx.moveTo(-18,-45);
-    renderCtx.lineTo(18,-45);
-    renderCtx.stroke();
-  } else {
-    renderCtx.fillStyle = k.combustAt ? "white" : "#111";
-    renderCtx.fillRect(-18,-48,36,8);
   }
 
   renderCtx.restore();

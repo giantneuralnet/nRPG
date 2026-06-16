@@ -45,16 +45,20 @@ function spawnThing(allowExileReturn = true, replaceIndex = null, checked = true
 }
 
 function sampleSpawnThing(allowExileReturn = true) {
+  if (hero && hero.prayerKind && hero.prayerRemaining > 0 && !hero.banishedItems.includes(hero.prayerKind)) {
+    const r = Math.min(W,H) * .062;
+    const p = findFreePosition(r);
+    return makeItem(p.x, -120 - rng()*200, p.y, r);
+  }
+
   if (allowExileReturn && exileQueue.length > 0 && rng() < .28) return popExiledMonster();
 
   const roll = rng();
   const isMonster = roll < .52;
-  const isKnight = roll >= .52 && roll < .60;
-  const r = Math.min(W,H) * (isMonster ? .076 : isKnight ? .068 : .062);
+  const r = Math.min(W,H) * (isMonster ? .076 : .062);
   const p = findFreePosition(r);
 
   if (isMonster) return makeMonster(p.x, -120 - rng()*200, p.y, r);
-  if (isKnight) return makeKnight(p.x, -120 - rng()*200, p.y, r);
   return makeItem(p.x, -120 - rng()*200, p.y, r);
 }
 
@@ -219,32 +223,12 @@ function makeMonster(x,y,targetY,r) {
       originalColor:null,
       head:pick(["circle","box","triangle","blob"]),
       eyes:rand(1,4),
-      mouth:pick(["smile","fangs","void"]),
+      mouth:pick(["fangs","void"]),
       horns:rng()<.4,
       legs:rand(1,4),
       arms:rand(0,3)
     }
   };
-}
-
-function makeKnight(x,y,targetY,r) {
-  const k = makeMonster(x,y,targetY,r);
-  k.team = "hero";
-  k.wasAlly = true;
-  k.elite = false;
-  k.hp = 70;
-  k.maxHp = 70;
-  k.atk = 12;
-  k.shielded = false;
-  k.parts.color = "#cfd6e6";
-  k.parts.originalColor = null;
-  k.parts.head = "box";
-  k.parts.eyes = 2;
-  k.parts.mouth = "void";
-  k.parts.horns = false;
-  k.parts.legs = 2;
-  k.parts.arms = 2;
-  return k;
 }
 
 function makeItem(x,y,targetY,r) {

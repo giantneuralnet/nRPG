@@ -90,7 +90,7 @@ const monsterInfo = [
   ["rage","Rage","Turns red and attacks nearby monsters."],
   ["frozen","Frozen","Cannot counter while frozen."],
   ["poisoned","Poisoned","Takes periodic poison damage."],
-  ["knight","Knight","Ally that attacks the monster you target."],
+  ["ally","Ally","Smiling monster that attacks the monster you target."],
   ["door","Door","Switches to one of the four remembered rooms."]
 ];
 
@@ -175,7 +175,7 @@ function infoMonster(kind) {
     type:"monster",
     x:50,y:50,targetY:50,r:26,
     hp:10,maxHp:10,atk:1,poison:0,fire:0,stone:false,frozenUntil:0,
-    team:kind === "knight" ? "hero" : "enemy",
+    team:kind === "ally" ? "hero" : "enemy",
     elite:kind === "elite" || kind === "ultraElite",
     ultraElite:kind === "ultraElite",
     shielded:kind === "shielded",
@@ -190,10 +190,10 @@ function infoMonster(kind) {
     rage:kind === "rage",
     attacking:false,
     parts:{
-      color:kind === "knight" ? "#cfd6e6" : kind === "zombie" || kind === "ghostZombie" ? "#6cff6c" : "#ff7070",
-      head:kind === "stone" || kind === "knight" ? "box" : "circle",
+      color:kind === "zombie" || kind === "ghostZombie" ? "#6cff6c" : "#ff7070",
+      head:kind === "stone" ? "box" : "circle",
       eyes:2,
-      mouth:kind === "zombie" || kind === "ghostZombie" ? "void" : "fangs",
+      mouth:kind === "ally" ? "smile" : kind === "zombie" || kind === "ghostZombie" ? "void" : "fangs",
       horns:kind === "elite",
       legs:2,
       arms:2

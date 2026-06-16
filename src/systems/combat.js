@@ -81,6 +81,7 @@ function attackMonster(m,index) {
   if (m.team === "hero") {
     m.team = "enemy";
     m.target = null;
+    if (m.parts) m.parts.mouth = "fangs";
     flash = "Ally turned!";
   }
 
@@ -228,6 +229,7 @@ function copyContagiousStatuses(source, target) {
   if (source.team === "hero") {
     target.team = "hero";
     target.target = null;
+    if (target.parts) target.parts.mouth = "smile";
   }
   target.poison = Math.max(target.poison || 0, source.poison || 0);
   target.fire = Math.max(target.fire || 0, source.fire || 0);
