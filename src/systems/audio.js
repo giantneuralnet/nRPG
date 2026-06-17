@@ -1,4 +1,5 @@
-let audioCtx, masterGain, windNodes, musicTimer, musicStep = 0, nextMusicAt = 0;
+let audioCtx, masterGain, windNodes, musicTimer, musicStep = 0, musicPhrase = 0, nextMusicAt = 0;
+let musicState = null;
 let audioMuted = localStorage.getItem("nrpgAudioMuted") === "1";
 
 function ensureAudio() {
@@ -161,6 +162,7 @@ function updateAudioToggle() {
 function startMusic() {
   if (!audioCtx || musicTimer) return;
   nextMusicAt = audioCtx.currentTime + .05;
+  musicState = generateMusicState(musicProfile());
   musicTimer = setInterval(scheduleMusic, 90);
 }
 
@@ -182,6 +184,7 @@ function musicProfile() {
     monsters,
     helpful,
     items,
+    health: hero ? Math.max(0, hero.hp / Math.max(1, hero.maxHp)) : 1,
     tension: Math.min(1, monsters / Math.max(1, settings.choices)),
     relief: Math.min(1, helpful / Math.max(1, items || 1))
   };
@@ -196,6 +199,11 @@ function scheduleMusic() {
   const lookahead = audioCtx.currentTime + .25;
   while (nextMusicAt < lookahead) {
     const profile = musicProfile();
+    if (!musicState) musicState = generateMusicState(profile);
+    if (musicStep === 0) {
+      musicPhrase++;
+      if (musicPhrase % 2 === 0) evolveMusicState(profile);
+    }
     playMusicStep(profile, musicStep, nextMusicAt);
     nextMusicAt += profile.tempo;
     musicStep = (musicStep + 1) % 16;
@@ -206,20 +214,83 @@ function playMusicStep(profile, step, time) {
   if (gameState === "menu") return;
   const root = profile.root;
   const octave = profile.room === 666 ? .5 : 1;
-  const bassDegrees = profile.tension > .45 ? [0,0,2,1] : [0,2,3,2];
-  const bassDegree = bassDegrees[Math.floor(step / 4) % bassDegrees.length];
-  const bassFreq = noteFreq(root * octave, profile.scale[bassDegree]);
+  const modeScale = profile.health < .38 ? [0,3,5,7,10] : [0,4,5,7,11];
+  const chord = musicState.chords[Math.floor(step / 4) % musicState.chords.length];
+  const chordTone = modeScale[chord % modeScale.length];
+  const bassDegree = musicState.bass[Math.floor(step / 2) % musicState.bass.length];
+  const bassFreq = noteFreq(root * octave, modeScale[bassDegree % modeScale.length]);
 
-  if (step % 4 === 0) playKick(time, profile.tension);
-  if (step % 8 === 4) playSnare(time, profile.relief);
+  if (musicState.drums[step % musicState.drums.length] & 1) playKick(time, profile.tension);
+  if (musicState.drums[step % musicState.drums.length] & 2) playSnare(time, profile.relief);
   if (step % 2 === 0) playBass(time, bassFreq, profile.tension);
+  if (step % 8 === 0) playChord(time + .015, root * 2, modeScale, chordTone, profile.health);
 
-  const leadSparse = profile.items > profile.monsters ? 4 : 8;
-  if (step % leadSparse === 2 || (profile.room === 666 && step % 8 === 6)) {
-    const degree = profile.lead[Math.floor(step / 2) % profile.lead.length];
-    const leadFreq = noteFreq(root * 2, profile.scale[degree] + (profile.relief > .5 ? 12 : 0));
+  const leadNote = musicState.lead[step % musicState.lead.length];
+  if (leadNote !== null) {
+    const leadFreq = noteFreq(root * 2, modeScale[leadNote % modeScale.length] + (profile.relief > .5 ? 12 : 0));
     playLead(time + profile.tempo * .35, leadFreq, profile);
   }
+}
+
+function generateMusicState(profile) {
+  return {
+    lead: generateLeadPattern(profile),
+    bass: generateBassPattern(profile),
+    drums: generateDrumPattern(profile),
+    chords: generateChordPattern(profile),
+    age: 0
+  };
+}
+
+function evolveMusicState(profile) {
+  musicState.age++;
+  const slot = musicState.age % 4;
+  if (slot === 0) musicState.lead = generateLeadPattern(profile);
+  if (slot === 1) musicState.bass = generateBassPattern(profile);
+  if (slot === 2) musicState.drums = generateDrumPattern(profile);
+  if (slot === 3) musicState.chords = generateChordPattern(profile);
+}
+
+function patternPick(values) {
+  return values[Math.floor(Math.random() * values.length)];
+}
+
+function generateLeadPattern(profile) {
+  const density = profile.items > profile.monsters ? .45 : .25;
+  const pattern = [];
+  let note = profile.room === 666 ? 1 : 0;
+  for (let i = 0; i < 16; i++) {
+    if (i % 4 === 0 || Math.random() < density) {
+      note = Math.max(0, Math.min(4, note + patternPick([-1,0,1,2])));
+      pattern.push(note);
+    } else {
+      pattern.push(null);
+    }
+  }
+  return pattern;
+}
+
+function generateBassPattern(profile) {
+  const base = profile.tension > .45 ? [0,0,1,0,2,1,0,1] : [0,2,3,2,0,2,1,2];
+  return base.map(n => Math.max(0, Math.min(4, n + (Math.random() < .2 ? patternPick([-1,1]) : 0))));
+}
+
+function generateDrumPattern(profile) {
+  const pattern = new Array(16).fill(0);
+  for (let i = 0; i < 16; i += 4) pattern[i] |= 1;
+  for (let i = 4; i < 16; i += 8) pattern[i] |= 2;
+  if (profile.tension > .45) {
+    pattern[8] |= 1;
+    pattern[12] |= 2;
+  }
+  if (profile.relief > .45) pattern[14] |= 2;
+  return pattern;
+}
+
+function generateChordPattern(profile) {
+  if (profile.health < .38) return profile.room === 666 ? [0,1,4,1] : [0,3,2,1];
+  if (profile.relief > profile.tension) return [0,3,4,2];
+  return [0,2,1,3];
 }
 
 function playKick(time, tension) {
@@ -228,7 +299,7 @@ function playKick(time, tension) {
   o.type = "sine";
   o.frequency.setValueAtTime(72 + tension * 20, time);
   o.frequency.exponentialRampToValueAtTime(38, time + .12);
-  g.gain.setValueAtTime(.035, time);
+  g.gain.setValueAtTime(.055, time);
   g.gain.exponentialRampToValueAtTime(.001, time + .16);
   o.connect(g); g.connect(masterGain);
   o.start(time); o.stop(time + .18);
@@ -245,7 +316,7 @@ function playSnare(time, relief) {
   filter.type = "highpass";
   filter.frequency.value = 1200;
   const g = audioCtx.createGain();
-  g.gain.setValueAtTime(.012 + relief * .006, time);
+  g.gain.setValueAtTime(.022 + relief * .01, time);
   g.gain.exponentialRampToValueAtTime(.001, time + .08);
   noise.connect(filter); filter.connect(g); g.connect(masterGain);
   noise.start(time); noise.stop(time + .09);
@@ -258,7 +329,7 @@ function playBass(time, freq, tension) {
   o.type = "square";
   filter.type = "lowpass";
   filter.frequency.value = 280 + tension * 120;
-  g.gain.setValueAtTime(.018, time);
+  g.gain.setValueAtTime(.036, time);
   g.gain.exponentialRampToValueAtTime(.001, time + .18);
   o.frequency.setValueAtTime(freq, time);
   o.connect(filter); filter.connect(g); g.connect(masterGain);
@@ -272,9 +343,27 @@ function playLead(time, freq, profile) {
   o.type = profile.room === 666 ? "sawtooth" : "triangle";
   filter.type = "lowpass";
   filter.frequency.value = profile.room === 666 ? 900 : 1200;
-  g.gain.setValueAtTime(.009, time);
+  g.gain.setValueAtTime(.017, time);
   g.gain.exponentialRampToValueAtTime(.001, time + .28);
   o.frequency.setValueAtTime(freq, time);
   o.connect(filter); filter.connect(g); g.connect(masterGain);
   o.start(time); o.stop(time + .3);
+}
+
+function playChord(time, root, scale, degree, health) {
+  const third = health < .38 ? 3 : 4;
+  const chord = [degree, degree + third, degree + 7];
+  for (const semitone of chord) {
+    const o = audioCtx.createOscillator();
+    const g = audioCtx.createGain();
+    const filter = audioCtx.createBiquadFilter();
+    o.type = "triangle";
+    o.frequency.setValueAtTime(noteFreq(root, semitone), time);
+    filter.type = "lowpass";
+    filter.frequency.value = 700;
+    g.gain.setValueAtTime(.006, time);
+    g.gain.exponentialRampToValueAtTime(.001, time + .45);
+    o.connect(filter); filter.connect(g); g.connect(masterGain);
+    o.start(time); o.stop(time + .5);
+  }
 }
