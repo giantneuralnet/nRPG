@@ -19,8 +19,7 @@ function clearCloudAt(x,y) {
 }
 
 canvas.addEventListener("pointerdown", e => {
-  if (!audioCtx) audioCtx = new AudioContext();
-  if (audioCtx.state === "suspended") audioCtx.resume();
+  ensureAudio();
 
   const { x, y } = canvasPoint(e);
 

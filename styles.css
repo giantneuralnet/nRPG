@@ -248,32 +248,42 @@ button:focus-visible {
   position: fixed;
   inset: 0;
   display: none;
-  place-items: center;
-  padding: 24px;
-  background: rgba(0,0,0,.72);
+  align-items: center;
+  justify-content: center;
+  padding: max(14px, env(safe-area-inset-top)) max(14px, env(safe-area-inset-right)) max(14px, env(safe-area-inset-bottom)) max(14px, env(safe-area-inset-left));
+  background: rgba(0,0,0,.86);
   z-index: 30;
 }
 
 .book-overlay.is-visible {
-  display: grid;
+  display: flex;
 }
 
 .book-panel {
-  width: min(420px, calc(100vmin - 48px));
-  height: min(420px, calc(100vmin - 48px));
+  box-sizing: border-box;
+  width: min(760px, 100%);
+  max-height: 100%;
   overflow: auto;
-  border: 2px solid rgba(255,255,255,.7);
-  background: #101015;
+  border: 2px solid white;
+  background: #111;
   color: white;
   padding: 18px;
-  display: grid;
-  grid-template-rows: auto 1fr;
 }
 
 .book-panel h2 {
-  margin: 0 0 8px;
-  font-size: 18px;
-  text-align: center;
+  margin: 0 0 12px;
+}
+
+.book-title {
+  animation: book-reveal .5s ease-out;
+}
+
+.book-title.is-blessed {
+  color: #70ff8a;
+}
+
+.book-title.is-cursed {
+  color: #c86bff;
 }
 
 .book-choice {
@@ -298,4 +308,9 @@ button:focus-visible {
 .book-choice.is-selected {
   border-color: #ffe65c;
   box-shadow: inset 0 0 0 3px #ffe65c;
+}
+
+@keyframes book-reveal {
+  0% { opacity: .2; letter-spacing: .18em; transform: scale(.96); }
+  100% { opacity: 1; letter-spacing: 0; transform: scale(1); }
 }

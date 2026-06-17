@@ -45,12 +45,6 @@ function spawnThing(allowExileReturn = true, replaceIndex = null, checked = true
 }
 
 function sampleSpawnThing(allowExileReturn = true) {
-  if (hero && currentPrayer()) {
-    const r = Math.min(W,H) * .062;
-    const p = findFreePosition(r);
-    return makeItem(p.x, -120 - rng()*200, p.y, r);
-  }
-
   if (allowExileReturn && exileQueue.length > 0 && rng() < .28) return popExiledMonster();
 
   const roll = rng();

@@ -104,8 +104,7 @@ const monsterInfo = [
 ];
 
 function resumeAudio() {
-  if (!audioCtx) audioCtx = new AudioContext();
-  if (audioCtx.state === "suspended") audioCtx.resume();
+  ensureAudio();
 }
 
 function updateMenuOverlay() {
@@ -294,11 +293,13 @@ function openItemBook(mode) {
   const blessed = nextBookBlessed;
   nextBookBlessed = !nextBookBlessed;
   const prefix = blessed ? "Blessed" : "Cursed";
+  sound("bookOpen");
   const overlay = document.createElement("div");
   overlay.className = `book-overlay is-visible book-${mode}`;
   const panel = document.createElement("div");
   panel.className = "book-panel";
   const title = document.createElement("h2");
+  title.className = `book-title ${blessed ? "is-blessed" : "is-cursed"}`;
   title.textContent = mode === "prayer" ? `${prefix} Prayer Book` : `${prefix} Banish Book`;
   panel.appendChild(title);
 
@@ -319,6 +320,7 @@ function openItemBook(mode) {
         if (!hero.banishedItems.includes(kind)) hero.banishedItems.push(kind);
         flash = `${name} banished`;
       }
+      sound("bookClose");
       overlay.remove();
     };
     button.addEventListener("click", choose);
