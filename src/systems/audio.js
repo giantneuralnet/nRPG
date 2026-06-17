@@ -172,10 +172,10 @@ function musicProfile() {
   const items = board ? board.filter(t => t.type === "item").length : 0;
   const room = currentRoom || 1;
   const profiles = {
-    1: { root: 110, scale: [0,3,5,7,10], tempo: .34, lead: [0,2,3,1,4,2,1,0] },
-    2: { root: 123.47, scale: [0,2,4,7,9], tempo: .37, lead: [0,1,3,4,2,1,0,2] },
-    3: { root: 103.83, scale: [0,3,6,7,10], tempo: .39, lead: [2,0,3,1,4,3,1,0] },
-    666: { root: 92.5, scale: [0,1,6,7,10], tempo: .29, lead: [0,2,1,3,4,3,1,2] }
+    1: { root: 110, scale: [0,3,5,7,10], tempo: .25, lead: [0,2,3,1,4,2,1,0] },
+    2: { root: 123.47, scale: [0,2,4,7,9], tempo: .27, lead: [0,1,3,4,2,1,0,2] },
+    3: { root: 103.83, scale: [0,3,6,7,10], tempo: .28, lead: [2,0,3,1,4,3,1,0] },
+    666: { root: 92.5, scale: [0,1,6,7,10], tempo: .23, lead: [0,2,1,3,4,3,1,2] }
   };
   const base = profiles[room] || profiles[1];
   return {
@@ -213,12 +213,11 @@ function scheduleMusic() {
 function playMusicStep(profile, step, time) {
   if (gameState === "menu") return;
   const root = profile.root;
-  const octave = profile.room === 666 ? .5 : 1;
   const modeScale = profile.health < .38 ? [0,3,5,7,10] : [0,4,5,7,11];
   const chord = musicState.chords[Math.floor(step / 4) % musicState.chords.length];
   const chordTone = modeScale[chord % modeScale.length];
   const bassDegree = musicState.bass[Math.floor(step / 2) % musicState.bass.length];
-  const bassFreq = noteFreq(root * octave, modeScale[bassDegree % modeScale.length]);
+  const bassFreq = noteFreq(root, modeScale[bassDegree % modeScale.length]);
 
   if (musicState.drums[step % musicState.drums.length] & 1) playKick(time, profile.tension);
   if (musicState.drums[step % musicState.drums.length] & 2) playSnare(time, profile.relief);
@@ -227,7 +226,7 @@ function playMusicStep(profile, step, time) {
 
   const leadNote = musicState.lead[step % musicState.lead.length];
   if (leadNote !== null) {
-    const leadFreq = noteFreq(root * 2, modeScale[leadNote % modeScale.length] + (profile.relief > .5 ? 12 : 0));
+    const leadFreq = noteFreq(root * 2, modeScale[leadNote % modeScale.length]);
     playLead(time + profile.tempo * .35, leadFreq, profile);
   }
 }
