@@ -13,9 +13,10 @@ function clearCloudAt(x,y) {
     } else {
       flash = `Cloud ${cloud.hits}/${cloud.maxHits || cloud.hits}`;
     }
+    return true;
   }
 
-  return true;
+  return false;
 }
 
 canvas.addEventListener("pointerdown", e => {
@@ -25,7 +26,7 @@ canvas.addEventListener("pointerdown", e => {
 
   if (gameState !== "playing") return;
 
-  clearCloudAt(x,y);
+  let acted = clearCloudAt(x,y);
 
   for (let i=board.length-1;i>=0;i--) {
     const t = board[i];
@@ -37,7 +38,10 @@ canvas.addEventListener("pointerdown", e => {
       if (t.type === "item") useItem(t,i);
       else if (t.type === "door") switchRoom(t.room);
       else if (t.type === "monster") attackMonster(t,i);
+      acted = true;
       break;
     }
   }
+
+  if (acted) recordPlayerAction();
 });
