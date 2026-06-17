@@ -77,6 +77,28 @@ button:focus-visible {
   outline-offset: 3px;
 }
 
+.audio-toggle {
+  position: fixed;
+  top: max(12px, env(safe-area-inset-top));
+  right: max(12px, env(safe-area-inset-right));
+  z-index: 40;
+  display: grid;
+  place-items: center;
+  width: 46px;
+  min-height: 46px;
+  padding: 0;
+  border: 2px solid rgba(255,255,255,.8);
+  background: rgba(17,17,17,.72);
+  color: white;
+  font-size: 22px;
+  line-height: 1;
+}
+
+.audio-toggle.is-muted {
+  color: rgba(255,255,255,.45);
+  border-color: rgba(255,255,255,.45);
+}
+
 .choice-controls button {
   width: 58px;
 }

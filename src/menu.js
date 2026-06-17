@@ -12,6 +12,7 @@ const infoOverlay = document.getElementById("infoOverlay");
 const infoClose = document.getElementById("infoClose");
 const infoList = document.getElementById("infoList");
 const menuAction = document.getElementById("menuAction");
+const audioToggle = document.getElementById("audioToggle");
 
 const itemInfo = [
   ["sword","Sword","Gain attack."],
@@ -352,6 +353,12 @@ seedClear.addEventListener("click", () => {
   updateSeedPlaceholder();
 });
 
+audioToggle.addEventListener("click", event => {
+  event.stopPropagation();
+  ensureAudio();
+  setAudioMuted(!audioMuted);
+});
+
 for (const button of difficultyButtons) {
   button.addEventListener("click", () => {
     settings.difficulty = button.dataset.difficulty;
@@ -386,3 +393,4 @@ menuAction.addEventListener("click", () => {
 setInterval(updateSeedPlaceholder, 1000);
 buildInfoList();
 updateMenuOverlay();
+updateAudioToggle();
