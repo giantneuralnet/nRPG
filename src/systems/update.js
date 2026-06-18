@@ -91,9 +91,9 @@ function update() {
 
   if (hero.decay > 0 && now - lastDecayTick >= 1000) {
     lastDecayTick = now;
-    hero.hp -= hero.decay;
+    const dealt = damage(hero, hero.decay, 120, 100, "#8f6bff", false, true, "curse");
     hero.poison += hero.decay;
-    floatText(120,100,`DECAY -${hero.decay}`,"#8f6bff");
+    if (dealt > 0) floatText(120,100,`DECAY -${hero.decay}`,"#8f6bff");
     if (hero.hp <= 0) die();
   }
 

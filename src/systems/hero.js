@@ -38,6 +38,10 @@ function damage(target, amount, x, y, color="#ff6b6b", useParticles = false, spl
   amount = Math.max(0, Math.floor(amount));
   const hitSound = soundType || damageSoundForColor(color);
 
+  if (target === hero && absorbHeroShield(x, y, useParticles)) {
+    return 0;
+  }
+
   if (target === hero && hero.dodge > 0 && rng() < Math.min(.75, hero.dodge / 100)) {
     floatText(x, y, "DODGE", "#72dfff");
     sound("hit");
@@ -78,6 +82,15 @@ function damage(target, amount, x, y, color="#ff6b6b", useParticles = false, spl
   floatText(x, y, "-" + amount, color);
   if (useParticles) burst(x,y,color,12,5);
   return amount;
+}
+
+function absorbHeroShield(x, y, useParticles = false) {
+  if (!hero.shielded) return false;
+  hero.shielded = false;
+  floatText(x, y, "SHIELD", "#85bdff");
+  if (useParticles) burst(x,y,"#d69a55",12,4);
+  sound("block");
+  return true;
 }
 
 function absorbShield(target, x, y, useParticles = false) {

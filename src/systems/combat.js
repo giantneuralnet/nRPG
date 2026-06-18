@@ -176,6 +176,7 @@ function killMonster(index, giveXp = true) {
 
   if (dead.boss) {
     bossKills++;
+    clearTriggerTimeouts();
     sound("dead");
     floatText(dead.x, dead.y, "BOSS KO", "#ffe65c");
     burst(dead.x,dead.y,"#ffe65c",34,9);
@@ -353,6 +354,7 @@ function levelUp() {
 }
 
 function die() {
+  clearTriggerTimeouts();
   if (hero.phoenix > 0) {
     hero.phoenix--;
     hero.hp = 1;
@@ -376,6 +378,7 @@ function checkStoneLock() {
   if (monsters.length > 0 && !hasItems && monsters.every(m => m.stone)) {
     hero.alive = false;
     gameState = "dead";
+    clearTriggerTimeouts();
     flash = "STONE LOCK";
     sound("dead");
   }

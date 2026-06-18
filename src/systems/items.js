@@ -4,11 +4,14 @@ function isCombatant(t) {
 
 function useItem(item, index) {
   const times = 1 + Math.max(0, hero.trigger || 0);
+  const runId = gameRunId;
   applyItemEffect(item);
   for (let i = 1; i < times; i++) {
-    setTimeout(() => {
-      if (gameState === "playing") applyItemEffect(item);
+    const timeout = setTimeout(() => {
+      pendingTriggerTimeouts = pendingTriggerTimeouts.filter(t => t !== timeout);
+      if (gameState === "playing" && gameRunId === runId) applyItemEffect(item);
     }, i * 400);
+    pendingTriggerTimeouts.push(timeout);
   }
   board[index] = spawnThing(true, index);
   checkStoneLock();
@@ -25,8 +28,9 @@ function applyItemEffect(item) {
 
   if (item.kind === "shield") {
     hero.def += value;
+    hero.shielded = true;
     flash = `Shield +${value} DEF`;
-    floatText(item.x,item.y,`DEF +${value}`,"#85bdff");
+    floatText(item.x,item.y,`SHIELD + DEF ${value}`,"#85bdff");
     sound("item");
   }
 
@@ -327,6 +331,7 @@ function cleanHero() {
   hero.unlucky = 0;
   hero.gunpowder = 0;
   hero.trigger = 0;
+  hero.shielded = false;
   hero.multiply = 1;
   hero.lucky = 0;
   hero.prayers = [];
@@ -439,6 +444,8 @@ function flashBang(x,y) {
 
 function shieldAllMonsters(x,y) {
   let count = 0;
+  hero.shielded = true;
+  floatText(120,100,"SHIELD","#85bdff");
   for (const m of board) {
     if (!isCombatant(m)) continue;
     m.shielded = true;
@@ -447,9 +454,9 @@ function shieldAllMonsters(x,y) {
     count++;
   }
 
-  flash = count ? "Shield all!" : "No monsters to shield!";
-  floatText(x,y,count ? "SHIELD ALL" : "NO TARGET","#85bdff");
-  if (count) burst(x,y,"#d69a55",14,4);
+  flash = "Shield all!";
+  floatText(x,y,"SHIELD ALL","#85bdff");
+  burst(x,y,"#d69a55",14,4);
   sound("item");
 }
 
@@ -587,8 +594,7 @@ function explode(x,y,power,kind) {
 
   if (kind === "normal") {
     const heroDmg = Math.floor(power * .6);
-    hero.hp -= heroDmg;
-    floatText(120,100,"-"+heroDmg,"#ff6b6b");
+    damage(hero, heroDmg, 120, 100, "#ff6b6b", true);
     flash = `Bomb hit everyone!`;
 
     for (let i = board.length - 1; i >= 0; i--) {
@@ -680,8 +686,7 @@ function explode(x,y,power,kind) {
 
   if (kind === "lightning") {
     const heroDmg = Math.floor(power * .35);
-    hero.hp -= heroDmg;
-    floatText(120,100,"-"+heroDmg,"#ffe65c");
+    damage(hero, heroDmg, 120, 100, "#ffe65c", true, true, "electric");
     flash = `Lightning bomb!`;
 
     for (let i = board.length - 1; i >= 0; i--) {
@@ -699,9 +704,8 @@ function explode(x,y,power,kind) {
 
   if (kind === "poison") {
     const heroDmg = Math.floor(power * 1.2);
-    hero.hp -= heroDmg;
+    damage(hero, heroDmg, 120, 100, "#7cff4f", true, true, "poisonTick");
     hero.poison = Math.max(0, hero.poison - 1);
-    floatText(120,100,"-"+heroDmg,"#7cff4f");
     flash = `Poison bomb!`;
 
     for (const m of board) {
@@ -851,11 +855,14 @@ function explode(x,y,power,kind) {
       board[i] = spawnThing(true, i);
     }
     burst(x,y,"#ff4f4f",30,9);
-    hero.hp = 0;
-    hero.alive = false;
-    gameState = "dead";
-    flash = "NUKED";
-    sound("dead");
+    if (!absorbHeroShield(120,100,true)) {
+      hero.hp = 0;
+      hero.alive = false;
+      gameState = "dead";
+      clearTriggerTimeouts();
+      flash = "NUKED";
+      sound("dead");
+    }
   }
 
   if (kind === "enrage") {

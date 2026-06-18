@@ -1,5 +1,7 @@
 let gameState = "menu";
 let hero, board, rooms, currentRoom, exileQueue, kills, bossKills, flash, shake, boom, shockwaves, floats, particles, clouds, lavaPools, soulLinks, lastPoisonTick, lastDecayTick, blindUntil;
+let gameRunId = 0;
+let pendingTriggerTimeouts = [];
 
 function difficultyScale() {
   if (settings.difficulty === "easy") return 0;
@@ -8,6 +10,8 @@ function difficultyScale() {
 }
 
 function resetGame() {
+  clearTriggerTimeouts();
+  gameRunId++;
   setGameSeed(settings.seed);
 
   hero = {
@@ -42,6 +46,7 @@ function resetGame() {
     unlucky: 0,
     gunpowder: 0,
     trigger: 0,
+    shielded: false,
     multiply: 1,
     prayers: [],
     banishedItems: []
@@ -68,6 +73,11 @@ function resetGame() {
   board = fillRoom(true);
   rooms[currentRoom] = board;
   gameState = "playing";
+}
+
+function clearTriggerTimeouts() {
+  for (const timeout of pendingTriggerTimeouts) clearTimeout(timeout);
+  pendingTriggerTimeouts = [];
 }
 
 function currentPrayer() {
