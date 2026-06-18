@@ -65,7 +65,7 @@ function resetGame() {
   lastPoisonTick = performance.now();
   lastDecayTick = performance.now();
 
-  board = fillRoom();
+  board = fillRoom(true);
   rooms[currentRoom] = board;
   gameState = "playing";
 }
@@ -76,11 +76,22 @@ function currentPrayer() {
   return hero.prayers[hero.prayers.length - 1] || null;
 }
 
-function fillRoom() {
+function fillRoom(initial = false) {
   const contents = [];
   const previousBoard = board;
   board = contents;
-  for (let i = 0; i < settings.choices; i++) contents.push(spawnThing());
+  const types = [];
+  if (initial) {
+    const monsters = Math.floor(settings.choices / 2);
+    for (let i = 0; i < settings.choices; i++) types.push(i < monsters ? "monster" : "item");
+    for (let i = types.length - 1; i > 0; i--) {
+      const j = rand(0, i);
+      const tmp = types[i];
+      types[i] = types[j];
+      types[j] = tmp;
+    }
+  }
+  for (let i = 0; i < settings.choices; i++) contents.push(spawnThing(true, null, types[i] || null));
   board = previousBoard;
   return contents;
 }

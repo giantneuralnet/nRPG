@@ -23,12 +23,10 @@ function findFreePosition(radius) {
   };
 }
 
-function spawnThing(allowExileReturn = true, replaceIndex = null, checked = true) {
-  if (!checked) return sampleSpawnThing(allowExileReturn);
-
+function spawnThing(allowExileReturn = true, replaceIndex = null, forceType = null) {
   for (let tries = 0; tries < 10; tries++) {
     const exileQueueBefore = exileQueue.slice();
-    const candidate = sampleSpawnThing(allowExileReturn);
+    const candidate = sampleSpawnThing(allowExileReturn, forceType);
     if (hero && hero.unlucky > 0 && isHelpfulEntity(candidate) && rng() < Math.min(.75, hero.unlucky * .12)) {
       exileQueue = exileQueueBefore;
       continue;
@@ -37,18 +35,17 @@ function spawnThing(allowExileReturn = true, replaceIndex = null, checked = true
       exileQueue = exileQueueBefore;
       continue;
     }
-    if (hasSafeAction(candidate, replaceIndex)) return candidate;
-    exileQueue = exileQueueBefore;
+    return candidate;
   }
 
-  return sampleSpawnThing(allowExileReturn);
+  return sampleSpawnThing(allowExileReturn, forceType);
 }
 
-function sampleSpawnThing(allowExileReturn = true) {
-  if (allowExileReturn && exileQueue.length > 0 && rng() < .28) return popExiledMonster();
+function sampleSpawnThing(allowExileReturn = true, forceType = null) {
+  if (forceType !== "item" && allowExileReturn && exileQueue.length > 0 && rng() < .28) return popExiledMonster();
 
   const roll = rng();
-  const isMonster = roll < .52;
+  const isMonster = forceType ? forceType === "monster" : roll < .52;
   const r = Math.min(W,H) * (isMonster ? .076 : .062);
   const p = findFreePosition(r);
 
@@ -70,49 +67,6 @@ function isHelpfulEntity(t) {
     "echoBomb","soulBomb","healBomb","lightningBomb","iceBomb","shieldBomb","stoneBomb","blindBomb",
     "blessedScroll","allyScroll","killRandomItem","healRandomItem","flashBang","exileItem","swapHealthItem","chest"
   ].includes(t.kind);
-}
-
-function boardWithCandidate(candidate, replaceIndex) {
-  const next = board.slice();
-  if (replaceIndex === null || replaceIndex === undefined) next.push(candidate);
-  else next[replaceIndex] = candidate;
-  return next;
-}
-
-function hasSafeAction(candidate, replaceIndex = null) {
-  if (!hero || hero.hp <= 0) return false;
-
-  return boardWithCandidate(candidate, replaceIndex).some(t => {
-    if (!t) return false;
-    if (t.type === "door") return true;
-    if (t.type === "item") return isSafeItemAction(t);
-    if (t.type === "monster") return isSafeMonsterAction(t);
-    return false;
-  });
-}
-
-function isSafeMonsterAction(m) {
-  if (m.team === "hero") return true;
-  if (m.stone) return true;
-  if (performance.now() < m.frozenUntil) return true;
-  if (performance.now() < blindUntil) return true;
-  if (m.blind) return true;
-
-  const hitsToKill = Math.max(1, Math.ceil(m.hp / Math.max(1, getHeroAtk())));
-  const counterDamage = Math.max(1, m.atk - getHeroDef());
-  return hitsToKill * counterDamage < hero.hp;
-}
-
-function isSafeItemAction(item) {
-  return playerDirectDamage(item) < hero.hp;
-}
-
-function playerDirectDamage(item) {
-  if (item.kind === "bomb") return Math.floor(item.value * .6);
-  if (item.kind === "lightningBomb") return Math.floor(item.value * .35);
-  if (item.kind === "poisonBomb") return Math.floor(item.value * 1.2);
-  if (item.kind === "nukeBomb") return hero ? hero.hp : 9999;
-  return 0;
 }
 
 function popExiledMonster() {
