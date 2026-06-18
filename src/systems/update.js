@@ -32,6 +32,12 @@ function resolveOverlaps() {
   }
 }
 
+function chooseMonsterRoamTarget(t, now) {
+  t.roamX = rand(t.r + 35, Math.max(t.r + 35, W - t.r - 35));
+  t.roamY = rand(175, Math.max(175, H - t.r - 95));
+  t.roamUntil = now + rand(1800, 4200);
+}
+
 function update() {
   const now = performance.now();
 
@@ -126,19 +132,35 @@ function update() {
         continue;
       }
 
+      if (!t.roamX || !t.roamY || now >= t.roamUntil || dist(t.x,t.y,t.roamX,t.roamY) < 35) {
+        chooseMonsterRoamTarget(t, now);
+      }
+
       t.wander += .025;
-      t.vx += Math.sin(t.wander)*.04;
-      t.vy += Math.cos(t.wander*1.4)*.04;
+      const targetDx = t.roamX - t.x;
+      const targetDy = t.roamY - t.y;
+      const targetDist = Math.max(1, Math.hypot(targetDx, targetDy));
+      const steer = t.zombie || t.rage || t.team === "hero" ? .09 : .045;
+      t.vx += (targetDx / targetDist) * steer + Math.sin(t.wander) * .018;
+      t.vy += (targetDy / targetDist) * steer + Math.cos(t.wander * 1.4) * .018;
 
       const speed = (t.zombie || t.rage ? 2.2 : 1) + hero.level*.035 + kills*.005;
       t.vx = Math.max(-speed, Math.min(speed, t.vx));
       t.vy = Math.max(-speed, Math.min(speed, t.vy));
+      t.vx *= .985;
+      t.vy *= .985;
 
       t.x += t.vx;
       t.y += t.vy;
 
-      if (t.x < t.r+20 || t.x > W-t.r-20) t.vx *= -1;
-      if (t.y < 160 || t.y > H-t.r-85) t.vy *= -1;
+      if (t.x < t.r+20 || t.x > W-t.r-20) {
+        t.vx *= -1;
+        chooseMonsterRoamTarget(t, now);
+      }
+      if (t.y < 160 || t.y > H-t.r-85) {
+        t.vy *= -1;
+        chooseMonsterRoamTarget(t, now);
+      }
     }
 
   }

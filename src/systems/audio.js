@@ -239,7 +239,7 @@ function musicProfile() {
     1: { root: 110, scale: [0,3,5,7,10], tempo: .25, lead: [0,2,3,1,4,2,1,0] },
     2: { root: 123.47, scale: [0,2,4,7,9], tempo: .27, lead: [0,1,3,4,2,1,0,2] },
     3: { root: 103.83, scale: [0,3,6,7,10], tempo: .28, lead: [2,0,3,1,4,3,1,0] },
-    666: { root: 92.5, scale: [0,1,6,7,10], tempo: .23, lead: [0,2,1,3,4,3,1,2] }
+    666: { root: 82.41, scale: [0,1,3,6,7,10], tempo: .21, lead: [0,3,1,4,2,5,1,3] }
   };
   const base = profiles[room] || profiles[1];
   return {
@@ -291,6 +291,7 @@ function playMusicStep(profile, step, time) {
   if (musicState.drums[step % musicState.drums.length] & 4) playHat(time, profile.intensity);
   if (step % 2 === 0) playBass(time, bassFreq, profile.tension);
   if (step % 8 === 0) playChord(time + .015, root * 2, modeScale, chordTone, profile.health);
+  if (profile.room === 666 && step % 8 === 4) playHellDrone(time, root, chordTone, profile);
   if (profile.intensity > .62 && step % 16 === 8) playPad(time, root * 2, chordTone, profile);
 
   const leadNote = musicState.lead[step % musicState.lead.length];
@@ -329,7 +330,7 @@ function generateLeadPattern(profile) {
   let note = profile.room === 666 ? 1 : 0;
   for (let i = 0; i < 16; i++) {
     if (i % 4 === 0 || Math.random() < density) {
-      note = Math.max(0, Math.min(4, note + patternPick([-1,0,1,2])));
+      note = Math.max(0, Math.min(profile.scale.length - 1, note + patternPick(profile.room === 666 ? [-2,-1,1,2,3] : [-1,0,1,2])));
       pattern.push(note);
     } else {
       pattern.push(null);
@@ -339,6 +340,10 @@ function generateLeadPattern(profile) {
 }
 
 function generateBassPattern(profile) {
+  if (profile.room === 666) {
+    const base = profile.intensity > .55 ? [0,0,3,0,1,4,0,2] : [0,0,1,0,3,0,1,0];
+    return base.map(n => Math.max(0, Math.min(profile.scale.length - 1, n + (Math.random() < .25 ? patternPick([-1,1]) : 0))));
+  }
   const base = profile.intensity > .55 ? [0,0,2,0,3,2,4,2] : profile.tension > .45 ? [0,0,1,0,2,1,0,1] : [0,2,3,2,0,2,1,2];
   return base.map(n => Math.max(0, Math.min(4, n + (Math.random() < .2 ? patternPick([-1,1]) : 0))));
 }
@@ -358,6 +363,7 @@ function generateDrumPattern(profile) {
 }
 
 function generateChordPattern(profile) {
+  if (profile.room === 666) return profile.intensity > .5 ? [0,3,1,4] : [0,1,3,1];
   if (profile.intensity > .62) return profile.room === 666 ? [0,4,2,4] : [0,4,3,4];
   if (profile.relief > profile.tension) return [0,3,4,2];
   return [0,2,1,3];
@@ -438,7 +444,7 @@ function playLead(time, freq, profile) {
 }
 
 function playChord(time, root, scale, degree, health) {
-  const third = 4;
+  const third = currentRoom === 666 ? 3 : 4;
   const chord = [degree, degree + third, degree + 7];
   for (const semitone of chord) {
     const o = audioCtx.createOscillator();
@@ -455,8 +461,26 @@ function playChord(time, root, scale, degree, health) {
   }
 }
 
+function playHellDrone(time, root, degree, profile) {
+  const notes = [degree - 12, degree - 6, degree + 1];
+  for (const semitone of notes) {
+    const o = audioCtx.createOscillator();
+    const g = audioCtx.createGain();
+    const filter = audioCtx.createBiquadFilter();
+    o.type = "sawtooth";
+    o.frequency.setValueAtTime(noteFreq(root, semitone), time);
+    filter.type = "lowpass";
+    filter.frequency.value = 260 + profile.intensity * 120;
+    g.gain.setValueAtTime(.001, time);
+    g.gain.linearRampToValueAtTime(.009 + profile.intensity * .004, time + .12);
+    g.gain.exponentialRampToValueAtTime(.001, time + 1.05);
+    o.connect(filter); filter.connect(g); g.connect(masterGain);
+    o.start(time); o.stop(time + 1.15);
+  }
+}
+
 function playPad(time, root, degree, profile) {
-  const chord = [degree, degree + 4, degree + 7, degree + 12];
+  const chord = profile.room === 666 ? [degree, degree + 1, degree + 6, degree + 12] : [degree, degree + 4, degree + 7, degree + 12];
   for (const semitone of chord) {
     const o = audioCtx.createOscillator();
     const g = audioCtx.createGain();

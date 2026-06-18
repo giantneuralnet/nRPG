@@ -44,13 +44,20 @@ function drawRoomBackground() {
 
   if (currentRoom === 666) {
     ctx.save();
-    for (let i = 0; i < 14; i++) {
-      const x = (i * 97 + Math.sin(performance.now() / 900 + i) * 24) % W;
-      const h = 70 + Math.sin(performance.now() / 500 + i) * 24;
-      ctx.fillStyle = i % 2 ? "rgba(255,80,12,.18)" : "rgba(255,190,40,.12)";
+    const now = performance.now();
+    const count = Math.max(12, Math.floor(W / 32));
+    for (let i = 0; i < count; i++) {
+      const size = 4 + (i % 5);
+      const phase = (now * (.035 + (i % 4) * .006) + i * 83) % (H + 90);
+      const x = (i * 71 + Math.sin(now / 700 + i) * 18) % W;
+      const y = H + 35 - phase;
+      const alpha = Math.max(0, Math.min(.45, y / H)) * (i % 3 === 0 ? .9 : .55);
+      ctx.fillStyle = i % 2 ? `rgba(255,85,28,${alpha})` : `rgba(255,190,70,${alpha})`;
       ctx.beginPath();
-      ctx.moveTo(x - 34, H);
-      ctx.quadraticCurveTo(x, H - h, x + 34, H);
+      ctx.moveTo(x, y - size);
+      ctx.lineTo(x + size, y);
+      ctx.lineTo(x, y + size);
+      ctx.lineTo(x - size, y);
       ctx.closePath();
       ctx.fill();
     }
@@ -98,7 +105,7 @@ function createRoomBackground(room, w, h) {
 function drawWoodFloor(g, w, h, r) {
   g.fillStyle = "#120b06";
   g.fillRect(0,0,w,h);
-  const plankH = Math.max(38, Math.floor(h / 13));
+  const plankH = Math.max(54, Math.floor(h / 9));
   for (let y = -plankH; y < h + plankH; y += plankH) {
     const shade = 20 + Math.floor(r() * 18);
     g.fillStyle = `rgb(${shade + 10},${shade + 2},${Math.max(2, shade - 10)})`;
@@ -116,7 +123,7 @@ function drawWoodFloor(g, w, h, r) {
       g.lineTo(x,y + plankH - 5);
       g.stroke();
     }
-    for (let i = 0; i < 10; i++) {
+    for (let i = 0; i < 3; i++) {
       const yy = y + 8 + r() * (plankH - 16);
       g.strokeStyle = "rgba(255,210,140,.045)";
       g.beginPath();
@@ -130,7 +137,7 @@ function drawWoodFloor(g, w, h, r) {
 function drawCarpet(g, w, h, r) {
   g.fillStyle = "#160909";
   g.fillRect(0,0,w,h);
-  const tile = 28;
+  const tile = 44;
   for (let y = 0; y < h; y += tile) {
     for (let x = 0; x < w; x += tile) {
       const v = 18 + Math.floor(r() * 18);
@@ -138,15 +145,15 @@ function drawCarpet(g, w, h, r) {
       g.fillRect(x,y,tile,tile);
     }
   }
-  g.strokeStyle = "rgba(180,90,80,.18)";
+  g.strokeStyle = "rgba(180,90,80,.1)";
   g.lineWidth = 1;
-  for (let x = -h; x < w; x += 42) {
+  for (let x = -h; x < w; x += 72) {
     g.beginPath();
     g.moveTo(x,0);
     g.lineTo(x + h,h);
     g.stroke();
   }
-  for (let x = 0; x < w + h; x += 42) {
+  for (let x = 0; x < w + h; x += 72) {
     g.beginPath();
     g.moveTo(x,0);
     g.lineTo(x - h,h);
@@ -157,19 +164,19 @@ function drawCarpet(g, w, h, r) {
 function drawGrass(g, w, h, r) {
   g.fillStyle = "#061206";
   g.fillRect(0,0,w,h);
-  for (let i = 0; i < Math.floor(w * h / 950); i++) {
+  for (let i = 0; i < Math.floor(w * h / 2400); i++) {
     const x = r() * w;
     const y = r() * h;
-    const len = 5 + r() * 16;
+    const len = 4 + r() * 10;
     const green = 28 + Math.floor(r() * 40);
-    g.strokeStyle = `rgba(${Math.floor(green * .35)},${green},${Math.floor(green * .25)},.42)`;
+    g.strokeStyle = `rgba(${Math.floor(green * .35)},${green},${Math.floor(green * .25)},.32)`;
     g.lineWidth = 1;
     g.beginPath();
     g.moveTo(x,y);
     g.lineTo(x + (r() - .5) * 8, y - len);
     g.stroke();
   }
-  for (let i = 0; i < 28; i++) {
+  for (let i = 0; i < 14; i++) {
     g.fillStyle = "rgba(0,0,0,.12)";
     g.beginPath();
     g.ellipse(r() * w, r() * h, 30 + r() * 80, 14 + r() * 45, r() * Math.PI, 0, Math.PI * 2);
@@ -180,7 +187,7 @@ function drawGrass(g, w, h, r) {
 function drawLavaRock(g, w, h, r) {
   g.fillStyle = "#160302";
   g.fillRect(0,0,w,h);
-  for (let i = 0; i < Math.floor(w * h / 4200); i++) {
+  for (let i = 0; i < Math.floor(w * h / 7600); i++) {
     const x = r() * w;
     const y = r() * h;
     const rad = 24 + r() * 80;
@@ -189,9 +196,9 @@ function drawLavaRock(g, w, h, r) {
     g.ellipse(x,y,rad,rad * (.45 + r() * .45),r() * Math.PI,0,Math.PI * 2);
     g.fill();
   }
-  for (let i = 0; i < 24; i++) {
-    g.strokeStyle = "rgba(255,80,20,.16)";
-    g.lineWidth = 2 + r() * 5;
+  for (let i = 0; i < 10; i++) {
+    g.strokeStyle = "rgba(255,80,20,.1)";
+    g.lineWidth = 2 + r() * 3;
     g.beginPath();
     let x = r() * w;
     let y = r() * h;
