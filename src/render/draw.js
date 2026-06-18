@@ -130,7 +130,10 @@ function drawWoodFloor(g, w, h, r) {
       g.strokeStyle = "rgba(255,210,140,.045)";
       g.beginPath();
       g.moveTo(0,yy);
-      for (let x = 0; x < w; x += 70) g.lineTo(x, yy + Math.sin(x * .02 + r() * 4) * 2);
+      const phase = r() * 4;
+      for (let x = 0; x <= w + 80; x += 40) {
+        g.lineTo(x, yy + Math.sin(x * .018 + phase) * 2);
+      }
       g.stroke();
     }
   }

@@ -1,4 +1,4 @@
-let audioCtx, masterGain, windNodes, musicTimer, musicStep = 0, musicPhrase = 0, nextMusicAt = 0;
+let audioCtx, masterGain, musicTimer, musicStep = 0, musicPhrase = 0, nextMusicAt = 0;
 let musicState = null;
 let actionTimes = [];
 let audioMuted = localStorage.getItem("nrpgAudioMuted") === "1";
@@ -11,12 +11,19 @@ function ensureAudio() {
     masterGain.gain.value = audioMuted ? 0 : 1;
     masterGain.connect(audioCtx.destination);
   }
-  startWind();
   startMusic();
 }
 
 function sound(type) {
   ensureAudio();
+  if (type === "fire" || type === "fireTick") {
+    fireNoise(type === "fire" ? .2 : .13, type === "fire" ? .11 : .065);
+    return;
+  }
+  if (type === "poisonTick") {
+    coughSound();
+    return;
+  }
   const o = audioCtx.createOscillator();
   const g = audioCtx.createGain();
   o.connect(g); g.connect(masterGain);
@@ -58,30 +65,6 @@ function sound(type) {
     o.frequency.exponentialRampToValueAtTime(220, now+.18);
     g.gain.setValueAtTime(.13, now);
     g.gain.exponentialRampToValueAtTime(.001, now+.22);
-  }
-  if (type === "fire") {
-    o.type = "sawtooth";
-    o.frequency.setValueAtTime(130, now);
-    o.frequency.exponentialRampToValueAtTime(360, now+.08);
-    o.frequency.exponentialRampToValueAtTime(90, now+.2);
-    g.gain.setValueAtTime(.12, now);
-    g.gain.exponentialRampToValueAtTime(.001, now+.26);
-  }
-  if (type === "fireTick") {
-    o.type = "sawtooth";
-    o.frequency.setValueAtTime(95, now);
-    o.frequency.exponentialRampToValueAtTime(210, now+.06);
-    o.frequency.exponentialRampToValueAtTime(70, now+.16);
-    g.gain.setValueAtTime(.075, now);
-    g.gain.exponentialRampToValueAtTime(.001, now+.2);
-  }
-  if (type === "poisonTick") {
-    o.type = "triangle";
-    o.frequency.setValueAtTime(260, now);
-    o.frequency.exponentialRampToValueAtTime(150, now+.11);
-    o.frequency.exponentialRampToValueAtTime(190, now+.2);
-    g.gain.setValueAtTime(.07, now);
-    g.gain.exponentialRampToValueAtTime(.001, now+.24);
   }
   if (type === "block") {
     o.type = "square";
@@ -146,54 +129,49 @@ function sound(type) {
   o.stop(now+.7);
 }
 
-function startWind() {
-  if (!audioCtx || windNodes) return;
-
-  const length = audioCtx.sampleRate * 2;
+function noiseBurst(duration, gainValue, filterType, frequency, q = .7) {
+  const now = audioCtx.currentTime;
+  const length = Math.max(1, Math.floor(audioCtx.sampleRate * duration));
   const buffer = audioCtx.createBuffer(1, length, audioCtx.sampleRate);
   const data = buffer.getChannelData(0);
-  let last = 0;
   for (let i = 0; i < length; i++) {
-    last = last * .985 + (Math.random() * 2 - 1) * .015;
-    data[i] = last;
+    data[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / length, 1.6);
   }
-
   const noise = audioCtx.createBufferSource();
   noise.buffer = buffer;
-  noise.loop = true;
-
   const filter = audioCtx.createBiquadFilter();
-  filter.type = "bandpass";
-  filter.frequency.value = 420;
-  filter.Q.value = .55;
-
-  const lfo = audioCtx.createOscillator();
-  lfo.type = "sine";
-  lfo.frequency.value = .055;
-  const lfoGain = audioCtx.createGain();
-  lfoGain.gain.value = 180;
-  lfo.connect(lfoGain);
-  lfoGain.connect(filter.frequency);
-
-  const howl = audioCtx.createOscillator();
-  howl.type = "sine";
-  howl.frequency.value = 112;
-  const howlGain = audioCtx.createGain();
-  howlGain.gain.value = .006;
-  howl.connect(howlGain);
-
+  filter.type = filterType;
+  filter.frequency.value = frequency;
+  filter.Q.value = q;
   const gain = audioCtx.createGain();
-  gain.gain.value = .018;
-
+  gain.gain.setValueAtTime(gainValue, now);
+  gain.gain.exponentialRampToValueAtTime(.001, now + duration);
   noise.connect(filter);
   filter.connect(gain);
-  howlGain.connect(gain);
   gain.connect(masterGain);
+  noise.start(now);
+  noise.stop(now + duration + .02);
+}
 
-  noise.start();
-  lfo.start();
-  howl.start();
-  windNodes = { noise, filter, lfo, lfoGain, howl, howlGain, gain };
+function fireNoise(duration, gainValue) {
+  noiseBurst(duration, gainValue, "bandpass", 520, .45);
+  setTimeout(() => {
+    if (audioCtx && masterGain) noiseBurst(duration * .55, gainValue * .45, "highpass", 1600, .25);
+  }, 18);
+}
+
+function coughSound() {
+  const now = audioCtx.currentTime;
+  noiseBurst(.09, .075, "lowpass", 360, .9);
+  const o = audioCtx.createOscillator();
+  const g = audioCtx.createGain();
+  o.type = "square";
+  o.frequency.setValueAtTime(115, now);
+  o.frequency.exponentialRampToValueAtTime(72, now + .08);
+  g.gain.setValueAtTime(.045, now);
+  g.gain.exponentialRampToValueAtTime(.001, now + .11);
+  o.connect(g); g.connect(masterGain);
+  o.start(now); o.stop(now + .12);
 }
 
 function setAudioMuted(muted) {
