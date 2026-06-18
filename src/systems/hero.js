@@ -87,7 +87,7 @@ function damage(target, amount, x, y, color="#ff6b6b", useParticles = false, spl
 function absorbHeroShield(x, y, useParticles = false) {
   if (!hero.shielded) return false;
   hero.shielded = false;
-  floatText(x, y, "BARRIER", "#d69a55");
+  floatText(x, y, "SHIELD", "#d69a55");
   if (useParticles) burst(x,y,"#d69a55",12,4);
   sound("block");
   return true;

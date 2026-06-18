@@ -244,7 +244,7 @@ function drawItem(item) {
   ctx.fillStyle = "white";
 
   if (item.kind === "sword") ctx.fillText(`ATK +${item.value}`, item.x, item.y+item.r+10);
-  if (item.kind === "shield") ctx.fillText(`DEF +${item.value}`, item.x, item.y+item.r+10);
+  if (item.kind === "shield") ctx.fillText(`DEFENSE +${item.value}`, item.x, item.y+item.r+10);
   if (item.kind === "potion") ctx.fillText(`HP +${item.value}`, item.x, item.y+item.r+10);
   if (item.kind === "regenPotion") ctx.fillText(`REGEN`, item.x, item.y+item.r+10);
   if (item.kind === "vampirePotion") ctx.fillText(`VAMPIRE`, item.x, item.y+item.r+10);
