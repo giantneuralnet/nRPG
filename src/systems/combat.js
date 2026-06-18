@@ -167,6 +167,16 @@ function killMonster(index, giveXp = true) {
     dead.contagious = false;
   }
 
+  if (dead.boss) {
+    bossDefeated = true;
+    sound("dead");
+    floatText(dead.x, dead.y, "BOSS KO", "#ffe65c");
+    burst(dead.x,dead.y,"#ffe65c",34,9);
+    gameState = "win";
+    flash = "YOU WIN!";
+    return;
+  }
+
   if (dead.team === "hero") {
     sound("dead");
     floatText(dead.x, dead.y, "DOWN", "#d8ecff");
@@ -203,10 +213,8 @@ function killMonster(index, giveXp = true) {
     }
   }
 
-  if (kills >= 20) {
-    gameState = "win";
-    flash = "YOU WIN!";
-    sound("level");
+  if (kills >= 20 && !bossSpawned) {
+    startBossPhase(index);
     return;
   }
 

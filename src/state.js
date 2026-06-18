@@ -1,5 +1,5 @@
 let gameState = "menu";
-let hero, board, rooms, currentRoom, exileQueue, kills, flash, shake, boom, shockwaves, floats, particles, clouds, lavaPools, soulLinks, lastPoisonTick, lastDecayTick, blindUntil;
+let hero, board, rooms, currentRoom, exileQueue, kills, bossSpawned, bossDefeated, flash, shake, boom, shockwaves, floats, particles, clouds, lavaPools, soulLinks, lastPoisonTick, lastDecayTick, blindUntil;
 
 function difficultyScale() {
   if (settings.difficulty === "easy") return 0;
@@ -56,6 +56,8 @@ function resetGame() {
   lavaPools = [];
   soulLinks = [];
   kills = 0;
+  bossSpawned = false;
+  bossDefeated = false;
   flash = "Tap monsters and items";
   shake = 0;
   boom = null;
