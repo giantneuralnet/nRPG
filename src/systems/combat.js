@@ -97,6 +97,7 @@ function closestChargeTarget(source, entities) {
 }
 
 function addCharge(entity, amount, x, y) {
+  if (entity === hero) return;
   amount = Math.max(1, Math.floor(amount || 1));
   entity.charge = (entity.charge || 0) + amount;
   floatText(x, y, `CHARGE +${amount}`, "#ffe65c");
@@ -122,7 +123,7 @@ function chargeTick() {
     const amount = Math.max(1, source.charge || 0);
     addChargeBolt(from, to);
     damage(target, amount, to.x, to.y, "#ffe65c", false, true, "electric");
-    if ((target === hero && hero.hp > 0) || (target !== hero && target.hp > 0)) addCharge(target, 1, to.x, to.y);
+    if (target !== hero && target.hp > 0) addCharge(target, 1, to.x, to.y);
   }
 
   for (let i = board.length - 1; i >= 0; i--) {

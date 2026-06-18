@@ -700,7 +700,6 @@ function explode(x,y,power,kind) {
 
   if (kind === "lightning") {
     const stacks = Math.max(1, Math.floor(power));
-    addCharge(hero, stacks, 120, 100);
     flash = `Charge bomb!`;
 
     for (const m of board) {

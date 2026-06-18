@@ -69,6 +69,11 @@ function drawChargeBolts() {
   for (const bolt of chargeBolts) {
     const alpha = Math.max(0, bolt.life / bolt.maxLife);
     const segments = 7;
+    const dx = bolt.x2 - bolt.x1;
+    const dy = bolt.y2 - bolt.y1;
+    const len = Math.max(1, Math.hypot(dx, dy));
+    const nx = -dy / len;
+    const ny = dx / len;
     ctx.strokeStyle = `rgba(255,245,100,${alpha})`;
     ctx.lineWidth = 3 + alpha * 2;
     ctx.beginPath();
@@ -77,15 +82,31 @@ function drawChargeBolts() {
       const x = bolt.x1 + (bolt.x2 - bolt.x1) * t;
       const y = bolt.y1 + (bolt.y2 - bolt.y1) * t;
       const wobble = Math.sin((bolt.seed + i * 13.7) * 4.1) * 14 * alpha;
-      const dx = bolt.y2 - bolt.y1;
-      const dy = bolt.x1 - bolt.x2;
-      const len = Math.max(1, Math.hypot(dx, dy));
-      const px = x + dx / len * wobble;
-      const py = y + dy / len * wobble;
+      const px = x + nx * wobble;
+      const py = y + ny * wobble;
       if (i === 0) ctx.moveTo(px, py);
       else ctx.lineTo(px, py);
     }
     ctx.stroke();
+
+    ctx.lineWidth = 2 + alpha;
+    for (let branch = 0; branch < 3; branch++) {
+      const t = (.25 + branch * .22 + Math.sin(bolt.seed + branch) * .06);
+      const baseX = bolt.x1 + dx * t + nx * Math.sin((bolt.seed + branch * 8.3) * 2.7) * 10 * alpha;
+      const baseY = bolt.y1 + dy * t + ny * Math.cos((bolt.seed + branch * 7.1) * 2.9) * 10 * alpha;
+      const side = branch % 2 ? -1 : 1;
+      const length = Math.min(54, Math.max(22, len * (.12 + branch * .025))) * alpha;
+      const along = .35 + Math.sin(bolt.seed + branch * 3.1) * .18;
+      const endX = baseX + nx * side * length + dx / len * length * along;
+      const endY = baseY + ny * side * length + dy / len * length * along;
+      const kinkX = (baseX + endX) / 2 + nx * side * 8 * alpha;
+      const kinkY = (baseY + endY) / 2 + ny * side * 8 * alpha;
+      ctx.beginPath();
+      ctx.moveTo(baseX, baseY);
+      ctx.lineTo(kinkX, kinkY);
+      ctx.lineTo(endX, endY);
+      ctx.stroke();
+    }
   }
   ctx.restore();
 }
