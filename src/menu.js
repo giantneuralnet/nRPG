@@ -64,7 +64,7 @@ const itemInfo = [
   ["stoneScroll","Stone scroll","Makes one monster permanently stone."],
   ["hauntedScroll","Curse scroll","Haunts monsters so they rise once as ghosts."],
   ["blessedScroll","Blessed curse","Heals you when you kill a monster."],
-  ["necroticScroll","Necrotic blessing","On death, gain defense and survive at 1 HP."],
+  ["necroticScroll","Necrotic blessing","On death, gain defense."],
   ["allyScroll","Ally scroll","Makes a random monster your ally."],
   ["combustionScroll","Combustion scroll","Starts a 10 second countdown, then pulses its attack as fire damage."],
   ["killRandomItem","Kill random","Kills a random monster or backfires on you."],
