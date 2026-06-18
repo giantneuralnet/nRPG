@@ -52,7 +52,10 @@ function sampleSpawnThing(allowExileReturn = true) {
   const r = Math.min(W,H) * (isMonster ? .076 : .062);
   const p = findFreePosition(r);
 
-  if (isMonster) return makeMonster(p.x, -120 - rng()*200, p.y, r);
+  if (isMonster) {
+    if (kills >= 20 && bossKills <= 0 && !bossOnBoard()) return makeBoss(p.x, -160 - rng()*220, p.y, r * 1.75);
+    return makeMonster(p.x, -120 - rng()*200, p.y, r);
+  }
   return makeItem(p.x, -120 - rng()*200, p.y, r);
 }
 
@@ -226,6 +229,42 @@ function makeMonster(x,y,targetY,r) {
       horns:rng()<.4,
       legs:rand(1,4),
       arms:rand(0,3)
+    }
+  };
+}
+
+function bossOnBoard() {
+  return !!(board && board.some(t => t.type === "monster" && t.boss && t.hp > 0));
+}
+
+function makeBoss(x,y,targetY,r) {
+  const samples = [];
+  for (let i = 0; i < 3; i++) samples.push(makeMonster(x,y,targetY,r * (.55 + rng() * .12)));
+  const hp = samples.reduce((sum, m) => sum + m.maxHp, 0);
+  const atk = Math.max(...samples.map(m => m.atk)) + Math.floor(samples.reduce((sum, m) => sum + m.atk, 0) * .25);
+  const primary = samples[0];
+
+  return {
+    ...primary,
+    boss:true,
+    x,y,targetY,r,
+    hp:Math.floor(hp * 1.35),
+    maxHp:Math.floor(hp * 1.35),
+    atk:Math.max(1, atk),
+    elite:true,
+    ultraElite:true,
+    shielded:true,
+    shieldBroken:false,
+    echoDamage:true,
+    parts:{
+      color:samples[rand(0,2)].parts.color,
+      originalColor:null,
+      head:samples[rand(0,2)].parts.head,
+      eyes:Math.max(2, Math.min(6, samples.reduce((sum, m) => sum + m.parts.eyes, 0))),
+      mouth:"fangs",
+      horns:samples.some(m => m.parts.horns),
+      legs:Math.max(...samples.map(m => m.parts.legs)),
+      arms:Math.min(5, samples.reduce((sum, m) => sum + m.parts.arms, 0))
     }
   };
 }

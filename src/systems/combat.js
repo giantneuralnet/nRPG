@@ -167,6 +167,16 @@ function killMonster(index, giveXp = true) {
     dead.contagious = false;
   }
 
+  if (dead.boss) {
+    bossKills++;
+    sound("dead");
+    floatText(dead.x, dead.y, "BOSS KO", "#ffe65c");
+    burst(dead.x,dead.y,"#ffe65c",34,9);
+    gameState = "win";
+    flash = "YOU WIN!";
+    return;
+  }
+
   if (dead.team === "hero") {
     sound("dead");
     floatText(dead.x, dead.y, "DOWN", "#d8ecff");
@@ -201,13 +211,6 @@ function killMonster(index, giveXp = true) {
       hero.xp -= hero.nextXp;
       levelUp();
     }
-  }
-
-  if (kills >= 20) {
-    gameState = "win";
-    flash = "YOU WIN!";
-    sound("level");
-    return;
   }
 
   board[index] = spawnThing(true, index);
