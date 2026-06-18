@@ -64,6 +64,7 @@ const itemInfo = [
   ["stoneScroll","Stone scroll","Makes one monster permanently stone."],
   ["hauntedScroll","Curse scroll","Haunts monsters so they rise once as ghosts."],
   ["blessedScroll","Blessed curse","Heals you when you kill a monster."],
+  ["necroticScroll","Necrotic blessing","On death, gain defense and survive at 1 HP."],
   ["allyScroll","Ally scroll","Makes a random monster your ally."],
   ["combustionScroll","Combustion scroll","Starts a 10 second countdown, then pulses its attack as fire damage."],
   ["killRandomItem","Kill random","Kills a random monster or backfires on you."],
@@ -79,7 +80,7 @@ const helpfulBookItems = new Set([
   "phoenixPotion","luckyCharm","gunpowder","multiplyStatus","triggerStatus","maxHealthUp","prayerBook","banishBook",
   "bomb","clearBomb","cleanBomb","randomBomb","weakenBomb","strengthBomb","cloudBomb","poisonBomb","fireBomb","lavaBomb","contagionBomb",
   "echoBomb","soulBomb","healBomb","lightningBomb","iceBomb","shieldBomb","stoneBomb","blindBomb",
-  "blessedScroll","allyScroll","killRandomItem","healRandomItem","flashBang","exileItem","swapHealthItem","chest"
+  "blessedScroll","necroticScroll","allyScroll","killRandomItem","healRandomItem","flashBang","exileItem","swapHealthItem","chest"
 ]);
 let nextBookBlessed = true;
 

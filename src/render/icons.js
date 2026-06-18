@@ -132,14 +132,14 @@ function makeIcon(type) {
     );
   }
 
-  if (type === "stoneScroll" || type === "zombieScroll" || type === "hauntedScroll" || type === "blessedScroll" || type === "allyScroll" || type === "combustionScroll") {
+  if (type === "stoneScroll" || type === "zombieScroll" || type === "hauntedScroll" || type === "blessedScroll" || type === "necroticScroll" || type === "allyScroll" || type === "combustionScroll") {
     g.fillStyle = "#d8d1b0";
     g.beginPath(); g.roundRect(20,20,60,60,8); g.fill(); g.stroke();
-    g.fillStyle = type === "zombieScroll" ? "#249f42" : type === "hauntedScroll" ? "#6c38d8" : type === "blessedScroll" ? "#d6a400" : type === "allyScroll" ? "#d8ecff" : type === "combustionScroll" ? "#ff9d3b" : "#777";
+    g.fillStyle = type === "zombieScroll" ? "#249f42" : type === "hauntedScroll" ? "#6c38d8" : type === "blessedScroll" ? "#d6a400" : type === "necroticScroll" ? "#6f48d8" : type === "allyScroll" ? "#d8ecff" : type === "combustionScroll" ? "#ff9d3b" : "#777";
     g.font = "bold 35px system-ui";
     g.textAlign = "center";
     g.textBaseline = "middle";
-    g.fillText(type === "zombieScroll" ? "Z" : type === "hauntedScroll" ? "☾" : type === "blessedScroll" ? "+" : type === "allyScroll" ? "A" : type === "combustionScroll" ? "!" : "▣",50,52);
+    g.fillText(type === "zombieScroll" ? "Z" : type === "hauntedScroll" ? "☾" : type === "blessedScroll" ? "+" : type === "necroticScroll" ? "N" : type === "allyScroll" ? "A" : type === "combustionScroll" ? "!" : "▣",50,52);
   }
 
   if ([
@@ -225,5 +225,5 @@ function makeIcon(type) {
   "cleanBomb","weakenBomb","strengthBomb","cloudBomb","poisonBomb","fireBomb","lavaBomb","contagionBomb","echoBomb","soulBomb","healBomb","lightningBomb",
   "iceBomb","stoneBomb","nukeBomb","enrageBomb","blindBomb","chest","powerPotion","regenPotion","vampirePotion","moltenPotion",
   "dodgePotion","critPotion","surprisePotion","decayCurse","phoenixPotion","confusionCurse","glitchCurse","luckyCharm","unluckyCurse","gunpowder","multiplyStatus","triggerStatus","maxHealthUp","maxHealthDown","prayerBook","banishBook","stoneScroll","zombieScroll",
-  "hauntedScroll","blessedScroll","allyScroll","combustionScroll","killRandomItem","healRandomItem","flashBang","exileItem","swapHealthItem","shieldBomb","monsterShield"
+  "hauntedScroll","blessedScroll","necroticScroll","allyScroll","combustionScroll","killRandomItem","healRandomItem","flashBang","exileItem","swapHealthItem","shieldBomb","monsterShield"
 ].forEach(t => icons[t] = makeIcon(t));

@@ -292,6 +292,7 @@ function drawItem(item) {
   if (item.kind === "stoneScroll") ctx.fillText(`STONE SCROLL`, item.x, item.y+item.r+10);
   if (item.kind === "hauntedScroll") ctx.fillText(`CURSE SCROLL`, item.x, item.y+item.r+10);
   if (item.kind === "blessedScroll") ctx.fillText(`BLESS CURSE`, item.x, item.y+item.r+10);
+  if (item.kind === "necroticScroll") ctx.fillText(`NECROTIC`, item.x, item.y+item.r+10);
   if (item.kind === "allyScroll") ctx.fillText(`ALLY SCROLL`, item.x, item.y+item.r+10);
   if (item.kind === "combustionScroll") ctx.fillText(`COMBUST`, item.x, item.y+item.r+10);
   if (item.kind === "killRandomItem") ctx.fillText(`KILL RANDOM`, item.x, item.y+item.r+10);

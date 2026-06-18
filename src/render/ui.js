@@ -37,6 +37,7 @@ function drawHeroStatuses(x,y) {
   if (hero.powerAtkTurns > 0) statuses.push(["ATK UP " + hero.powerAtkTurns, "#ffd84a"]);
   if (hero.powerDefTurns > 0) statuses.push(["DEF UP " + hero.powerDefTurns, "#85bdff"]);
   if (hero.blessed > 0) statuses.push(["BLESSED " + hero.blessed, "#ffe65c"]);
+  if (hero.necrotic > 0) statuses.push(["NECROTIC " + hero.necrotic, "#9f7cff"]);
   if (hero.molten > 0) statuses.push(["MOLTEN " + hero.molten, "#ff7a2f"]);
   if (hero.dodge > 0) statuses.push(["DODGE " + hero.dodge + "%", "#72dfff"]);
   if (hero.crit > 0) statuses.push(["CRIT " + hero.crit + "%", "#ffe65c"]);

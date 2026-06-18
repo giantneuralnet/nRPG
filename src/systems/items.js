@@ -136,6 +136,7 @@ function applyItemEffect(item) {
   if (item.kind === "stoneScroll") stoneRandomMonster(item.x,item.y);
   if (item.kind === "hauntedScroll") hauntMonsters(item.x,item.y);
   if (item.kind === "blessedScroll") blessHero(item.x,item.y);
+  if (item.kind === "necroticScroll") blessNecrotic(item.x,item.y);
   if (item.kind === "allyScroll") allyRandomMonster(item.x,item.y);
   if (item.kind === "combustionScroll") combustRandomMonster(item.x,item.y);
   if (item.kind === "killRandomItem") killRandomTarget(item.x,item.y);
@@ -241,6 +242,13 @@ function blessHero(x,y) {
   sound("level");
 }
 
+function blessNecrotic(x,y) {
+  hero.necrotic += 1;
+  flash = "Necrotic blessing!";
+  floatText(x,y,"NECROTIC","#9f7cff");
+  sound("curse");
+}
+
 function allyRandomMonster(x,y) {
   const monsters = board.filter(t => t.type === "monster" && t.team !== "hero");
   if (monsters.length <= 0) {
@@ -318,6 +326,7 @@ function cleanHero() {
   hero.regenPower = 0;
   hero.vampire = 0;
   hero.blessed = 0;
+  hero.necrotic = 0;
   hero.rage = false;
   hero.molten = 0;
   hero.dodge = 0;
@@ -846,23 +855,19 @@ function explode(x,y,power,kind) {
   }
 
   if (kind === "nuke") {
-    const killed = board.filter(t => t.type === "monster" && t.team !== "hero").length;
-    kills += killed;
-    flash = killed > 0 ? `NUKE! +${killed} kills` : `NUKE!`;
+    flash = `NUKE!`;
+    damage(hero, 1000000, 120, 100, "#ff4f4f", true);
     for (let i = board.length - 1; i >= 0; i--) {
       const t = board[i];
-      floatText(t.x,t.y,t.type === "monster" ? "KO" : "NUKED","#ff4f4f");
-      board[i] = spawnThing(true, i);
+      if (t.type === "monster") {
+        damage(t, 1000000, t.x, t.y, "#ff4f4f", true);
+        if (t.hp <= 0) replaceDefeated(i, false);
+      } else {
+        floatText(t.x,t.y,"NUKED","#ff4f4f");
+        board[i] = spawnThing(true, i);
+      }
     }
     burst(x,y,"#ff4f4f",30,9);
-    if (!absorbHeroShield(120,100,true)) {
-      hero.hp = 0;
-      hero.alive = false;
-      gameState = "dead";
-      clearTriggerTimeouts();
-      flash = "NUKED";
-      sound("dead");
-    }
   }
 
   if (kind === "enrage") {

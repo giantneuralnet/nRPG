@@ -32,6 +32,7 @@ function resetGame() {
     regenPower: 0,
     vampire: 0,
     blessed: 0,
+    necrotic: 0,
     rage: false,
     molten: 0,
     dodge: 0,

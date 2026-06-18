@@ -355,6 +355,18 @@ function levelUp() {
 
 function die() {
   clearTriggerTimeouts();
+  if (hero.necrotic > 0) {
+    const amount = 5 + hero.necrotic * 2;
+    hero.necrotic--;
+    hero.def += amount;
+    hero.hp = 1;
+    hero.alive = true;
+    flash = "NECROTIC!";
+    floatText(120,100,"DEF +" + amount,"#9f7cff");
+    burst(120,100,"#9f7cff",26,8);
+    sound("curse");
+    return;
+  }
   if (hero.phoenix > 0) {
     hero.phoenix--;
     hero.hp = 1;

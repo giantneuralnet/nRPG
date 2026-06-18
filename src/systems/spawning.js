@@ -65,7 +65,7 @@ function isHelpfulEntity(t) {
     "phoenixPotion","luckyCharm","gunpowder","multiplyStatus","triggerStatus","maxHealthUp","prayerBook","banishBook",
     "bomb","clearBomb","cleanBomb","randomBomb","weakenBomb","strengthBomb","cloudBomb","poisonBomb","fireBomb","lavaBomb","contagionBomb",
     "echoBomb","soulBomb","healBomb","lightningBomb","iceBomb","shieldBomb","stoneBomb","blindBomb",
-    "blessedScroll","allyScroll","killRandomItem","healRandomItem","flashBang","exileItem","swapHealthItem","chest"
+    "blessedScroll","necroticScroll","allyScroll","killRandomItem","healRandomItem","flashBang","exileItem","swapHealthItem","chest"
   ].includes(t.kind);
 }
 
@@ -231,7 +231,7 @@ function makeItem(x,y,targetY,r) {
     "cloudBomb","poisonBomb","fireBomb","lavaBomb","contagionBomb","echoBomb","soulBomb","healBomb","lightningBomb","iceBomb",
     "stoneBomb","nukeBomb","enrageBomb","blindBomb",
     "powerPotion","regenPotion","vampirePotion","moltenPotion","dodgePotion","critPotion","surprisePotion","decayCurse",
-    "phoenixPotion","confusionCurse","glitchCurse","luckyCharm","unluckyCurse","gunpowder","multiplyStatus","triggerStatus","maxHealthUp","maxHealthDown","prayerBook","banishBook","stoneScroll","zombieScroll","hauntedScroll","blessedScroll","allyScroll","combustionScroll",
+    "phoenixPotion","confusionCurse","glitchCurse","luckyCharm","unluckyCurse","gunpowder","multiplyStatus","triggerStatus","maxHealthUp","maxHealthDown","prayerBook","banishBook","stoneScroll","zombieScroll","hauntedScroll","blessedScroll","necroticScroll","allyScroll","combustionScroll",
     "killRandomItem","healRandomItem","flashBang","exileItem","swapHealthItem","door","chest","chest"
   ];
   const prayer = currentPrayer();
@@ -303,6 +303,7 @@ function makeItem(x,y,targetY,r) {
       kind === "stoneScroll" ? 0 :
       kind === "hauntedScroll" ? 0 :
       kind === "blessedScroll" ? 0 :
+      kind === "necroticScroll" ? 0 :
       kind === "allyScroll" ? 0 :
       kind === "combustionScroll" ? 0 :
       kind === "killRandomItem" ? 0 :
