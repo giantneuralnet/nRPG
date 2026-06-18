@@ -85,8 +85,10 @@ function damage(target, amount, x, y, color="#ff6b6b", useParticles = false, spl
 }
 
 function absorbHeroShield(x, y, useParticles = false) {
-  if (!hero.shielded) return false;
-  hero.shielded = false;
+  const count = hero.shieldCount || (hero.shielded ? 1 : 0);
+  if (count <= 0) return false;
+  hero.shieldCount = Math.max(0, count - 1);
+  hero.shielded = hero.shieldCount > 0;
   floatText(x, y, "SHIELD", "#d69a55");
   if (useParticles) burst(x,y,"#d69a55",12,4);
   sound("block");
@@ -94,8 +96,11 @@ function absorbHeroShield(x, y, useParticles = false) {
 }
 
 function absorbShield(target, x, y, useParticles = false) {
-  if (target.shielded && !target.shieldBroken) {
-    target.shieldBroken = true;
+  const count = target.shieldCount || (target.shielded && !target.shieldBroken ? 1 : 0);
+  if (count > 0) {
+    target.shieldCount = Math.max(0, count - 1);
+    target.shielded = target.shieldCount > 0;
+    target.shieldBroken = target.shieldCount <= 0;
     floatText(x, y, "SHIELD", "#85bdff");
     if (useParticles) burst(x,y,"#d69a55",12,4);
     sound("block");

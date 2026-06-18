@@ -54,6 +54,13 @@ function update() {
     }
   }
 
+  if (chargeBolts) {
+    for (let i = chargeBolts.length - 1; i >= 0; i--) {
+      chargeBolts[i].life--;
+      if (chargeBolts[i].life <= 0) chargeBolts.splice(i,1);
+    }
+  }
+
   if (lavaPools) {
     for (let i = lavaPools.length - 1; i >= 0; i--) {
       lavaPools[i].r *= .998;

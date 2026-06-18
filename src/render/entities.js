@@ -106,8 +106,27 @@ function drawMonster(m) {
   const now = performance.now();
   const frozen = now < m.frozenUntil;
   const stone = m.stone;
+  const shieldCount = m.shieldCount || (m.shielded && !m.shieldBroken ? 1 : 0);
 
   drawMonsterBodyOn(ctx, m, m.x, m.y, r, shake);
+
+  if (m.charge > 0) {
+    ctx.save();
+    ctx.strokeStyle = "rgba(255,245,100,.9)";
+    ctx.lineWidth = 3;
+    ctx.lineCap = "round";
+    const count = Math.min(8, 3 + m.charge);
+    for (let i = 0; i < count; i++) {
+      const a = now * .006 + i * Math.PI * 2 / count;
+      const inner = r * (.8 + (i % 2) * .12);
+      const outer = r * (1.35 + (i % 3) * .16);
+      ctx.beginPath();
+      ctx.moveTo(m.x + Math.cos(a) * inner, m.y + Math.sin(a) * inner);
+      ctx.lineTo(m.x + Math.cos(a + Math.sin(now * .01 + i) * .25) * outer, m.y + Math.sin(a + Math.cos(now * .008 + i) * .25) * outer);
+      ctx.stroke();
+    }
+    ctx.restore();
+  }
 
   if (m.contagious) {
     ctx.save();
@@ -130,11 +149,23 @@ function drawMonster(m) {
     ctx.restore();
   }
 
-  if (m.shielded && !m.shieldBroken) {
+  if (shieldCount > 0) {
     const shieldSize = r * 1.55;
     if (!icons.monsterShield && typeof makeIcon === "function") icons.monsterShield = makeIcon("monsterShield");
     if (icons.monsterShield) {
       ctx.drawImage(icons.monsterShield, m.x + r * .45 - shieldSize * .5, m.y - shieldSize * .25, shieldSize, shieldSize);
+    }
+    if (shieldCount > 1) {
+      ctx.save();
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.font = `bold ${Math.max(13, r * .42)}px system-ui`;
+      ctx.lineWidth = 4;
+      ctx.strokeStyle = "rgba(40,22,10,.9)";
+      ctx.fillStyle = "#fff3d0";
+      ctx.strokeText(`${shieldCount}`, m.x + r * .45, m.y + r * .13);
+      ctx.fillText(`${shieldCount}`, m.x + r * .45, m.y + r * .13);
+      ctx.restore();
     }
   }
 
@@ -173,7 +204,7 @@ function drawMonster(m) {
   ctx.font = "bold 14px system-ui";
   ctx.fillStyle = "white";
   const combustText = m.combusting ? "COMBUST " : m.combustAt ? `BURN ${Math.max(0, Math.ceil((m.combustAt - performance.now()) / 1000))} ` : "";
-  ctx.fillText(`${m.boss ? "BOSS " : ""}${m.team === "hero" ? "ALLY " : ""}${stone ? "STONE " : ""}${combustText}${m.rage ? "RAGE " : ""}${m.blind ? "BLIND " : ""}${m.contagious ? "CONTAGIOUS " : ""}${m.echoDamage ? "SHOCK " : ""}${m.shielded && !m.shieldBroken ? "SHIELDED " : ""}${m.ghost ? "GHOST " : ""}${m.haunted ? "HAUNTED " : ""}${m.zombie ? "ZOMBIE " : ""}${m.ultraElite ? "ULTRA " : m.elite ? "ELITE " : ""}ATK ${m.atk}`,m.x,by-4);
+  ctx.fillText(`${m.boss ? "BOSS " : ""}${m.team === "hero" ? "ALLY " : ""}${stone ? "STONE " : ""}${combustText}${m.rage ? "RAGE " : ""}${m.blind ? "BLIND " : ""}${m.contagious ? "CONTAGIOUS " : ""}${m.echoDamage ? "SHOCK " : ""}${m.charge > 0 ? `CHARGE ${m.charge} ` : ""}${shieldCount > 0 ? "SHIELDED " : ""}${m.ghost ? "GHOST " : ""}${m.haunted ? "HAUNTED " : ""}${m.zombie ? "ZOMBIE " : ""}${m.ultraElite ? "ULTRA " : m.elite ? "ELITE " : ""}ATK ${m.atk}`,m.x,by-4);
 
   if (m.attacking) {
     ctx.fillStyle = "#ff6666";
@@ -274,7 +305,7 @@ function drawItem(item) {
   if (item.kind === "weakenBomb") ctx.fillText(`WEAKEN`, item.x, item.y+item.r+10);
   if (item.kind === "strengthBomb") ctx.fillText(`STRENGTH`, item.x, item.y+item.r+10);
   if (item.kind === "cloudBomb") ctx.fillText(`CLOUDY BOMB`, item.x, item.y+item.r+10);
-  if (item.kind === "lightningBomb") ctx.fillText(`LIGHTNING ${item.value}`, item.x, item.y+item.r+10);
+  if (item.kind === "lightningBomb") ctx.fillText(`CHARGE`, item.x, item.y+item.r+10);
   if (item.kind === "poisonBomb") ctx.fillText(`POISON BOMB`, item.x, item.y+item.r+10);
   if (item.kind === "fireBomb") ctx.fillText(`FIRE BOMB`, item.x, item.y+item.r+10);
   if (item.kind === "lavaBomb") ctx.fillText(`LAVA BOMB`, item.x, item.y+item.r+10);

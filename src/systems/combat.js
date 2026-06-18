@@ -47,6 +47,8 @@ function statusTick() {
     }
   }
 
+  chargeTick();
+
   for (let i = lavaPools.length - 1; i >= 0; i--) {
     const pool = lavaPools[i];
     let burned = false;
@@ -62,6 +64,72 @@ function statusTick() {
     }
     if (burned) sound("fireTick");
   }
+}
+
+function entityCenter(entity) {
+  return entity === hero ? { x: 120, y: 100 } : { x: entity.x, y: entity.y };
+}
+
+function livingChargeEntities() {
+  const entities = [];
+  if (hero && hero.alive) entities.push(hero);
+  for (const t of board) {
+    if (t.type === "monster" && t.hp > 0) entities.push(t);
+  }
+  return entities;
+}
+
+function closestChargeTarget(source, entities) {
+  const from = entityCenter(source);
+  let best = null;
+  let bestDist = Infinity;
+  for (const target of entities) {
+    if (target === source) continue;
+    if (target.type === "monster" && target.hp <= 0) continue;
+    const to = entityCenter(target);
+    const d = dist(from.x, from.y, to.x, to.y);
+    if (d < bestDist) {
+      bestDist = d;
+      best = target;
+    }
+  }
+  return best;
+}
+
+function addCharge(entity, amount, x, y) {
+  amount = Math.max(1, Math.floor(amount || 1));
+  entity.charge = (entity.charge || 0) + amount;
+  floatText(x, y, `CHARGE +${amount}`, "#ffe65c");
+  sound("electric");
+}
+
+function addChargeBolt(from, to) {
+  if (!chargeBolts) chargeBolts = [];
+  chargeBolts.push({ x1: from.x, y1: from.y, x2: to.x, y2: to.y, life: 14, maxLife: 14, seed: rng() * 9999 });
+}
+
+function chargeTick() {
+  const entities = livingChargeEntities();
+  const sources = entities.filter(entity => (entity.charge || 0) > 0);
+  if (sources.length <= 0 || entities.length <= 1) return;
+
+  for (const source of sources) {
+    if (source !== hero && (!board.includes(source) || source.hp <= 0)) continue;
+    const target = closestChargeTarget(source, entities);
+    if (!target) continue;
+    const from = entityCenter(source);
+    const to = entityCenter(target);
+    const amount = Math.max(1, source.charge || 0);
+    addChargeBolt(from, to);
+    damage(target, amount, to.x, to.y, "#ffe65c", false, true, "electric");
+    if ((target === hero && hero.hp > 0) || (target !== hero && target.hp > 0)) addCharge(target, 1, to.x, to.y);
+  }
+
+  for (let i = board.length - 1; i >= 0; i--) {
+    const m = board[i];
+    if (m.type === "monster" && m.hp <= 0) killMonster(i, m.team !== "hero");
+  }
+  if (hero.hp <= 0) die();
 }
 
 function attackMonster(m,index) {
@@ -177,6 +245,7 @@ function killMonster(index, giveXp = true) {
   if (dead.boss) {
     bossKills++;
     clearTriggerTimeouts();
+    runEndAt = performance.now() - runStartAt;
     sound("dead");
     floatText(dead.x, dead.y, "BOSS KO", "#ffe65c");
     burst(dead.x,dead.y,"#ffe65c",34,9);
@@ -252,13 +321,15 @@ function copyContagiousStatuses(source, target) {
   target.blind = target.blind || source.blind;
   target.rage = target.rage || source.rage;
   target.echoDamage = target.echoDamage || source.echoDamage;
+  target.charge = Math.max(target.charge || 0, source.charge || 0);
   target.combustAt = target.combustAt || source.combustAt;
   target.combusting = target.combusting || source.combusting;
   target.ghost = target.ghost || source.ghost;
 
   if (source.zombie && !target.zombie) zombifyMonster(target);
-  if (source.shielded && !source.shieldBroken) {
+  if ((source.shieldCount || (source.shielded && !source.shieldBroken ? 1 : 0)) > 0) {
     target.shielded = true;
+    target.shieldCount = Math.max(target.shieldCount || 0, source.shieldCount || 1);
     target.shieldBroken = false;
   }
   if (source.frozenUntil && source.frozenUntil > performance.now()) {
@@ -294,6 +365,10 @@ function makeGhost(dead) {
     rage: dead.rage,
     contagious: false,
     echoDamage: dead.echoDamage,
+    charge: dead.charge || 0,
+    shieldCount: dead.shieldCount || (dead.shielded && !dead.shieldBroken ? 1 : 0),
+    shielded: (dead.shieldCount || (dead.shielded && !dead.shieldBroken ? 1 : 0)) > 0,
+    shieldBroken: (dead.shieldCount || (dead.shielded && !dead.shieldBroken ? 1 : 0)) <= 0,
     combustAt: dead.combustAt,
     combusting: dead.combusting,
     attacking: false,
@@ -376,6 +451,7 @@ function die() {
   }
   hero.alive = false;
   gameState = "dead";
+  runEndAt = performance.now() - runStartAt;
   flash = "YOU DIED";
   sound("dead");
 }
@@ -387,6 +463,7 @@ function checkStoneLock() {
   if (monsters.length > 0 && !hasItems && monsters.every(m => m.stone)) {
     hero.alive = false;
     gameState = "dead";
+    runEndAt = performance.now() - runStartAt;
     clearTriggerTimeouts();
     flash = "STONE LOCK";
     sound("dead");

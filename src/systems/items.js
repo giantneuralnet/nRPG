@@ -296,9 +296,11 @@ function cleanMonster(m) {
   m.rage = false;
   m.contagious = false;
   m.echoDamage = false;
+  m.charge = 0;
   m.combustAt = 0;
   m.combusting = false;
   m.shielded = false;
+  m.shieldCount = 0;
   m.shieldBroken = false;
   m.attacking = false;
   m.target = null;
@@ -340,6 +342,8 @@ function cleanHero() {
   hero.gunpowder = 0;
   hero.trigger = 0;
   hero.shielded = false;
+  hero.shieldCount = 0;
+  hero.charge = 0;
   hero.multiply = 1;
   hero.lucky = 0;
   hero.prayers = [];
@@ -452,13 +456,15 @@ function flashBang(x,y) {
 
 function shieldAllMonsters(x,y) {
   let count = 0;
+  hero.shieldCount = (hero.shieldCount || 0) + 1;
   hero.shielded = true;
-  floatText(120,100,"SHIELD","#d69a55");
+  floatText(120,100,`SHIELD ${hero.shieldCount}`,"#d69a55");
   for (const m of board) {
     if (!isCombatant(m)) continue;
+    m.shieldCount = (m.shieldCount || (m.shielded && !m.shieldBroken ? 1 : 0)) + 1;
     m.shielded = true;
     m.shieldBroken = false;
-    floatText(m.x,m.y,"SHIELD","#85bdff");
+    floatText(m.x,m.y,`SHIELD ${m.shieldCount}`,"#85bdff");
     count++;
   }
 
@@ -693,21 +699,19 @@ function explode(x,y,power,kind) {
   }
 
   if (kind === "lightning") {
-    const heroDmg = Math.floor(power * .35);
-    damage(hero, heroDmg, 120, 100, "#ffe65c", true, true, "electric");
-    flash = `Lightning bomb!`;
+    const stacks = Math.max(1, Math.floor(power));
+    addCharge(hero, stacks, 120, 100);
+    flash = `Charge bomb!`;
 
-    for (let i = board.length - 1; i >= 0; i--) {
-      const m = board[i];
+    for (const m of board) {
       if (!isCombatant(m)) continue;
       if (m.stone) {
         floatText(m.x,m.y,"STONE","#bbbbbb");
         continue;
       }
-      const dmg = power + 12;
-      damage(m,dmg,m.x,m.y,"#ffe65c", true, true, "electric");
-      if (m.hp <= 0) replaceDefeated(i, false);
+      addCharge(m, stacks, m.x, m.y);
     }
+    burst(x,y,"#ffe65c",20,7);
   }
 
   if (kind === "poison") {

@@ -5,7 +5,8 @@ function drawHeroUI() {
   ctx.textAlign = "left";
   ctx.font = "bold 18px system-ui";
   ctx.fillText(`Room ${currentRoom}  Kills ${Math.min(kills,20)}/20  Boss ${bossKills}/1`,18,30);
-  ctx.fillText(`LV ${hero.level}  XP ${hero.xp}/${hero.nextXp}  ATK ${getHeroAtk()}  DEF ${getHeroDef()}`,18,58);
+  const elapsed = gameState === "playing" ? performance.now() - runStartAt : runEndAt || 0;
+  ctx.fillText(`LV ${hero.level}  XP ${hero.xp}/${hero.nextXp}  ATK ${getHeroAtk()}  DEF ${getHeroDef()}  ${formatRunTime(elapsed)}`,18,58);
 
   const bw = Math.min(360,W-36);
   ctx.fillStyle = "#333";
@@ -51,7 +52,8 @@ function drawHeroStatuses(x,y) {
   if (hero.gunpowder > 0) statuses.push(["GUNPOWDER " + hero.gunpowder, "#ffcf4f"]);
   if (hero.multiply > 1) statuses.push(["MULTIPLY " + hero.multiply, "#ffe65c"]);
   if (hero.trigger > 0) statuses.push(["TRIGGER " + hero.trigger, "#d8ecff"]);
-  if (hero.shielded) statuses.push(["SHIELD", "#d69a55"]);
+  if ((hero.shieldCount || 0) > 0) statuses.push(["SHIELD " + hero.shieldCount, "#d69a55"]);
+  if (hero.charge > 0) statuses.push(["CHARGE " + hero.charge, "#ffe65c"]);
   if (hero.prayers && hero.prayers.length) {
     while (hero.prayers.length && hero.prayers[hero.prayers.length - 1].remaining <= 0) hero.prayers.pop();
     for (let i = 0; i < hero.prayers.length; i++) {

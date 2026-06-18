@@ -61,6 +61,35 @@ function drawShockwaves() {
   ctx.restore();
 }
 
+function drawChargeBolts() {
+  if (!chargeBolts || !chargeBolts.length) return;
+
+  ctx.save();
+  ctx.lineCap = "round";
+  for (const bolt of chargeBolts) {
+    const alpha = Math.max(0, bolt.life / bolt.maxLife);
+    const segments = 7;
+    ctx.strokeStyle = `rgba(255,245,100,${alpha})`;
+    ctx.lineWidth = 3 + alpha * 2;
+    ctx.beginPath();
+    for (let i = 0; i <= segments; i++) {
+      const t = i / segments;
+      const x = bolt.x1 + (bolt.x2 - bolt.x1) * t;
+      const y = bolt.y1 + (bolt.y2 - bolt.y1) * t;
+      const wobble = Math.sin((bolt.seed + i * 13.7) * 4.1) * 14 * alpha;
+      const dx = bolt.y2 - bolt.y1;
+      const dy = bolt.x1 - bolt.x2;
+      const len = Math.max(1, Math.hypot(dx, dy));
+      const px = x + dx / len * wobble;
+      const py = y + dy / len * wobble;
+      if (i === 0) ctx.moveTo(px, py);
+      else ctx.lineTo(px, py);
+    }
+    ctx.stroke();
+  }
+  ctx.restore();
+}
+
 function drawBlind() {
   const remaining = blindUntil - performance.now();
   if (remaining <= 0) return;

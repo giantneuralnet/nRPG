@@ -111,6 +111,7 @@ function makeDoor(x,y,targetY,r,room) {
 function makeMonster(x,y,targetY,r) {
   const ultraElite = rng() < .018 + Math.min(.035, kills * .001);
   const elite = ultraElite || rng() < .09 + Math.min(.08, kills * .002);
+  const shieldCount = rng() < .18 ? 1 : 0;
 
   const hpType = rng();
   const atkType = rng();
@@ -180,8 +181,9 @@ function makeMonster(x,y,targetY,r) {
     team:"enemy",
     elite,
     ultraElite,
-    shielded:rng()<.18,
-    shieldBroken:false,
+    shielded:shieldCount > 0,
+    shieldCount,
+    shieldBroken:shieldCount <= 0,
     zombie:false,
     ghost:false,
     haunted:false,
@@ -189,6 +191,7 @@ function makeMonster(x,y,targetY,r) {
     rage:false,
     contagious:false,
     echoDamage:false,
+    charge:0,
     combustAt:0,
     combusting:false,
     attacking:false,
@@ -226,6 +229,7 @@ function makeBoss(x,y,targetY,r) {
     elite:true,
     ultraElite:true,
     shielded:true,
+    shieldCount:1,
     shieldBroken:false,
     echoDamage:true,
     parts:{
@@ -296,7 +300,7 @@ function makeItem(x,y,targetY,r) {
       kind === "powerPotion" ? rand(6,10) :
       kind === "poison" ? rand(2,4) :
       kind === "bomb" ? rand(25,45) :
-      kind === "lightningBomb" ? rand(35,60) :
+      kind === "lightningBomb" ? 1 :
       kind === "poisonBomb" ? rand(4,8) :
       kind === "fireBomb" ? rand(5,9) :
       kind === "lavaBomb" ? rand(10,16) :

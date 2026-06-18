@@ -45,6 +45,12 @@ canvas {
   font-size: clamp(14px, 4vw, 18px);
 }
 
+.menu-panel p.seed-retry {
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
 .menu-group {
   margin: 0 0 28px;
 }

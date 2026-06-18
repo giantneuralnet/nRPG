@@ -67,6 +67,14 @@ function pick(a){ return a[rand(0,a.length-1)]; }
 function visualRand(a,b){ return Math.floor(Math.random()*(b-a+1))+a; }
 function dist(a,b,c,d){ return Math.hypot(a-c,b-d); }
 
+function formatRunTime(ms) {
+  ms = Math.max(0, Math.floor(ms || 0));
+  const minutes = Math.floor(ms / 60000);
+  const seconds = Math.floor((ms % 60000) / 1000);
+  const millis = ms % 1000;
+  return `${minutes}:${String(seconds).padStart(2,"0")}.${String(millis).padStart(3,"0")}`;
+}
+
 let settings = {
   choices: 5,
   difficulty: "normal",

@@ -1,5 +1,5 @@
 let gameState = "menu";
-let hero, board, rooms, currentRoom, exileQueue, kills, bossKills, flash, shake, boom, shockwaves, floats, particles, clouds, lavaPools, soulLinks, lastPoisonTick, lastDecayTick, blindUntil;
+let hero, board, rooms, currentRoom, exileQueue, kills, bossKills, flash, shake, boom, shockwaves, chargeBolts, floats, particles, clouds, lavaPools, soulLinks, lastPoisonTick, lastDecayTick, blindUntil, runStartAt, runEndAt;
 let gameRunId = 0;
 let pendingTriggerTimeouts = [];
 
@@ -48,6 +48,8 @@ function resetGame() {
     gunpowder: 0,
     trigger: 0,
     shielded: false,
+    shieldCount: 0,
+    charge: 0,
     multiply: 1,
     prayers: [],
     banishedItems: []
@@ -67,9 +69,12 @@ function resetGame() {
   shake = 0;
   boom = null;
   shockwaves = [];
+  chargeBolts = [];
   blindUntil = 0;
   lastPoisonTick = performance.now();
   lastDecayTick = performance.now();
+  runStartAt = performance.now();
+  runEndAt = 0;
 
   board = fillRoom(true);
   rooms[currentRoom] = board;
@@ -116,6 +121,7 @@ function switchRoom(roomNumber) {
   lavaPools = [];
   soulLinks = [];
   shockwaves = [];
+  chargeBolts = [];
   floats = [];
   flash = `Room ${currentRoom}`;
   sound("door");

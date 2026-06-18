@@ -53,7 +53,7 @@ const itemInfo = [
   ["echoBomb","Shockwave bomb","Makes enemies emit damaging shockwaves during counterattacks."],
   ["soulBomb","Soul connection bomb","Links two monsters so they split incoming damage."],
   ["healBomb","Heal bomb","Heals you and monsters."],
-  ["lightningBomb","Lightning bomb","Damages all monsters and you."],
+  ["lightningBomb","Lightning bomb","Adds Charge to you and monsters."],
   ["iceBomb","Ice bomb","Freezes monsters temporarily."],
   ["zombieScroll","Zombie scroll","Turns one monster into a zombie."],
   ["shieldBomb","Shield all bomb","Gives you a brown shield and monsters a wood shield."],
@@ -87,6 +87,7 @@ const monsterInfo = [
   ["haunted","Haunted","Purple eyes; rises as a ghost when killed."],
   ["contagious","Contagious","Copies statuses, including ally, to all other monsters when killed."],
   ["echo","Shockwave","Counterattacks emit a radius that can trigger more shockwaves."],
+  ["charge","Charge","Shocks the nearest entity every second and spreads Charge."],
   ["combustion","Combustion","Flashes fire colors, counts down, then pulses attack damage every second."],
   ["stone","Stone","Cannot move or take damage."],
   ["burning","Burning","Takes periodic fire damage."],
@@ -109,15 +110,18 @@ function updateMenuOverlay() {
 
   if (gameState === "dead") {
     menuTitle.textContent = "YOU DIED";
-    menuSubtitle.textContent = `Seed ${activeSeed}`;
+    menuSubtitle.textContent = `Seed ${activeSeed}  Time ${formatRunTime(runEndAt || (performance.now() - runStartAt))}`;
+    menuSubtitle.classList.add("seed-retry");
     menuAction.textContent = "RESET";
   } else if (gameState === "win") {
     menuTitle.textContent = "YOU WIN!";
-    menuSubtitle.textContent = `Seed ${activeSeed}`;
+    menuSubtitle.textContent = `Seed ${activeSeed}  Time ${formatRunTime(runEndAt || (performance.now() - runStartAt))}`;
+    menuSubtitle.classList.add("seed-retry");
     menuAction.textContent = "PLAY AGAIN";
   } else {
     menuTitle.textContent = "DROP RPG";
     menuSubtitle.textContent = "Swords, shields, potions, bombs, elites, ice, zombies, clouds, and curses.";
+    menuSubtitle.classList.remove("seed-retry");
     menuAction.textContent = "START";
   }
 
@@ -192,12 +196,14 @@ function infoMonster(kind) {
     elite:kind === "elite" || kind === "ultraElite",
     ultraElite:kind === "ultraElite",
     shielded:kind === "shielded",
-    shieldBroken:false,
+    shieldCount:kind === "shielded" ? 1 : 0,
+    shieldBroken:kind !== "shielded",
     zombie:kind === "zombie" || kind === "ghostZombie",
     ghost:kind === "ghostZombie",
     haunted:kind === "haunted",
     contagious:kind === "contagious",
     echoDamage:kind === "echo",
+    charge:kind === "charge" ? 3 : 0,
     combustAt:kind === "combustion" ? performance.now() + 10000 : 0,
     combusting:false,
     blind:kind === "blind",
@@ -251,7 +257,7 @@ function makeMonsterInfoIcon(kind) {
     g.restore();
   }
   if (!icons.monsterShield && typeof makeIcon === "function") icons.monsterShield = makeIcon("monsterShield");
-  if (m.shielded && !m.shieldBroken && icons.monsterShield) {
+  if ((m.shieldCount || (m.shielded && !m.shieldBroken ? 1 : 0)) > 0 && icons.monsterShield) {
     const shieldSize = m.r * 1.55;
     g.drawImage(icons.monsterShield, 50 + m.r * .45 - shieldSize * .5, 50 - shieldSize * .25, shieldSize, shieldSize);
   }
@@ -346,6 +352,13 @@ choiceUp.addEventListener("click", () => {
 seedClear.addEventListener("click", () => {
   seedInput.value = "";
   updateSeedPlaceholder();
+});
+
+menuSubtitle.addEventListener("click", () => {
+  if (gameState !== "dead" && gameState !== "win") return;
+  seedInput.value = `${activeSeed}`;
+  settings.seed = activeSeed;
+  seedInput.focus();
 });
 
 audioToggle.addEventListener("click", event => {
