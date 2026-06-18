@@ -227,7 +227,7 @@ function zombieRandomMonster(x,y) {
   flash = "Zombie scroll!";
   floatText(m.x,m.y,"ZOMBIE","#7aff7a");
   burst(m.x,m.y,"#7aff7a",16,4);
-  sound("boom");
+  sound("curse");
 }
 
 function blessHero(x,y) {
@@ -271,7 +271,7 @@ function combustRandomMonster(x,y) {
   flash = "Spontaneous combustion!";
   floatText(m.x,m.y,"10","#ff9d3b");
   burst(m.x,m.y,"#ff9d3b",16,4);
-  sound("zap");
+  sound("fire");
 }
 
 function cleanMonster(m) {
@@ -408,7 +408,7 @@ function flashBang(x,y) {
   flash = "FLASH BANG!";
   floatText(x,y,"BLIND","#ffffff");
   burst(x,y,"#ffffff",30,8);
-  sound("zap");
+  sound("electric");
 }
 
 function shieldAllMonsters(x,y) {
@@ -541,7 +541,7 @@ function hauntMonsters(x,y) {
   }
 
   flash = "Haunted curse!";
-  sound("zap");
+  sound("curse");
 }
 
 function explode(x,y,power,kind) {
@@ -551,8 +551,12 @@ function explode(x,y,power,kind) {
   boom = { x,y, r: Math.max(W,H), t:20, kind };
   shake = 20;
 
-  if (kind === "lightning") sound("zap");
-  else if (kind === "clean") sound("item");
+  if (kind === "lightning") sound("electric");
+  else if (kind === "clean") sound("cleanse");
+  else if (kind === "poison") sound("poisonTick");
+  else if (kind === "fire" || kind === "lava") sound("fire");
+  else if (kind === "stone") sound("block");
+  else if (["contagion","echo","soul","zombie","blind","enrage"].includes(kind)) sound("curse");
   else sound("boom");
 
   if (kind === "normal") {
@@ -662,7 +666,7 @@ function explode(x,y,power,kind) {
         continue;
       }
       const dmg = power + 12;
-      damage(m,dmg,m.x,m.y,"#ffe65c", true);
+      damage(m,dmg,m.x,m.y,"#ffe65c", true, true, "electric");
       if (m.hp <= 0) replaceDefeated(i, false);
     }
   }
@@ -715,6 +719,7 @@ function explode(x,y,power,kind) {
       });
       floatText(m.x,m.y,"LAVA","#ff7a2f");
     }
+    sound("fire");
     burst(x,y,"#ff7a2f",20,7);
   }
 

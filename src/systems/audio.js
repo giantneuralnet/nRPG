@@ -50,6 +50,60 @@ function sound(type) {
     g.gain.setValueAtTime(.16, now);
     g.gain.exponentialRampToValueAtTime(.001, now+.22);
   }
+  if (type === "electric") {
+    o.type = "square";
+    o.frequency.setValueAtTime(1240, now);
+    o.frequency.setValueAtTime(620, now+.035);
+    o.frequency.setValueAtTime(1480, now+.07);
+    o.frequency.exponentialRampToValueAtTime(220, now+.18);
+    g.gain.setValueAtTime(.13, now);
+    g.gain.exponentialRampToValueAtTime(.001, now+.22);
+  }
+  if (type === "fire") {
+    o.type = "sawtooth";
+    o.frequency.setValueAtTime(130, now);
+    o.frequency.exponentialRampToValueAtTime(360, now+.08);
+    o.frequency.exponentialRampToValueAtTime(90, now+.2);
+    g.gain.setValueAtTime(.12, now);
+    g.gain.exponentialRampToValueAtTime(.001, now+.26);
+  }
+  if (type === "fireTick") {
+    o.type = "sawtooth";
+    o.frequency.setValueAtTime(95, now);
+    o.frequency.exponentialRampToValueAtTime(210, now+.06);
+    o.frequency.exponentialRampToValueAtTime(70, now+.16);
+    g.gain.setValueAtTime(.075, now);
+    g.gain.exponentialRampToValueAtTime(.001, now+.2);
+  }
+  if (type === "poisonTick") {
+    o.type = "triangle";
+    o.frequency.setValueAtTime(260, now);
+    o.frequency.exponentialRampToValueAtTime(150, now+.11);
+    o.frequency.exponentialRampToValueAtTime(190, now+.2);
+    g.gain.setValueAtTime(.07, now);
+    g.gain.exponentialRampToValueAtTime(.001, now+.24);
+  }
+  if (type === "block") {
+    o.type = "square";
+    o.frequency.setValueAtTime(210, now);
+    o.frequency.exponentialRampToValueAtTime(95, now+.055);
+    g.gain.setValueAtTime(.14, now);
+    g.gain.exponentialRampToValueAtTime(.001, now+.12);
+  }
+  if (type === "curse") {
+    o.type = "sawtooth";
+    o.frequency.setValueAtTime(420, now);
+    o.frequency.exponentialRampToValueAtTime(120, now+.32);
+    g.gain.setValueAtTime(.12, now);
+    g.gain.exponentialRampToValueAtTime(.001, now+.42);
+  }
+  if (type === "cleanse") {
+    o.type = "sine";
+    o.frequency.setValueAtTime(320, now);
+    o.frequency.exponentialRampToValueAtTime(980, now+.2);
+    g.gain.setValueAtTime(.1, now);
+    g.gain.exponentialRampToValueAtTime(.001, now+.32);
+  }
   if (type === "dead") {
     o.type = "triangle";
     o.frequency.setValueAtTime(260, now);

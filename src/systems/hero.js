@@ -26,8 +26,17 @@ function findSoulLinkedTarget(target) {
   return null;
 }
 
-function damage(target, amount, x, y, color="#ff6b6b", useParticles = false, splitSoul = true) {
+function damageSoundForColor(color) {
+  if (color === "#7cff4f" || color === "#31cc33") return "poisonTick";
+  if (color === "#ff7a2f" || color === "#ff6b2f") return "fireTick";
+  if (color === "#ffe65c" || color === "#72dfff") return "electric";
+  if (color === "#c86bff" || color === "#b987ff") return "curse";
+  return "hit";
+}
+
+function damage(target, amount, x, y, color="#ff6b6b", useParticles = false, splitSoul = true, soundType = null) {
   amount = Math.max(0, Math.floor(amount));
+  const hitSound = soundType || damageSoundForColor(color);
 
   if (target === hero && hero.dodge > 0 && rng() < Math.min(.75, hero.dodge / 100)) {
     floatText(x, y, "DODGE", "#72dfff");
@@ -40,8 +49,8 @@ function damage(target, amount, x, y, color="#ff6b6b", useParticles = false, spl
     if (linked) {
       const targetAmount = Math.ceil(amount / 2);
       const linkedAmount = Math.floor(amount / 2);
-      const dealtTarget = damage(target, targetAmount, x, y, color, useParticles, false);
-      const dealtLinked = linkedAmount > 0 ? damage(linked, linkedAmount, linked.x, linked.y, "#ff3333", useParticles, false) : 0;
+      const dealtTarget = damage(target, targetAmount, x, y, color, useParticles, false, hitSound);
+      const dealtLinked = linkedAmount > 0 ? damage(linked, linkedAmount, linked.x, linked.y, "#ff3333", useParticles, false, hitSound) : 0;
       return dealtTarget + dealtLinked;
     }
   }
@@ -55,7 +64,7 @@ function damage(target, amount, x, y, color="#ff6b6b", useParticles = false, spl
   if (target.type === "monster" && target.stone) {
     floatText(x, y, "STONE", "#bbbbbb");
     if (useParticles) burst(x,y,"#bbbbbb",8,3);
-    sound("hit");
+    sound("block");
     return 0;
   }
 
@@ -65,7 +74,7 @@ function damage(target, amount, x, y, color="#ff6b6b", useParticles = false, spl
 
   target.hp -= amount;
   shake = 7;
-  sound("hit");
+  sound(hitSound);
   floatText(x, y, "-" + amount, color);
   if (useParticles) burst(x,y,color,12,5);
   return amount;
@@ -76,7 +85,7 @@ function absorbShield(target, x, y, useParticles = false) {
     target.shieldBroken = true;
     floatText(x, y, "SHIELD", "#85bdff");
     if (useParticles) burst(x,y,"#d69a55",12,4);
-    sound("hit");
+    sound("block");
     return true;
   }
   return false;

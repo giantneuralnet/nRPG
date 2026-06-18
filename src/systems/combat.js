@@ -26,13 +26,13 @@ function statusTick() {
     if (m.poison > 0) {
       const dmg = m.poison;
       m.poison = Math.max(0, m.poison - 1);
-      damage(m, dmg, m.x, m.y, "#7cff4f", true);
+      damage(m, dmg, m.x, m.y, "#7cff4f", true, true, "poisonTick");
     }
 
     if (m.fire > 0 && m.hp > 0) {
       const dmg = m.fire + 2;
       m.fire = Math.max(0, m.fire - 1);
-      damage(m, dmg, m.x, m.y, "#ff7a2f", true);
+      damage(m, dmg, m.x, m.y, "#ff7a2f", true, true, "fireTick");
     }
 
     if (m.hp <= 0) {
@@ -42,6 +42,7 @@ function statusTick() {
 
   for (let i = lavaPools.length - 1; i >= 0; i--) {
     const pool = lavaPools[i];
+    let burned = false;
     for (let j = board.length - 1; j >= 0; j--) {
       const t = board[j];
       if (t.type !== "monster") continue;
@@ -50,7 +51,9 @@ function statusTick() {
       if (dist(t.x,t.y,pool.x,pool.y) > pool.r + t.r * .65) continue;
       t.fire += pool.fire;
       floatText(t.x,t.y,`FIRE +${pool.fire}`,"#ff7a2f");
+      burned = true;
     }
+    if (burned) sound("fireTick");
   }
 }
 
@@ -221,7 +224,7 @@ function spreadContagion(source) {
   }
   if (count) {
     flash = `Contagion spread to ${count}`;
-    sound("zap");
+    sound("curse");
   }
 }
 
@@ -300,6 +303,7 @@ function shockwavePulse(source, cascade = null) {
   const pulseDamage = Math.max(1, Math.floor(source.atk * .65));
   const startAt = performance.now();
   floatText(source.x,source.y,"SHOCK","#72dfff");
+  sound("electric");
   shockwaves.push({ x:source.x, y:source.y, r:radius, startAt, life });
   burst(source.x,source.y,"#72dfff",12,5);
 
@@ -310,7 +314,7 @@ function shockwavePulse(source, cascade = null) {
 
     setTimeout(() => {
       if (gameState !== "playing" || !board.includes(t) || t.hp <= 0) return;
-      damage(t,pulseDamage,t.x,t.y,"#72dfff", true);
+      damage(t,pulseDamage,t.x,t.y,"#72dfff", true, true, "electric");
       if (t.echoDamage) shockwavePulse(t, chain);
       for (let i = board.length - 1; i >= 0; i--) {
         const current = board[i];
