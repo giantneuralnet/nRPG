@@ -315,7 +315,7 @@ function openItemBook(mode) {
     button.type = "button";
     const choose = () => {
       if (mode === "prayer") {
-        hero.prayers.push({ kind, remaining: 13 });
+        hero.prayers.push({ kind, remaining: 7 });
         flash = `${name} prayed`;
       } else {
         if (!hero.banishedItems.includes(kind)) hero.banishedItems.push(kind);
