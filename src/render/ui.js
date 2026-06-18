@@ -4,8 +4,8 @@ function drawHeroUI() {
   ctx.fillStyle = "white";
   ctx.textAlign = "left";
   ctx.font = "bold 18px system-ui";
-  ctx.fillText(`Room ${currentRoom}  Kills ${Math.min(kills,20)}/20  Boss ${bossDefeated ? 1 : 0}/1`,18,30);
-  ctx.fillText(`LV ${hero.level}  XP ${hero.xp}/${hero.nextXp}  ATK ${getHeroAtk()}  DEF ${getHeroDef()}`,18,58);
+  ctx.fillText(`Room ${currentRoom}  Kills ${kills}/20  LV ${hero.level}  XP ${hero.xp}/${hero.nextXp}`,18,30);
+  ctx.fillText(`ATK ${getHeroAtk()}  DEF ${getHeroDef()}`,18,58);
 
   const bw = Math.min(360,W-36);
   ctx.fillStyle = "#333";

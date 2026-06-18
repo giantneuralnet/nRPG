@@ -88,7 +88,6 @@ function update() {
   }
 
   if (gameState !== "playing") return;
-  ensureBossPresence();
 
   if (hero.decay > 0 && now - lastDecayTick >= 1000) {
     lastDecayTick = now;

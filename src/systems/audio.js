@@ -207,7 +207,6 @@ function recordPlayerAction() {
 
 function musicProfile() {
   const monsters = board ? board.filter(t => t.type === "monster" && t.team !== "hero").length : 0;
-  const boss = board ? board.some(t => t.type === "monster" && t.boss && t.hp > 0) : false;
   const helpful = board ? board.filter(t => t.type === "item" && typeof isHelpfulEntity === "function" && isHelpfulEntity(t)).length : 0;
   const items = board ? board.filter(t => t.type === "item").length : 0;
   const now = performance.now();
@@ -220,12 +219,10 @@ function musicProfile() {
     3: { root: 103.83, scale: [0,3,6,7,10], tempo: .28, lead: [2,0,3,1,4,3,1,0] },
     666: { root: 82.41, scale: [0,1,3,6,7,10], tempo: .21, lead: [0,3,1,4,2,5,1,3] }
   };
-  const bossProfile = { root: 73.42, scale: [0,1,4,6,7,11], tempo: .18, lead: [0,4,1,5,2,4,1,3] };
-  const base = boss ? bossProfile : profiles[room] || profiles[1];
+  const base = profiles[room] || profiles[1];
   return {
     ...base,
     room,
-    boss,
     monsters,
     helpful,
     items,
@@ -234,7 +231,7 @@ function musicProfile() {
     action,
     tension: Math.min(1, monsters / Math.max(1, settings.choices)),
     relief: Math.min(1, helpful / Math.max(1, items || 1)),
-    intensity: Math.min(1, (boss ? .35 : 0) + action * .55 + (hero ? 1 - Math.max(0, hero.hp / Math.max(1, hero.maxHp)) : 0) * .35 + Math.min(1, monsters / Math.max(1, settings.choices)) * .45)
+    intensity: Math.min(1, action * .55 + (hero ? 1 - Math.max(0, hero.hp / Math.max(1, hero.maxHp)) : 0) * .35 + Math.min(1, monsters / Math.max(1, settings.choices)) * .45)
   };
 }
 
@@ -271,8 +268,8 @@ function playMusicStep(profile, step, time) {
   if (musicState.drums[step % musicState.drums.length] & 2) playSnare(time, profile.relief);
   if (musicState.drums[step % musicState.drums.length] & 4) playHat(time, profile.intensity);
   if (step % 2 === 0) playBass(time, bassFreq, profile.tension);
-  if (step % 8 === 0) playChord(time + .015, root * 2, modeScale, chordTone, profile);
-  if ((profile.room === 666 || profile.boss) && step % 8 === 4) playHellDrone(time, root, chordTone, profile);
+  if (step % 8 === 0) playChord(time + .015, root * 2, modeScale, chordTone, profile.health);
+  if (profile.room === 666 && step % 8 === 4) playHellDrone(time, root, chordTone, profile);
   if (profile.intensity > .62 && step % 16 === 8) playPad(time, root * 2, chordTone, profile);
 
   const leadNote = musicState.lead[step % musicState.lead.length];
@@ -308,10 +305,10 @@ function patternPick(values) {
 function generateLeadPattern(profile) {
   const density = Math.min(.72, (profile.items > profile.monsters ? .45 : .25) + profile.action * .25 + profile.danger * .2);
   const pattern = [];
-  let note = profile.room === 666 || profile.boss ? 1 : 0;
+  let note = profile.room === 666 ? 1 : 0;
   for (let i = 0; i < 16; i++) {
     if (i % 4 === 0 || Math.random() < density) {
-      note = Math.max(0, Math.min(profile.scale.length - 1, note + patternPick(profile.room === 666 || profile.boss ? [-2,-1,1,2,3] : [-1,0,1,2])));
+      note = Math.max(0, Math.min(profile.scale.length - 1, note + patternPick(profile.room === 666 ? [-2,-1,1,2,3] : [-1,0,1,2])));
       pattern.push(note);
     } else {
       pattern.push(null);
@@ -321,7 +318,7 @@ function generateLeadPattern(profile) {
 }
 
 function generateBassPattern(profile) {
-  if (profile.room === 666 || profile.boss) {
+  if (profile.room === 666) {
     const base = profile.intensity > .55 ? [0,0,3,0,1,4,0,2] : [0,0,1,0,3,0,1,0];
     return base.map(n => Math.max(0, Math.min(profile.scale.length - 1, n + (Math.random() < .25 ? patternPick([-1,1]) : 0))));
   }
@@ -344,7 +341,7 @@ function generateDrumPattern(profile) {
 }
 
 function generateChordPattern(profile) {
-  if (profile.room === 666 || profile.boss) return profile.intensity > .5 ? [0,3,1,4] : [0,1,3,1];
+  if (profile.room === 666) return profile.intensity > .5 ? [0,3,1,4] : [0,1,3,1];
   if (profile.intensity > .62) return profile.room === 666 ? [0,4,2,4] : [0,4,3,4];
   if (profile.relief > profile.tension) return [0,3,4,2];
   return [0,2,1,3];
@@ -424,8 +421,8 @@ function playLead(time, freq, profile) {
   o.start(time); o.stop(time + .3);
 }
 
-function playChord(time, root, scale, degree, profile) {
-  const third = profile.room === 666 || profile.boss ? 3 : 4;
+function playChord(time, root, scale, degree, health) {
+  const third = currentRoom === 666 ? 3 : 4;
   const chord = [degree, degree + third, degree + 7];
   for (const semitone of chord) {
     const o = audioCtx.createOscillator();

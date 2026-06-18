@@ -432,7 +432,7 @@ function exileMonsters(x,y) {
   for (let i = 0; i < board.length; i++) {
     const t = board[i];
     if (t.type !== "monster") continue;
-    if (!t.boss) exileQueue.push(t);
+    exileQueue.push(t);
     board[i] = spawnThing(false, i);
     count++;
   }
@@ -441,7 +441,6 @@ function exileMonsters(x,y) {
   floatText(x,y,count ? "EXILE" : "NO TARGET","#d8ecff");
   if (count) burst(x,y,"#d8ecff",28,8);
   sound(count ? "zap" : "item");
-  ensureBossPresence();
 }
 
 function randomizeCloudCoveredPositions() {
@@ -589,7 +588,6 @@ function explode(x,y,power,kind) {
     soulLinks = [];
     shockwaves = [];
     burst(x,y,"#ffffff",20,6);
-    ensureBossPresence();
   }
 
   if (kind === "clean") {

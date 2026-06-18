@@ -45,7 +45,6 @@ function spawnThing(allowExileReturn = true, replaceIndex = null, checked = true
 }
 
 function sampleSpawnThing(allowExileReturn = true) {
-  if (bossSpawned && !bossDefeated && !bossOnBoard()) return makeBoss();
   if (allowExileReturn && exileQueue.length > 0 && rng() < .28) return popExiledMonster();
 
   const roll = rng();
@@ -228,78 +227,6 @@ function makeMonster(x,y,targetY,r) {
       legs:rand(1,4),
       arms:rand(0,3)
     }
-  };
-}
-
-function bossOnBoard() {
-  return !!(board && board.some(t => t.type === "monster" && t.boss && t.hp > 0));
-}
-
-function startBossPhase(replaceIndex = null) {
-  if (bossSpawned || bossDefeated) return;
-  bossSpawned = true;
-  const boss = makeBoss();
-  if (replaceIndex === null || replaceIndex === undefined || !board[replaceIndex]) board.push(boss);
-  else board[replaceIndex] = boss;
-  flash = "BOSS!";
-  sound("level");
-}
-
-function ensureBossPresence() {
-  if (!bossSpawned || bossDefeated || bossOnBoard() || gameState !== "playing") return;
-  const boss = makeBoss();
-  const index = board.findIndex(t => t.type !== "monster" || !t.boss);
-  if (index >= 0) board[index] = boss;
-  else board.push(boss);
-  flash = "The boss returns!";
-}
-
-function makeBoss() {
-  const r = Math.min(W,H) * .13;
-  const p = findFreePosition(r);
-  const samples = [];
-  for (let i = 0; i < 3; i++) samples.push(makeMonster(p.x, p.y, p.y, r * (.82 + rng() * .18)));
-  const hp = samples.reduce((sum, m) => sum + m.maxHp, 0);
-  const atk = Math.max(...samples.map(m => m.atk)) + Math.floor(samples.reduce((sum, m) => sum + m.atk, 0) * .35);
-  const primary = samples[0];
-  const parts = {
-    color: samples.map(m => m.parts.color)[rand(0,2)],
-    originalColor: null,
-    head: samples[rand(0,2)].parts.head,
-    eyes: Math.max(2, Math.min(6, samples.reduce((sum, m) => sum + m.parts.eyes, 0))),
-    mouth: "fangs",
-    horns: samples.some(m => m.parts.horns),
-    legs: Math.max(...samples.map(m => m.parts.legs)),
-    arms: Math.min(5, samples.reduce((sum, m) => sum + m.parts.arms, 0))
-  };
-
-  return {
-    ...primary,
-    boss:true,
-    x:p.x,
-    y:-180 - rng() * 160,
-    targetY:p.y,
-    r,
-    vx:(rng() - .5) * 2.2,
-    vy:0,
-    roamX:p.x,
-    roamY:p.y,
-    roamUntil:0,
-    hp:Math.floor(hp * 1.55),
-    maxHp:Math.floor(hp * 1.55),
-    atk:Math.max(1, atk),
-    elite:true,
-    ultraElite:true,
-    shielded:true,
-    shieldBroken:false,
-    zombie:samples.some(m => m.zombie),
-    ghost:samples.some(m => m.ghost),
-    haunted:samples.some(m => m.haunted),
-    blind:samples.some(m => m.blind),
-    rage:samples.some(m => m.rage),
-    contagious:samples.some(m => m.contagious),
-    echoDamage:true,
-    parts
   };
 }
 
