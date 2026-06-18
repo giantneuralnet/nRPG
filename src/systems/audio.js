@@ -24,10 +24,10 @@ function sound(type) {
 
   if (type === "hit") {
     o.type = "square";
-    o.frequency.setValueAtTime(170, now);
-    o.frequency.exponentialRampToValueAtTime(70, now+.12);
-    g.gain.setValueAtTime(.16, now);
-    g.gain.exponentialRampToValueAtTime(.001, now+.15);
+    o.frequency.setValueAtTime(105, now);
+    o.frequency.exponentialRampToValueAtTime(48, now+.055);
+    g.gain.setValueAtTime(.095, now);
+    g.gain.exponentialRampToValueAtTime(.001, now+.075);
   }
   if (type === "item") {
     o.type = "sine";

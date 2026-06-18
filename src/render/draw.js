@@ -116,7 +116,9 @@ function drawWoodFloor(g, w, h, r) {
     g.moveTo(0,y);
     g.lineTo(w,y);
     g.stroke();
-    for (let x = -80 + Math.floor(r() * 120); x < w; x += 150 + Math.floor(r() * 110)) {
+    const seamStep = 170 + Math.floor(r() * 80);
+    const seamOffset = Math.floor(r() * seamStep);
+    for (let x = -seamOffset; x < w + seamStep; x += seamStep) {
       g.strokeStyle = "rgba(0,0,0,.32)";
       g.beginPath();
       g.moveTo(x,y + 3);
