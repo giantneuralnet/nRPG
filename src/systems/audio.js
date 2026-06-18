@@ -66,6 +66,13 @@ function sound(type) {
     g.gain.setValueAtTime(.13, now);
     g.gain.exponentialRampToValueAtTime(.001, now+.22);
   }
+  if (type === "fuse") {
+    o.type = "sawtooth";
+    o.frequency.setValueAtTime(150, now);
+    o.frequency.exponentialRampToValueAtTime(95, now+.12);
+    g.gain.setValueAtTime(.055, now);
+    g.gain.exponentialRampToValueAtTime(.001, now+.18);
+  }
   if (type === "block") {
     o.type = "square";
     o.frequency.setValueAtTime(210, now);

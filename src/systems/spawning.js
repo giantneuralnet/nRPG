@@ -173,6 +173,7 @@ function makeMonster(x,y,targetY,r) {
     contagious:false,
     echoDamage:false,
     combustAt:0,
+    combusting:false,
     attacking:false,
     parts:{
       color:pick(colors),

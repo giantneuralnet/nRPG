@@ -268,6 +268,7 @@ function combustRandomMonster(x,y) {
 
   const m = pick(monsters);
   m.combustAt = performance.now() + 10000;
+  m.combusting = false;
   flash = "Spontaneous combustion!";
   floatText(m.x,m.y,"10","#ff9d3b");
   burst(m.x,m.y,"#ff9d3b",16,4);
@@ -285,6 +286,7 @@ function cleanMonster(m) {
   m.contagious = false;
   m.echoDamage = false;
   m.combustAt = 0;
+  m.combusting = false;
   m.shielded = false;
   m.shieldBroken = false;
   m.attacking = false;
@@ -347,12 +349,36 @@ function zombifyMonster(m) {
   m.attacking = false;
 }
 
-function spontaneousCombust(m) {
+function igniteCombustion(m) {
   if (!m || m.type !== "monster") return;
   m.combustAt = 0;
+  m.combusting = true;
   flash = "Spontaneous combustion!";
-  floatText(m.x,m.y,"BOOM","#ff9d3b");
-  explode(m.x,m.y,Math.max(1, m.atk),"normal");
+  floatText(m.x,m.y,"IGNITE","#ff9d3b");
+  burst(m.x,m.y,"#ff9d3b",20,7);
+  sound("fire");
+}
+
+function pulseCombustion(m) {
+  if (!m || m.type !== "monster") return;
+  const dmg = Math.max(1, m.atk);
+  flash = "Combustion pulse!";
+  floatText(m.x,m.y,"BURN " + dmg,"#ff9d3b");
+  burst(m.x,m.y,"#ff7a2f",14,5);
+  sound("fire");
+
+  damage(hero,dmg,120,100,"#ff7a2f",true,true,"fireTick");
+  for (let i = board.length - 1; i >= 0; i--) {
+    const t = board[i];
+    if (t === m || t.type !== "monster" || t.hp <= 0) continue;
+    damage(t,dmg,t.x,t.y,"#ff7a2f",true,true,"fireTick");
+  }
+
+  for (let i = board.length - 1; i >= 0; i--) {
+    const t = board[i];
+    if (t.type === "monster" && t.hp <= 0) killMonster(i, t.team !== "hero");
+  }
+  if (hero.hp <= 0) die();
 }
 
 function replaceDefeated(index, giveXp = false) {
@@ -833,9 +859,7 @@ function explode(x,y,power,kind) {
   }
 
   if (kind === "enrage") {
-    hero.rage = true;
     flash = `Enrage bomb!`;
-    floatText(120,100,"RAGE","#ff3b3b");
     for (const m of board) {
       if (!isCombatant(m)) continue;
       m.rage = true;

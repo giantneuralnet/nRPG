@@ -13,9 +13,16 @@ function statusTick() {
     const m = board[i];
     if (m.type !== "monster") continue;
 
+    if (m.combustAt && now < m.combustAt) {
+      sound("fuse");
+    }
+
     if (m.combustAt && now >= m.combustAt) {
-      spontaneousCombust(m);
-      return;
+      igniteCombustion(m);
+    }
+
+    if (m.combusting && m.hp > 0) {
+      pulseCombustion(m);
     }
 
     if (m.stone && (m.poison > 0 || m.fire > 0)) {
@@ -245,6 +252,7 @@ function copyContagiousStatuses(source, target) {
   target.rage = target.rage || source.rage;
   target.echoDamage = target.echoDamage || source.echoDamage;
   target.combustAt = target.combustAt || source.combustAt;
+  target.combusting = target.combusting || source.combusting;
   target.ghost = target.ghost || source.ghost;
 
   if (source.zombie && !target.zombie) zombifyMonster(target);
@@ -286,6 +294,7 @@ function makeGhost(dead) {
     contagious: false,
     echoDamage: dead.echoDamage,
     combustAt: dead.combustAt,
+    combusting: dead.combusting,
     attacking: false,
     vx: (rng() - .5) * 2,
     vy: (rng() - .5) * 2,

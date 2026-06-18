@@ -8,7 +8,8 @@ function drawMonsterBodyOn(renderCtx, m, x, y, r, shakeAmount = 0) {
   renderCtx.translate(x + visualRand(-shakeAmount,shakeAmount), y + visualRand(-shakeAmount,shakeAmount));
   renderCtx.scale(r/75,r/75);
   if (m.ghost) renderCtx.globalAlpha = .68;
-  renderCtx.fillStyle = stone ? "#888888" : frozen ? "#72dfff" : m.rage ? "#ff3b3b" : p.color;
+  const fireFlash = ["#ff4b18","#ff9d3b","#ffd15a"][Math.floor(now / 1000) % 3];
+  renderCtx.fillStyle = stone ? "#888888" : frozen ? "#72dfff" : m.combustAt || m.combusting ? fireFlash : m.rage ? "#ff3b3b" : p.color;
 
   if (p.head === "circle") {
     renderCtx.beginPath(); renderCtx.arc(0,0,70,0,Math.PI*2); renderCtx.fill();
@@ -42,7 +43,7 @@ function drawMonsterBodyOn(renderCtx, m, x, y, r, shakeAmount = 0) {
   }
 
   if (m.blind) {
-    renderCtx.strokeStyle = m.combustAt ? "#ff9d3b" : m.haunted ? "#b987ff" : "white";
+    renderCtx.strokeStyle = m.combustAt || m.combusting ? "#ff9d3b" : m.haunted ? "#b987ff" : "white";
     renderCtx.lineWidth = 8;
     for (let i=0;i<p.eyes;i++) {
       const ex = (i-(p.eyes-1)/2)*25;
@@ -52,12 +53,12 @@ function drawMonsterBodyOn(renderCtx, m, x, y, r, shakeAmount = 0) {
       renderCtx.stroke();
     }
   } else {
-    const eyeColor = m.combustAt ? "#ff9d3b" : m.haunted ? "#b987ff" : "white";
+    const eyeColor = m.combustAt || m.combusting ? "#ff9d3b" : m.haunted ? "#b987ff" : "white";
     renderCtx.fillStyle = eyeColor;
     for (let i=0;i<p.eyes;i++) {
       const ex = (i-(p.eyes-1)/2)*25;
       renderCtx.beginPath(); renderCtx.arc(ex,-20,11,0,Math.PI*2); renderCtx.fill();
-      renderCtx.fillStyle = m.combustAt || m.haunted ? "white" : m.zombie ? "#111" : "black";
+      renderCtx.fillStyle = m.combustAt || m.combusting || m.haunted ? "white" : m.zombie ? "#111" : "black";
       renderCtx.beginPath(); renderCtx.arc(ex,-20,5,0,Math.PI*2); renderCtx.fill();
       renderCtx.fillStyle = eyeColor;
     }
@@ -78,7 +79,7 @@ function drawMonsterBodyOn(renderCtx, m, x, y, r, shakeAmount = 0) {
     renderCtx.beginPath(); renderCtx.arc(0,25,25,0,Math.PI*2); renderCtx.fill();
   }
 
-  renderCtx.strokeStyle = stone ? "#666" : frozen ? "#72dfff" : m.rage ? "#ff3b3b" : p.color;
+  renderCtx.strokeStyle = stone ? "#666" : frozen ? "#72dfff" : m.combustAt || m.combusting ? fireFlash : m.rage ? "#ff3b3b" : p.color;
   renderCtx.lineWidth = 10;
 
   for (let i=0;i<p.arms;i++) {
@@ -171,7 +172,7 @@ function drawMonster(m) {
   ctx.textBaseline = "bottom";
   ctx.font = "bold 14px system-ui";
   ctx.fillStyle = "white";
-  const combustText = m.combustAt ? `BURN ${Math.max(0, Math.ceil((m.combustAt - performance.now()) / 1000))} ` : "";
+  const combustText = m.combusting ? "COMBUST " : m.combustAt ? `BURN ${Math.max(0, Math.ceil((m.combustAt - performance.now()) / 1000))} ` : "";
   ctx.fillText(`${m.boss ? "BOSS " : ""}${m.team === "hero" ? "ALLY " : ""}${stone ? "STONE " : ""}${combustText}${m.rage ? "RAGE " : ""}${m.blind ? "BLIND " : ""}${m.contagious ? "CONTAGIOUS " : ""}${m.echoDamage ? "SHOCK " : ""}${m.shielded && !m.shieldBroken ? "SHIELDED " : ""}${m.ghost ? "GHOST " : ""}${m.haunted ? "HAUNTED " : ""}${m.zombie ? "ZOMBIE " : ""}${m.ultraElite ? "ULTRA " : m.elite ? "ELITE " : ""}ATK ${m.atk}`,m.x,by-4);
 
   if (m.attacking) {
