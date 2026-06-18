@@ -16,7 +16,7 @@ const audioToggle = document.getElementById("audioToggle");
 
 const itemInfo = [
   ["sword","Sword","Gain attack."],
-  ["shield","Shield","Gain defense and block the next damage."],
+  ["shield","Shield","Gain defense."],
   ["potion","Potion","Heal immediately."],
   ["poison","Poison","Add poison to your attacks."],
   ["powerPotion","Power potion","Temporary attack or defense boost."],
@@ -56,7 +56,7 @@ const itemInfo = [
   ["lightningBomb","Lightning bomb","Damages all monsters and you."],
   ["iceBomb","Ice bomb","Freezes monsters temporarily."],
   ["zombieScroll","Zombie scroll","Turns one monster into a zombie."],
-  ["shieldBomb","Shield all bomb","Gives you and every current monster a fresh shield."],
+  ["shieldBomb","Shield all bomb","Gives you a brown barrier and monsters a wood shield."],
   ["stoneBomb","Stone bomb","Turns every current monster into stone."],
   ["nukeBomb","Nuke","Nukes everything."],
   ["enrageBomb","Enrage bomb","Makes monsters attack nearby targets and turn red."],

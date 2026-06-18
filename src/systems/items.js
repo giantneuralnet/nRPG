@@ -28,9 +28,8 @@ function applyItemEffect(item) {
 
   if (item.kind === "shield") {
     hero.def += value;
-    hero.shielded = true;
     flash = `Shield +${value} DEF`;
-    floatText(item.x,item.y,`SHIELD + DEF ${value}`,"#85bdff");
+    floatText(item.x,item.y,`DEF +${value}`,"#85bdff");
     sound("item");
   }
 
@@ -454,7 +453,7 @@ function flashBang(x,y) {
 function shieldAllMonsters(x,y) {
   let count = 0;
   hero.shielded = true;
-  floatText(120,100,"SHIELD","#85bdff");
+  floatText(120,100,"BARRIER","#d69a55");
   for (const m of board) {
     if (!isCombatant(m)) continue;
     m.shielded = true;
@@ -464,7 +463,7 @@ function shieldAllMonsters(x,y) {
   }
 
   flash = "Shield all!";
-  floatText(x,y,"SHIELD ALL","#85bdff");
+  floatText(x,y,"SHIELD ALL","#d69a55");
   burst(x,y,"#d69a55",14,4);
   sound("item");
 }

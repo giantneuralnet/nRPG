@@ -51,7 +51,7 @@ function drawHeroStatuses(x,y) {
   if (hero.gunpowder > 0) statuses.push(["GUNPOWDER " + hero.gunpowder, "#ffcf4f"]);
   if (hero.multiply > 1) statuses.push(["MULTIPLY " + hero.multiply, "#ffe65c"]);
   if (hero.trigger > 0) statuses.push(["TRIGGER " + hero.trigger, "#d8ecff"]);
-  if (hero.shielded) statuses.push(["SHIELD", "#85bdff"]);
+  if (hero.shielded) statuses.push(["BARRIER", "#d69a55"]);
   if (hero.prayers && hero.prayers.length) {
     while (hero.prayers.length && hero.prayers[hero.prayers.length - 1].remaining <= 0) hero.prayers.pop();
     for (let i = 0; i < hero.prayers.length; i++) {
