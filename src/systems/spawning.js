@@ -27,11 +27,11 @@ function spawnThing(allowExileReturn = true, replaceIndex = null, forceType = nu
   for (let tries = 0; tries < 10; tries++) {
     const exileQueueBefore = exileQueue.slice();
     const candidate = sampleSpawnThing(allowExileReturn, forceType);
-    if (hero && hero.unlucky > 0 && isHelpfulEntity(candidate) && rng() < Math.min(.75, hero.unlucky * .12)) {
+    if (hero && hero.unlucky > 0 && entityCategory(candidate) === "good" && rng() < Math.min(.75, hero.unlucky * .12)) {
       exileQueue = exileQueueBefore;
       continue;
     }
-    if (hero && hero.lucky > 0 && !isHelpfulEntity(candidate) && rng() < Math.min(.75, hero.lucky * .12)) {
+    if (hero && hero.lucky > 0 && entityCategory(candidate) === "bad" && rng() < Math.min(.75, hero.lucky * .12)) {
       exileQueue = exileQueueBefore;
       continue;
     }
@@ -56,17 +56,34 @@ function sampleSpawnThing(allowExileReturn = true, forceType = null) {
   return makeItem(p.x, -120 - rng()*200, p.y, r);
 }
 
-function isHelpfulEntity(t) {
-  if (t.type === "door") return true;
-  if (t.type === "monster") return t.team === "hero" || t.stone;
+const itemCategories = {
+  sword:"good", shield:"good", potion:"good", poison:"good", powerPotion:"good", regenPotion:"good", vampirePotion:"good",
+  moltenPotion:"good", dodgePotion:"good", critPotion:"good", surprisePotion:"good", phoenixPotion:"good", luckyCharm:"good",
+  gunpowder:"good", multiplyStatus:"good", triggerStatus:"good", maxHealthUp:"good", prayerBook:"good", banishBook:"good",
+  fireBomb:"good", lavaBomb:"good", contagionBomb:"good", echoBomb:"good", soulBomb:"good", iceBomb:"good", blindBomb:"good",
+  blessedScroll:"good", necroticScroll:"good", allyScroll:"good", healRandomItem:"good", chest:"good",
+
+  bomb:"mixed", clearBomb:"mixed", cleanBomb:"mixed", randomBomb:"mixed", weakenBomb:"mixed", strengthBomb:"mixed",
+  cloudBomb:"mixed", poisonBomb:"mixed", healBomb:"mixed", lightningBomb:"mixed", shieldBomb:"mixed", nukeBomb:"mixed",
+  zombieScroll:"mixed", combustionScroll:"mixed", killRandomItem:"mixed", flashBang:"mixed", exileItem:"mixed", swapHealthItem:"mixed",
+
+  decayCurse:"bad", confusionCurse:"bad", glitchCurse:"bad", unluckyCurse:"bad", maxHealthDown:"bad", stoneBomb:"bad",
+  enrageBomb:"bad", stoneScroll:"bad", hauntedScroll:"bad"
+};
+
+function itemCategory(kind) {
+  return itemCategories[kind] || "mixed";
+}
+
+function entityCategory(t) {
+  if (t.type === "door") return "good";
+  if (t.type === "monster") return t.team === "hero" || t.stone ? "good" : "bad";
   if (t.type !== "item") return false;
-  return [
-    "sword","shield","potion","poison","powerPotion","regenPotion","vampirePotion","moltenPotion","dodgePotion","critPotion","surprisePotion",
-    "phoenixPotion","luckyCharm","gunpowder","multiplyStatus","triggerStatus","maxHealthUp","prayerBook","banishBook",
-    "bomb","clearBomb","cleanBomb","randomBomb","weakenBomb","strengthBomb","cloudBomb","poisonBomb","fireBomb","lavaBomb","contagionBomb",
-    "echoBomb","soulBomb","healBomb","lightningBomb","iceBomb","shieldBomb","stoneBomb","blindBomb",
-    "blessedScroll","necroticScroll","allyScroll","killRandomItem","healRandomItem","flashBang","exileItem","swapHealthItem","chest"
-  ].includes(t.kind);
+  return itemCategory(t.kind);
+}
+
+function isHelpfulEntity(t) {
+  return entityCategory(t) === "good";
 }
 
 function popExiledMonster() {

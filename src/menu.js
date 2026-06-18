@@ -75,13 +75,6 @@ const itemInfo = [
   ["chest","Chest","Opens a random reward."]
 ];
 
-const helpfulBookItems = new Set([
-  "sword","shield","potion","poison","powerPotion","regenPotion","vampirePotion","moltenPotion","dodgePotion","critPotion","surprisePotion",
-  "phoenixPotion","luckyCharm","gunpowder","multiplyStatus","triggerStatus","maxHealthUp","prayerBook","banishBook",
-  "bomb","clearBomb","cleanBomb","randomBomb","weakenBomb","strengthBomb","cloudBomb","poisonBomb","fireBomb","lavaBomb","contagionBomb",
-  "echoBomb","soulBomb","healBomb","lightningBomb","iceBomb","shieldBomb","stoneBomb","blindBomb",
-  "blessedScroll","necroticScroll","allyScroll","killRandomItem","healRandomItem","flashBang","exileItem","swapHealthItem","chest"
-]);
 let nextBookBlessed = true;
 
 const monsterInfo = [
@@ -281,8 +274,8 @@ function buildInfoList() {
 }
 
 function sampleBookItems(mode, blessed, count = 3) {
-  const wantsGood = mode === "prayer" ? blessed : !blessed;
-  let pool = itemInfo.filter(([kind]) => helpfulBookItems.has(kind) === wantsGood);
+  const category = mode === "prayer" ? blessed ? "good" : "bad" : blessed ? "bad" : "good";
+  let pool = itemInfo.filter(([kind]) => itemCategory(kind) === category);
   if (pool.length < count) pool = itemInfo.slice();
   const sample = [];
   while (pool.length && sample.length < count) {
