@@ -9,9 +9,9 @@ function clearCloudAt(x,y) {
     sound("item");
     if (cloud.hits <= 0) {
       clouds = [];
-      flash = "Cloud cleared";
+      flash = localizeFlashText("Cloud cleared");
     } else {
-      flash = `Cloud ${cloud.hits}/${cloud.maxHits || cloud.hits}`;
+      flash = localizeFlashText(`Cloud ${cloud.hits}/${cloud.maxHits || cloud.hits}`);
     }
     return true;
   }

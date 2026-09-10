@@ -203,12 +203,12 @@ function drawMonster(m) {
   ctx.textBaseline = "bottom";
   ctx.font = "bold 14px system-ui";
   ctx.fillStyle = "white";
-  const combustText = m.combusting ? "COMBUST " : m.combustAt ? `BURN ${Math.max(0, Math.ceil((m.combustAt - performance.now()) / 1000))} ` : "";
-  ctx.fillText(`${m.boss ? "BOSS " : ""}${m.team === "hero" ? "ALLY " : ""}${stone ? "STONE " : ""}${combustText}${m.rage ? "RAGE " : ""}${m.blind ? "BLIND " : ""}${m.contagious ? "CONTAGIOUS " : ""}${m.echoDamage ? "SHOCK " : ""}${m.charge > 0 ? `CHARGE ${m.charge} ` : ""}${shieldCount > 0 ? "SHIELDED " : ""}${m.ghost ? "GHOST " : ""}${m.haunted ? "HAUNTED " : ""}${m.zombie ? "ZOMBIE " : ""}${m.ultraElite ? "ULTRA " : m.elite ? "ELITE " : ""}ATK ${m.atk}`,m.x,by-4);
+  const combustText = m.combusting ? `${monsterLabel("COMBUST")} ` : m.combustAt ? `${monsterLabel("BURN")} ${Math.max(0, Math.ceil((m.combustAt - performance.now()) / 1000))} ` : "";
+  ctx.fillText(`${m.boss ? monsterLabel("BOSS") + " " : ""}${m.team === "hero" ? monsterLabel("ALLY") + " " : ""}${stone ? monsterLabel("STONE") + " " : ""}${combustText}${m.rage ? monsterLabel("RAGE") + " " : ""}${m.blind ? monsterLabel("BLIND") + " " : ""}${m.contagious ? monsterLabel("CONTAGIOUS") + " " : ""}${m.echoDamage ? monsterLabel("SHOCK") + " " : ""}${m.charge > 0 ? `${monsterLabel("CHARGE")} ${m.charge} ` : ""}${shieldCount > 0 ? monsterLabel("SHIELDED") + " " : ""}${m.ghost ? monsterLabel("GHOST") + " " : ""}${m.haunted ? monsterLabel("HAUNTED") + " " : ""}${m.zombie ? monsterLabel("ZOMBIE") + " " : ""}${m.ultraElite ? monsterLabel("ULTRA") + " " : m.elite ? monsterLabel("ELITE") + " " : ""}${monsterLabel("ATK")} ${m.atk}`,m.x,by-4);
 
   if (m.attacking) {
     ctx.fillStyle = "#ff6666";
-    ctx.fillText("attacking...",m.x,m.y+m.r+28);
+    ctx.fillText(isJapanese() ? "攻撃中..." : "attacking...",m.x,m.y+m.r+28);
   }
 
   ctx.restore();
@@ -251,7 +251,7 @@ function drawDoor(door) {
   ctx.textAlign = "center";
   ctx.fillStyle = "white";
   ctx.font = "bold 15px system-ui";
-  ctx.fillText(`ROOM ${door.room}`, door.x, door.y + door.r + 10);
+  ctx.fillText(`${isJapanese() ? "部屋" : "ROOM"} ${door.room}`, door.x, door.y + door.r + 10);
   ctx.restore();
 }
 
@@ -274,64 +274,73 @@ function drawItem(item) {
   ctx.font = "bold 15px system-ui";
   ctx.fillStyle = "white";
 
-  if (item.kind === "sword") ctx.fillText(`ATK +${item.value}`, item.x, item.y+item.r+10);
-  if (item.kind === "shield") ctx.fillText(`DEFENSE +${item.value}`, item.x, item.y+item.r+10);
-  if (item.kind === "potion") ctx.fillText(`HP +${item.value}`, item.x, item.y+item.r+10);
-  if (item.kind === "regenPotion") ctx.fillText(`REGEN`, item.x, item.y+item.r+10);
-  if (item.kind === "vampirePotion") ctx.fillText(`VAMPIRE`, item.x, item.y+item.r+10);
-  if (item.kind === "moltenPotion") ctx.fillText(`MOLTEN`, item.x, item.y+item.r+10);
-  if (item.kind === "dodgePotion") ctx.fillText(`DODGE`, item.x, item.y+item.r+10);
-  if (item.kind === "critPotion") ctx.fillText(`CRIT`, item.x, item.y+item.r+10);
-  if (item.kind === "surprisePotion") ctx.fillText(`SURPRISE`, item.x, item.y+item.r+10);
-  if (item.kind === "decayCurse") ctx.fillText(`DECAY`, item.x, item.y+item.r+10);
-  if (item.kind === "phoenixPotion") ctx.fillText(`PHOENIX`, item.x, item.y+item.r+10);
-  if (item.kind === "confusionCurse") ctx.fillText(`CONFUSED`, item.x, item.y+item.r+10);
-  if (item.kind === "glitchCurse") ctx.fillText(`GLITCH`, item.x, item.y+item.r+10);
-  if (item.kind === "luckyCharm") ctx.fillText(`LUCKY`, item.x, item.y+item.r+10);
-  if (item.kind === "unluckyCurse") ctx.fillText(`UNLUCKY`, item.x, item.y+item.r+10);
-  if (item.kind === "gunpowder") ctx.fillText(`GUNPOWDER`, item.x, item.y+item.r+10);
-  if (item.kind === "multiplyStatus") ctx.fillText(`MULTIPLY`, item.x, item.y+item.r+10);
-  if (item.kind === "triggerStatus") ctx.fillText(`TRIGGER`, item.x, item.y+item.r+10);
-  if (item.kind === "maxHealthUp") ctx.fillText(`MAX HP +${item.value}`, item.x, item.y+item.r+10);
-  if (item.kind === "maxHealthDown") ctx.fillText(`MAX HP -${item.value}`, item.x, item.y+item.r+10);
-  if (item.kind === "prayerBook") ctx.fillText(`PRAYER`, item.x, item.y+item.r+10);
-  if (item.kind === "banishBook") ctx.fillText(`BANISH`, item.x, item.y+item.r+10);
-  if (item.kind === "powerPotion") ctx.fillText(`POWER UP`, item.x, item.y+item.r+10);
-  if (item.kind === "poison") ctx.fillText(`POISON +${item.value}`, item.x, item.y+item.r+10);
-  if (item.kind === "bomb") ctx.fillText(`BOMB ${item.value}`, item.x, item.y+item.r+10);
-  if (item.kind === "clearBomb") ctx.fillText(`CLEAR BOMB`, item.x, item.y+item.r+10);
-  if (item.kind === "cleanBomb") ctx.fillText(`CLEAN BOMB`, item.x, item.y+item.r+10);
-  if (item.kind === "randomBomb") ctx.fillText(`RANDOM BOMB`, item.x, item.y+item.r+10);
-  if (item.kind === "weakenBomb") ctx.fillText(`WEAKEN`, item.x, item.y+item.r+10);
-  if (item.kind === "strengthBomb") ctx.fillText(`STRENGTH`, item.x, item.y+item.r+10);
-  if (item.kind === "cloudBomb") ctx.fillText(`CLOUDY BOMB`, item.x, item.y+item.r+10);
-  if (item.kind === "lightningBomb") ctx.fillText(`CHARGE`, item.x, item.y+item.r+10);
-  if (item.kind === "poisonBomb") ctx.fillText(`POISON BOMB`, item.x, item.y+item.r+10);
-  if (item.kind === "fireBomb") ctx.fillText(`FIRE BOMB`, item.x, item.y+item.r+10);
-  if (item.kind === "lavaBomb") ctx.fillText(`LAVA BOMB`, item.x, item.y+item.r+10);
-  if (item.kind === "contagionBomb") ctx.fillText(`CONTAGION`, item.x, item.y+item.r+10);
-  if (item.kind === "echoBomb") ctx.fillText(`SHOCKWAVE`, item.x, item.y+item.r+10);
-  if (item.kind === "soulBomb") ctx.fillText(`SOUL LINK`, item.x, item.y+item.r+10);
-  if (item.kind === "healBomb") ctx.fillText(`HEAL BOMB`, item.x, item.y+item.r+10);
-  if (item.kind === "iceBomb") ctx.fillText(`ICE BOMB`, item.x, item.y+item.r+10);
-  if (item.kind === "zombieScroll") ctx.fillText(`ZOMBIE SCROLL`, item.x, item.y+item.r+10);
-  if (item.kind === "shieldBomb") ctx.fillText(`SHIELD BOMB`, item.x, item.y+item.r+10);
-  if (item.kind === "stoneBomb") ctx.fillText(`STONE BOMB`, item.x, item.y+item.r+10);
-  if (item.kind === "nukeBomb") ctx.fillText(`NUKE`, item.x, item.y+item.r+10);
-  if (item.kind === "enrageBomb") ctx.fillText(`ENRAGE`, item.x, item.y+item.r+10);
-  if (item.kind === "blindBomb") ctx.fillText(`BLIND BOMB`, item.x, item.y+item.r+10);
-  if (item.kind === "stoneScroll") ctx.fillText(`STONE SCROLL`, item.x, item.y+item.r+10);
-  if (item.kind === "hauntedScroll") ctx.fillText(`CURSE SCROLL`, item.x, item.y+item.r+10);
-  if (item.kind === "blessedScroll") ctx.fillText(`BLESS CURSE`, item.x, item.y+item.r+10);
-  if (item.kind === "necroticScroll") ctx.fillText(`NECROTIC`, item.x, item.y+item.r+10);
-  if (item.kind === "allyScroll") ctx.fillText(`ALLY SCROLL`, item.x, item.y+item.r+10);
-  if (item.kind === "combustionScroll") ctx.fillText(`COMBUST`, item.x, item.y+item.r+10);
-  if (item.kind === "killRandomItem") ctx.fillText(`KILL RANDOM`, item.x, item.y+item.r+10);
-  if (item.kind === "healRandomItem") ctx.fillText(`HEAL RANDOM`, item.x, item.y+item.r+10);
-  if (item.kind === "flashBang") ctx.fillText(`FLASH BANG`, item.x, item.y+item.r+10);
-  if (item.kind === "exileItem") ctx.fillText(`EXILE`, item.x, item.y+item.r+10);
-  if (item.kind === "swapHealthItem") ctx.fillText(`HP SWAP`, item.x, item.y+item.r+10);
-  if (item.kind === "chest") ctx.fillText("CHEST", item.x, item.y+item.r+10);
+  const translated = itemLabel(item.kind);
+  if (translated) {
+    const valueText =
+      ["sword","shield","potion","maxHealthUp","maxHealthDown","poison"].includes(item.kind) ? ` ${item.value > 0 ? "+" : ""}${item.value}` :
+      item.kind === "bomb" ? ` ${item.value}` :
+      "";
+    ctx.fillText(`${translated}${valueText}`, item.x, item.y+item.r+10);
+  } else {
+    if (item.kind === "sword") ctx.fillText(`ATK +${item.value}`, item.x, item.y+item.r+10);
+    if (item.kind === "shield") ctx.fillText(`DEFENSE +${item.value}`, item.x, item.y+item.r+10);
+    if (item.kind === "potion") ctx.fillText(`HP +${item.value}`, item.x, item.y+item.r+10);
+    if (item.kind === "regenPotion") ctx.fillText(`REGEN`, item.x, item.y+item.r+10);
+    if (item.kind === "vampirePotion") ctx.fillText(`VAMPIRE`, item.x, item.y+item.r+10);
+    if (item.kind === "moltenPotion") ctx.fillText(`MOLTEN`, item.x, item.y+item.r+10);
+    if (item.kind === "dodgePotion") ctx.fillText(`DODGE`, item.x, item.y+item.r+10);
+    if (item.kind === "critPotion") ctx.fillText(`CRIT`, item.x, item.y+item.r+10);
+    if (item.kind === "surprisePotion") ctx.fillText(`SURPRISE`, item.x, item.y+item.r+10);
+    if (item.kind === "decayCurse") ctx.fillText(`DECAY`, item.x, item.y+item.r+10);
+    if (item.kind === "phoenixPotion") ctx.fillText(`PHOENIX`, item.x, item.y+item.r+10);
+    if (item.kind === "confusionCurse") ctx.fillText(`CONFUSED`, item.x, item.y+item.r+10);
+    if (item.kind === "glitchCurse") ctx.fillText(`GLITCH`, item.x, item.y+item.r+10);
+    if (item.kind === "luckyCharm") ctx.fillText(`LUCKY`, item.x, item.y+item.r+10);
+    if (item.kind === "unluckyCurse") ctx.fillText(`UNLUCKY`, item.x, item.y+item.r+10);
+    if (item.kind === "gunpowder") ctx.fillText(`GUNPOWDER`, item.x, item.y+item.r+10);
+    if (item.kind === "multiplyStatus") ctx.fillText(`MULTIPLY`, item.x, item.y+item.r+10);
+    if (item.kind === "triggerStatus") ctx.fillText(`TRIGGER`, item.x, item.y+item.r+10);
+    if (item.kind === "maxHealthUp") ctx.fillText(`MAX HP +${item.value}`, item.x, item.y+item.r+10);
+    if (item.kind === "maxHealthDown") ctx.fillText(`MAX HP -${item.value}`, item.x, item.y+item.r+10);
+    if (item.kind === "prayerBook") ctx.fillText(`PRAYER`, item.x, item.y+item.r+10);
+    if (item.kind === "banishBook") ctx.fillText(`BANISH`, item.x, item.y+item.r+10);
+    if (item.kind === "powerPotion") ctx.fillText(`POWER UP`, item.x, item.y+item.r+10);
+    if (item.kind === "poison") ctx.fillText(`POISON +${item.value}`, item.x, item.y+item.r+10);
+    if (item.kind === "bomb") ctx.fillText(`BOMB ${item.value}`, item.x, item.y+item.r+10);
+    if (item.kind === "clearBomb") ctx.fillText(`CLEAR BOMB`, item.x, item.y+item.r+10);
+    if (item.kind === "cleanBomb") ctx.fillText(`CLEAN BOMB`, item.x, item.y+item.r+10);
+    if (item.kind === "randomBomb") ctx.fillText(`RANDOM BOMB`, item.x, item.y+item.r+10);
+    if (item.kind === "weakenBomb") ctx.fillText(`WEAKEN`, item.x, item.y+item.r+10);
+    if (item.kind === "strengthBomb") ctx.fillText(`STRENGTH`, item.x, item.y+item.r+10);
+    if (item.kind === "cloudBomb") ctx.fillText(`CLOUDY BOMB`, item.x, item.y+item.r+10);
+    if (item.kind === "lightningBomb") ctx.fillText(`CHARGE`, item.x, item.y+item.r+10);
+    if (item.kind === "poisonBomb") ctx.fillText(`POISON BOMB`, item.x, item.y+item.r+10);
+    if (item.kind === "fireBomb") ctx.fillText(`FIRE BOMB`, item.x, item.y+item.r+10);
+    if (item.kind === "lavaBomb") ctx.fillText(`LAVA BOMB`, item.x, item.y+item.r+10);
+    if (item.kind === "contagionBomb") ctx.fillText(`CONTAGION`, item.x, item.y+item.r+10);
+    if (item.kind === "echoBomb") ctx.fillText(`SHOCKWAVE`, item.x, item.y+item.r+10);
+    if (item.kind === "soulBomb") ctx.fillText(`SOUL LINK`, item.x, item.y+item.r+10);
+    if (item.kind === "healBomb") ctx.fillText(`HEAL BOMB`, item.x, item.y+item.r+10);
+    if (item.kind === "iceBomb") ctx.fillText(`ICE BOMB`, item.x, item.y+item.r+10);
+    if (item.kind === "zombieScroll") ctx.fillText(`ZOMBIE SCROLL`, item.x, item.y+item.r+10);
+    if (item.kind === "shieldBomb") ctx.fillText(`SHIELD BOMB`, item.x, item.y+item.r+10);
+    if (item.kind === "stoneBomb") ctx.fillText(`STONE BOMB`, item.x, item.y+item.r+10);
+    if (item.kind === "nukeBomb") ctx.fillText(`NUKE`, item.x, item.y+item.r+10);
+    if (item.kind === "enrageBomb") ctx.fillText(`ENRAGE`, item.x, item.y+item.r+10);
+    if (item.kind === "blindBomb") ctx.fillText(`BLIND BOMB`, item.x, item.y+item.r+10);
+    if (item.kind === "stoneScroll") ctx.fillText(`STONE SCROLL`, item.x, item.y+item.r+10);
+    if (item.kind === "hauntedScroll") ctx.fillText(`CURSE SCROLL`, item.x, item.y+item.r+10);
+    if (item.kind === "blessedScroll") ctx.fillText(`BLESS CURSE`, item.x, item.y+item.r+10);
+    if (item.kind === "necroticScroll") ctx.fillText(`NECROTIC`, item.x, item.y+item.r+10);
+    if (item.kind === "allyScroll") ctx.fillText(`ALLY SCROLL`, item.x, item.y+item.r+10);
+    if (item.kind === "combustionScroll") ctx.fillText(`COMBUST`, item.x, item.y+item.r+10);
+    if (item.kind === "killRandomItem") ctx.fillText(`KILL RANDOM`, item.x, item.y+item.r+10);
+    if (item.kind === "healRandomItem") ctx.fillText(`HEAL RANDOM`, item.x, item.y+item.r+10);
+    if (item.kind === "flashBang") ctx.fillText(`FLASH BANG`, item.x, item.y+item.r+10);
+    if (item.kind === "exileItem") ctx.fillText(`EXILE`, item.x, item.y+item.r+10);
+    if (item.kind === "swapHealthItem") ctx.fillText(`HP SWAP`, item.x, item.y+item.r+10);
+    if (item.kind === "chest") ctx.fillText("CHEST", item.x, item.y+item.r+10);
+  }
 
   ctx.restore();
 }

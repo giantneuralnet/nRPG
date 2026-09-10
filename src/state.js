@@ -65,7 +65,7 @@ function resetGame() {
   soulLinks = [];
   kills = 0;
   bossKills = 0;
-  flash = "Tap monsters and items";
+  flash = localizeFlashText("Tap monsters and items");
   shake = 0;
   boom = null;
   shockwaves = [];
@@ -123,6 +123,6 @@ function switchRoom(roomNumber) {
   shockwaves = [];
   chargeBolts = [];
   floats = [];
-  flash = `Room ${currentRoom}`;
+  flash = localizeFlashText(`Room ${currentRoom}`);
   sound("door");
 }

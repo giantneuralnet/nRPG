@@ -13,6 +13,7 @@ const seedClear = document.getElementById("seedClear");
 const infoButton = document.getElementById("infoButton");
 const infoOverlay = document.getElementById("infoOverlay");
 const infoClose = document.getElementById("infoClose");
+const infoTitle = document.getElementById("infoTitle");
 const infoList = document.getElementById("infoList");
 const menuAction = document.getElementById("menuAction");
 const audioToggle = document.getElementById("audioToggle");
@@ -56,6 +57,120 @@ const menuText = {
 
 function t() {
   return menuText[settings.language] || menuText.en;
+}
+
+const itemJa = {
+  sword:["剣","攻撃力を上げる。"], shield:["防御","防御力を上げる。"], potion:["ポーション","すぐに回復する。"], poison:["毒","攻撃に毒を付与する。"],
+  powerPotion:["パワーポーション","一時的に攻撃力か防御力を上げる。"], regenPotion:["再生ポーション","数秒間、定期的に回復する。"], vampirePotion:["吸血ポーション","攻撃時に体力を吸収する。"],
+  moltenPotion:["溶岩化","攻撃時に敵の下へ溶岩を作る。"], dodgePotion:["回避","受けるダメージを避ける確率を得る。"], critPotion:["会心","2倍ダメージの確率を得る。"],
+  surprisePotion:["奇襲","体力満タンの敵に追加ダメージ。"], decayCurse:["腐敗","毎秒ダメージを受け、毒も増える。"], phoenixPotion:["不死鳥","死ぬ代わりにHP1で復活する。"],
+  confusionCurse:["混乱","攻撃がランダム対象になり、自分に当たることもある。"], glitchCurse:["グリッチ","全エンティティの位置を0.5-1秒ごとに入れ替える。"], luckyCharm:["幸運","有利な出現が増えやすくなる。"],
+  unluckyCurse:["不運","アイテム出現が少なくなる。"], gunpowder:["火薬","爆弾ダメージを上げる。"], multiplyStatus:["倍率","今後のアイテム効果を強くする。"], triggerStatus:["連鎖","今後のアイテムを追加発動する。"],
+  maxHealthUp:["最大HP上昇","最大HPを上げる。"], maxHealthDown:["最大HP低下","最大HPを下げる。"], prayerBook:["祈りの本","選んだアイテムだけが出るようにする。"], banishBook:["追放の本","選んだアイテムを出現しないようにする。"],
+  bomb:["爆弾","自分と全モンスターにダメージ。"], clearBomb:["クリア爆弾","キルなしで部屋を消し、雲を消す。"], cleanBomb:["浄化爆弾","自分とモンスターの状態異常を消す。"], randomBomb:["ランダム爆弾","自分とモンスターのHPをランダム化する。"],
+  weakenBomb:["弱体爆弾","全員の攻撃力を下げる。"], strengthBomb:["強化爆弾","全員の攻撃力を上げる。"], cloudBomb:["雲爆弾","画面を3-9回タップまで灰色にする。"], poisonBomb:["毒爆弾","全モンスターを毒にし、自分も傷つく。"],
+  fireBomb:["火炎爆弾","モンスターを燃やして継続ダメージ。"], lavaBomb:["溶岩爆弾","火を付与する長持ち溶岩を作る。"], contagionBomb:["感染爆弾","死亡時に状態を他のモンスターへコピーする。"], echoBomb:["衝撃波爆弾","反撃時に連鎖する衝撃波を出す。"],
+  soulBomb:["魂リンク爆弾","2体のモンスターが受けるダメージを分ける。"], healBomb:["回復爆弾","自分とモンスターを回復する。"], lightningBomb:["帯電爆弾","モンスターに帯電を付与する。"], iceBomb:["氷爆弾","モンスターを一時的に凍らせる。"],
+  zombieScroll:["ゾンビ巻物","モンスター1体をゾンビにする。"], shieldBomb:["盾爆弾","自分とモンスターに茶色の盾を付与する。"], stoneBomb:["石化爆弾","全モンスターを石化する。"], nukeBomb:["核爆弾","すべてを吹き飛ばす。"],
+  enrageBomb:["激怒爆弾","モンスターを赤くし、近くを攻撃させる。"], blindBomb:["盲目爆弾","モンスターを盲目にし、反撃対象をランダムにする。"], stoneScroll:["石化巻物","モンスター1体を永久に石化する。"], hauntedScroll:["呪い巻物","モンスターを呪い、死後にゴースト化させる。"],
+  blessedScroll:["祝福の呪い","モンスターを倒すと回復する。"], necroticScroll:["死霊の祝福","死亡時に防御を得る。"], allyScroll:["味方巻物","ランダムなモンスターを味方にする。"], combustionScroll:["自然発火巻物","10秒後に攻撃力分の火炎を毎秒放つ。"],
+  killRandomItem:["ランダムキル","ランダムなモンスターを倒すか、自分に跳ね返る。"], healRandomItem:["ランダム回復","ランダム対象を全回復する。"], flashBang:["閃光弾","画面を白くし、5秒間モンスター戦闘を止める。"], exileItem:["追放","現在のモンスターを後で再出現するキューへ送る。"],
+  swapHealthItem:["HP交換","自分とモンスターのHPをシャッフルする。"], chest:["宝箱","ランダム報酬を開く。"]
+};
+
+const monsterJa = {
+  normal:["モンスター","反撃する通常モンスター。"], elite:["エリート","より強く、XPも多い。"], ultraElite:["超エリート","さらに強く、XPも多い。"], shielded:["盾持ち","木の盾が次のダメージを吸収する。"],
+  zombie:["ゾンビ","他のモンスターと戦い、自分にも反撃する。"], ghostZombie:["ゴーストゾンビ","呪いで復活した透明なゾンビ。"], haunted:["呪われた","紫の目。倒すと一度ゴーストになる。"], contagious:["感染","死亡時に味方を含む状態を他へコピーする。"],
+  echo:["衝撃波","反撃時に連鎖する範囲攻撃を出す。"], charge:["帯電","毎秒いちばん近い相手を感電させ、帯電を広げる。"], combustion:["自然発火","炎色に点滅し、カウント後に毎秒ダメージ。"], stone:["石化","動けず、ダメージを受けない。"],
+  burning:["炎上","定期的に火ダメージを受ける。"], blind:["盲目","目を閉じ、反撃対象がランダム。"], rage:["激怒","赤くなり、近くのモンスターを攻撃する。"], frozen:["凍結","凍っている間は反撃できない。"],
+  poisoned:["毒","定期的に毒ダメージを受ける。"], ally:["味方","笑顔のモンスター。あなたが狙った敵を攻撃する。"], door:["ドア","記憶された4部屋のどれかへ移動する。"]
+};
+
+const gameplayJa = {
+  room:"部屋", kills:"撃破", boss:"ボス", lv:"LV", xp:"XP", atk:"攻", def:"防", hp:"HP", time:"時間",
+  tapStart:"モンスターとアイテムをタップ", tapClouds:"雲を消すにはタップ", roomFlash:"部屋 {room}",
+  statuses:{ POISON:"毒", VAMP:"吸血", REGEN:"再生", "ATK UP":"攻撃UP", "DEF UP":"防御UP", BLESSED:"祝福", NECROTIC:"死霊", MOLTEN:"溶岩", DODGE:"回避", CRIT:"会心", SURPRISE:"奇襲", DECAY:"腐敗", PHOENIX:"不死鳥", CONFUSED:"混乱", GLITCHED:"グリッチ", LUCKY:"幸運", UNLUCKY:"不運", GUNPOWDER:"火薬", MULTIPLY:"倍率", TRIGGER:"連鎖", SHIELD:"盾", CHARGE:"帯電", RAGE:"激怒", Prayer:"祈り" },
+  monster:{ BOSS:"ボス", ALLY:"味方", STONE:"石化", COMBUST:"発火", BURN:"燃焼", RAGE:"激怒", BLIND:"盲目", CONTAGIOUS:"感染", SHOCK:"衝撃", CHARGE:"帯電", SHIELDED:"盾", GHOST:"ゴースト", HAUNTED:"呪い", ZOMBIE:"ゾンビ", ULTRA:"超", ELITE:"エリート", ATK:"攻" },
+  item:{ sword:"攻撃", shield:"防御", potion:"HP", regenPotion:"再生", vampirePotion:"吸血", moltenPotion:"溶岩", dodgePotion:"回避", critPotion:"会心", surprisePotion:"奇襲", decayCurse:"腐敗", phoenixPotion:"不死鳥", confusionCurse:"混乱", glitchCurse:"グリッチ", luckyCharm:"幸運", unluckyCurse:"不運", gunpowder:"火薬", multiplyStatus:"倍率", triggerStatus:"連鎖", maxHealthUp:"最大HP", maxHealthDown:"最大HP", prayerBook:"祈り", banishBook:"追放", powerPotion:"強化", poison:"毒", bomb:"爆弾", clearBomb:"クリア爆弾", cleanBomb:"浄化爆弾", randomBomb:"ランダム爆弾", weakenBomb:"弱体", strengthBomb:"強化", cloudBomb:"雲爆弾", lightningBomb:"帯電", poisonBomb:"毒爆弾", fireBomb:"火炎爆弾", lavaBomb:"溶岩爆弾", contagionBomb:"感染", echoBomb:"衝撃波", soulBomb:"魂リンク", healBomb:"回復爆弾", iceBomb:"氷爆弾", zombieScroll:"ゾンビ巻物", shieldBomb:"盾爆弾", stoneBomb:"石化爆弾", nukeBomb:"核爆弾", enrageBomb:"激怒", blindBomb:"盲目爆弾", stoneScroll:"石化巻物", hauntedScroll:"呪い巻物", blessedScroll:"祝福", necroticScroll:"死霊", allyScroll:"味方巻物", combustionScroll:"発火", killRandomItem:"ランダムキル", healRandomItem:"ランダム回復", flashBang:"閃光弾", exileItem:"追放", swapHealthItem:"HP交換", chest:"宝箱" }
+};
+
+function isJapanese() {
+  return settings.language === "ja";
+}
+
+function localizeInfo(entry, map) {
+  if (!isJapanese() || !map[entry[0]]) return entry;
+  return [entry[0], map[entry[0]][0], map[entry[0]][1]];
+}
+
+function gameplayLabel(group, key) {
+  if (!isJapanese()) return key;
+  return gameplayJa[group] || key;
+}
+
+function statusLabel(key) {
+  return isJapanese() ? gameplayJa.statuses[key] || key : key;
+}
+
+function monsterLabel(key) {
+  return isJapanese() ? gameplayJa.monster[key] || key : key;
+}
+
+function itemLabel(kind) {
+  return isJapanese() ? gameplayJa.item[kind] || kind : null;
+}
+
+function localizeFlashText(text) {
+  if (!isJapanese() || typeof text !== "string") return text;
+  return text
+    .replace("Tap monsters and items", gameplayJa.tapStart)
+    .replace(/^Room (\d+)$/, (_, room) => gameplayJa.roomFlash.replace("{room}", room))
+    .replace("YOU WIN!", "勝利!")
+    .replace("YOU DIED", "ゲームオーバー")
+    .replace("STONE LOCK", "石化ロック")
+    .replace("Cloud cleared", "雲が晴れた")
+    .replace(/^Cloud /, "雲 ")
+    .replace("No monster", "対象モンスターなし")
+    .replace("No monsters", "対象モンスターなし")
+    .replace("No enemies", "対象の敵なし")
+    .replace("Bomb hit everyone!", "全員に爆弾!")
+    .replace("Clear bomb! No kills.", "クリア爆弾! キルなし")
+    .replace("Clean bomb!", "浄化爆弾!")
+    .replace("Random bomb!", "ランダム爆弾!")
+    .replace("Weaken bomb!", "弱体爆弾!")
+    .replace("Strength bomb!", "強化爆弾!")
+    .replace("Cloudy bomb!", "雲爆弾!")
+    .replace("Charge bomb!", "帯電爆弾!")
+    .replace("Poison bomb!", "毒爆弾!")
+    .replace("Fire bomb!", "火炎爆弾!")
+    .replace("Lava bomb!", "溶岩爆弾!")
+    .replace("Contagion bomb!", "感染爆弾!")
+    .replace("Shockwave bomb!", "衝撃波爆弾!")
+    .replace("Healing bomb!", "回復爆弾!")
+    .replace("Ice bomb!", "氷爆弾!")
+    .replace("Zombie bomb!", "ゾンビ爆弾!")
+    .replace("Stone bomb!", "石化爆弾!")
+    .replace("Enrage bomb!", "激怒爆弾!")
+    .replace("Blind bomb!", "盲目爆弾!")
+    .replace("Stone scroll!", "石化巻物!")
+    .replace("Zombie scroll!", "ゾンビ巻物!")
+    .replace("Ally scroll!", "味方巻物!")
+    .replace("Haunted curse!", "呪い!")
+    .replace("Blessed curse!", "祝福!")
+    .replace("Necrotic blessing!", "死霊の祝福!")
+    .replace("Spontaneous combustion!", "自然発火!")
+    .replace("Health swap!", "HP交換!")
+    .replace("FLASH BANG!", "閃光弾!")
+    .replace("NUKE!", "核爆弾!")
+    .replace("Frozen monster cannot counter!", "凍結中は反撃できない!")
+    .replace("Stone monster cannot counter!", "石化中は反撃できない!")
+    .replace("Blinded monster cannot counter!", "盲目で反撃できない!")
+    .replace("Ally turned!", "味方が離反!")
+    .replace("A ghost rises!", "ゴーストが蘇る!")
+    .replace("Wild counter!", "乱反撃!")
+    .replace("Need two souls!", "魂が2つ必要!")
+    .replace("Soul connection!", "魂リンク!")
+    .replace("Glitched!", "グリッチ!");
 }
 
 const itemInfo = [
@@ -177,6 +292,7 @@ function updateMenuOverlay() {
   seedLabel.textContent = text.seed;
   infoButton.textContent = text.info;
   infoClose.textContent = text.close;
+  infoTitle.textContent = text.info;
   const difficultyLabel = document.querySelector(".difficulty-controls").previousElementSibling;
   difficultyLabel.textContent = text.difficulty;
   seedInput.placeholder = `${currentSeed}`;
@@ -242,7 +358,7 @@ function createInfoRow(icon, name, description, isItem = true) {
 
 function itemDisplayName(kind) {
   const item = itemInfo.find(([itemKind]) => itemKind === kind);
-  return item ? item[1] : kind;
+  return item ? localizeInfo(item, itemJa)[1] : kind;
 }
 
 function infoMonster(kind) {
@@ -323,16 +439,21 @@ function makeMonsterInfoIcon(kind) {
 }
 
 function buildInfoList() {
-  addInfoTitle("Items");
-  for (const item of itemInfo) addInfoRow(item[0], item[1], item[2], true);
-  addInfoTitle("Monsters and rooms");
+  infoList.innerHTML = "";
+  addInfoTitle(isJapanese() ? "アイテム" : "Items");
+  for (const item of itemInfo) {
+    const localized = localizeInfo(item, itemJa);
+    addInfoRow(localized[0], localized[1], localized[2], true);
+  }
+  addInfoTitle(isJapanese() ? "モンスターと部屋" : "Monsters and rooms");
   for (const monster of monsterInfo) {
+    const localized = localizeInfo(monster, monsterJa);
     try {
       const icon = makeMonsterInfoIcon(monster[0]);
       icons[`info_${monster[0]}`] = icon;
-      addInfoRow(`info_${monster[0]}`, monster[1], monster[2], true);
+      addInfoRow(`info_${monster[0]}`, localized[1], localized[2], true);
     } catch {
-      addInfoRow(monster[0].slice(0, 4).toUpperCase(), monster[1], monster[2], false);
+      addInfoRow(monster[0].slice(0, 4).toUpperCase(), localized[1], localized[2], false);
     }
   }
 }
@@ -353,6 +474,9 @@ function openItemBook(mode) {
   const blessed = nextBookBlessed;
   nextBookBlessed = !nextBookBlessed;
   const prefix = blessed ? "Blessed" : "Cursed";
+  const titleText = isJapanese()
+    ? mode === "prayer" ? `${blessed ? "祝福" : "呪い"}の祈りの本` : `${blessed ? "祝福" : "呪い"}の追放の本`
+    : mode === "prayer" ? `${prefix} Prayer Book` : `${prefix} Banish Book`;
   sound("bookOpen");
   const overlay = document.createElement("div");
   overlay.className = `book-overlay is-visible book-${mode}`;
@@ -360,13 +484,14 @@ function openItemBook(mode) {
   panel.className = "book-panel";
   const title = document.createElement("h2");
   title.className = `book-title ${blessed ? "is-blessed" : "is-cursed"}`;
-  title.textContent = mode === "prayer" ? `${prefix} Prayer Book` : `${prefix} Banish Book`;
+  title.textContent = titleText;
   panel.appendChild(title);
 
   const grid = document.createElement("div");
   grid.className = "book-list";
 
-  for (const [kind,name,description] of sampleBookItems(mode, blessed)) {
+  for (const entry of sampleBookItems(mode, blessed)) {
+    const [kind,name,description] = localizeInfo(entry, itemJa);
     const button = createInfoRow(kind, name, description, true);
     button.className = "info-row book-choice";
     button.tabIndex = 0;
@@ -375,10 +500,10 @@ function openItemBook(mode) {
     const choose = () => {
       if (mode === "prayer") {
         hero.prayers.push({ kind, remaining: 7 });
-        flash = `${name} prayed`;
+        flash = isJapanese() ? `${name}を祈った` : `${name} prayed`;
       } else {
         if (!hero.banishedItems.includes(kind)) hero.banishedItems.push(kind);
-        flash = `${name} banished`;
+        flash = isJapanese() ? `${name}を追放` : `${name} banished`;
       }
       sound("bookClose");
       overlay.remove();
@@ -435,6 +560,7 @@ for (const button of difficultyButtons) {
 for (const button of languageButtons) {
   button.addEventListener("click", () => {
     settings.language = button.dataset.language;
+    buildInfoList();
     updateMenuOverlay();
   });
 }

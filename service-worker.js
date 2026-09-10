@@ -1,4 +1,4 @@
-const CACHE_NAME = "drop-rpg-offline-v2";
+const CACHE_NAME = "drop-rpg-offline-v3";
 
 const OFFLINE_ASSETS = [
   "./",
