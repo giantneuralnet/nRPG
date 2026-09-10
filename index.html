@@ -39,7 +39,15 @@
     </div>
 
     <div class="menu-group">
-      <label class="menu-label" for="seedInput">Seed</label>
+      <div id="languageLabel" class="menu-label">Language</div>
+      <div class="language-controls" aria-label="Language">
+        <button class="language-button" type="button" data-language="en">EN</button>
+        <button class="language-button" type="button" data-language="ja">日本語</button>
+      </div>
+    </div>
+
+    <div class="menu-group">
+      <label id="seedLabel" class="menu-label" for="seedInput">Seed</label>
       <div class="seed-row">
         <input id="seedInput" class="seed-input" type="number" inputmode="numeric">
         <button id="seedClear" class="seed-clear" type="button" aria-label="Clear seed">X</button>

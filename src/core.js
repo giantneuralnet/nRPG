@@ -78,5 +78,6 @@ function formatRunTime(ms) {
 let settings = {
   choices: 5,
   difficulty: "normal",
-  seed: currentSeed
+  seed: currentSeed,
+  language: "en"
 };

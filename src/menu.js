@@ -5,6 +5,9 @@ const choicesLabel = document.getElementById("choicesLabel");
 const choiceDown = document.getElementById("choiceDown");
 const choiceUp = document.getElementById("choiceUp");
 const difficultyButtons = Array.from(document.querySelectorAll(".difficulty-button"));
+const languageLabel = document.getElementById("languageLabel");
+const languageButtons = Array.from(document.querySelectorAll(".language-button"));
+const seedLabel = document.getElementById("seedLabel");
 const seedInput = document.getElementById("seedInput");
 const seedClear = document.getElementById("seedClear");
 const infoButton = document.getElementById("infoButton");
@@ -13,6 +16,47 @@ const infoClose = document.getElementById("infoClose");
 const infoList = document.getElementById("infoList");
 const menuAction = document.getElementById("menuAction");
 const audioToggle = document.getElementById("audioToggle");
+
+const menuText = {
+  en: {
+    title: "DROP RPG",
+    subtitle: "Swords, shields, potions, bombs, elites, ice, zombies, clouds, and curses.",
+    dead: "YOU DIED",
+    win: "YOU WIN!",
+    reset: "RESET",
+    playAgain: "PLAY AGAIN",
+    start: "START",
+    info: "INFO",
+    close: "CLOSE",
+    choices: "N = number of choices",
+    difficulty: "Difficulty",
+    difficulties: { easy: "easy", normal: "normal", hard: "hard" },
+    language: "Language",
+    seed: "Seed",
+    seedTime: "Seed {seed}  Time {time}"
+  },
+  ja: {
+    title: "ドロップRPG",
+    subtitle: "剣、盾、ポーション、爆弾、エリート、氷、ゾンビ、雲、呪い。",
+    dead: "ゲームオーバー",
+    win: "勝利!",
+    reset: "リセット",
+    playAgain: "もう一度",
+    start: "スタート",
+    info: "情報",
+    close: "閉じる",
+    choices: "選択肢の数",
+    difficulty: "難易度",
+    difficulties: { easy: "かんたん", normal: "普通", hard: "むずかしい" },
+    language: "言語",
+    seed: "シード",
+    seedTime: "シード {seed}  タイム {time}"
+  }
+};
+
+function t() {
+  return menuText[settings.language] || menuText.en;
+}
 
 const itemInfo = [
   ["sword","Sword","Gain attack."],
@@ -107,31 +151,45 @@ function updateMenuOverlay() {
   const visible = gameState === "menu" || gameState === "dead" || gameState === "win";
   menuOverlay.classList.toggle("is-visible", visible);
   if (!visible) return;
+  const text = t();
 
   if (gameState === "dead") {
-    menuTitle.textContent = "YOU DIED";
-    menuSubtitle.textContent = `Seed ${activeSeed}  Time ${formatRunTime(runEndAt || (performance.now() - runStartAt))}`;
+    menuTitle.textContent = text.dead;
+    menuSubtitle.textContent = text.seedTime.replace("{seed}", activeSeed).replace("{time}", formatRunTime(runEndAt || (performance.now() - runStartAt)));
     menuSubtitle.classList.add("seed-retry");
-    menuAction.textContent = "RESET";
+    menuAction.textContent = text.reset;
   } else if (gameState === "win") {
-    menuTitle.textContent = "YOU WIN!";
-    menuSubtitle.textContent = `Seed ${activeSeed}  Time ${formatRunTime(runEndAt || (performance.now() - runStartAt))}`;
+    menuTitle.textContent = text.win;
+    menuSubtitle.textContent = text.seedTime.replace("{seed}", activeSeed).replace("{time}", formatRunTime(runEndAt || (performance.now() - runStartAt)));
     menuSubtitle.classList.add("seed-retry");
-    menuAction.textContent = "PLAY AGAIN";
+    menuAction.textContent = text.playAgain;
   } else {
-    menuTitle.textContent = "DROP RPG";
-    menuSubtitle.textContent = "Swords, shields, potions, bombs, elites, ice, zombies, clouds, and curses.";
+    menuTitle.textContent = text.title;
+    menuSubtitle.textContent = text.subtitle;
     menuSubtitle.classList.remove("seed-retry");
-    menuAction.textContent = "START";
+    menuAction.textContent = text.start;
   }
 
-  choicesLabel.textContent = `N = number of choices: ${settings.choices}`;
+  document.documentElement.lang = settings.language === "ja" ? "ja" : "en";
+  choicesLabel.textContent = `${text.choices}: ${settings.choices}`;
+  choicesLabel.nextElementSibling.setAttribute("aria-label", text.choices);
+  languageLabel.textContent = text.language;
+  seedLabel.textContent = text.seed;
+  infoButton.textContent = text.info;
+  infoClose.textContent = text.close;
+  const difficultyLabel = document.querySelector(".difficulty-controls").previousElementSibling;
+  difficultyLabel.textContent = text.difficulty;
   seedInput.placeholder = `${currentSeed}`;
   choiceDown.disabled = settings.choices <= 1;
   choiceUp.disabled = settings.choices >= 9;
 
   for (const button of difficultyButtons) {
     button.classList.toggle("is-selected", button.dataset.difficulty === settings.difficulty);
+    button.textContent = text.difficulties[button.dataset.difficulty];
+  }
+
+  for (const button of languageButtons) {
+    button.classList.toggle("is-selected", button.dataset.language === settings.language);
   }
 }
 
@@ -370,6 +428,13 @@ audioToggle.addEventListener("click", event => {
 for (const button of difficultyButtons) {
   button.addEventListener("click", () => {
     settings.difficulty = button.dataset.difficulty;
+    updateMenuOverlay();
+  });
+}
+
+for (const button of languageButtons) {
+  button.addEventListener("click", () => {
+    settings.language = button.dataset.language;
     updateMenuOverlay();
   });
 }

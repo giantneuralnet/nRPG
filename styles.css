@@ -62,7 +62,8 @@ canvas {
 }
 
 .choice-controls,
-.difficulty-controls {
+.difficulty-controls,
+.language-controls {
   display: flex;
   justify-content: center;
   gap: 18px;
@@ -109,11 +110,13 @@ button:focus-visible {
   width: 58px;
 }
 
-.difficulty-controls button {
+.difficulty-controls button,
+.language-controls button {
   width: min(120px, 26vw);
 }
 
-.difficulty-controls button.is-selected {
+.difficulty-controls button.is-selected,
+.language-controls button.is-selected {
   background: #ffd84a;
 }
 
